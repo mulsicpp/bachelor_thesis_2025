@@ -110,6 +110,36 @@ struct Vertex {
     }
 };
 
+struct InstanceInfo {
+    glm::vec3 offset;
+    glm::vec3 color;
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 1;
+        bindingDescription.stride = sizeof(InstanceInfo);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+
+        attributeDescriptions[0].binding = 1;
+        attributeDescriptions[0].location = 3;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(InstanceInfo, color);
+
+        attributeDescriptions[1].binding = 1;
+        attributeDescriptions[1].location = 4;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(InstanceInfo, offset);
+
+        return attributeDescriptions;
+    }
+};
+
 struct UniformBufferObject {
     alignas(16) glm::mat4 model;
     alignas(16) glm::mat4 view;
@@ -120,17 +150,17 @@ const std::vector<Vertex> vertices = {
     {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
     {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
     {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+};
 
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+const std::vector<InstanceInfo> instances = {
+    {{0.0f, 0.0f, 0.5f},  {1.0f, 0.0f, 0.0f}},
+    {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+    {{0.0f, 0.0f, -0.5f}, {0.0f, 0.0f, 1.0f}},
 };
 
 const std::vector<uint16_t> indices = {
-    0, 1, 2, 2, 3, 0,
-    4, 5, 6, 6, 7, 4
+    0, 1, 2, 2, 3, 0
 };
 
 class HelloTriangleApplication {
@@ -180,6 +210,8 @@ private:
 
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
+    VkBuffer instanceBuffer;
+    VkDeviceMemory instanceBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
 
@@ -232,6 +264,7 @@ private:
         createTextureImageView();
         createTextureSampler();
         createVertexBuffer();
+        createInstanceBuffer();
         createIndexBuffer();
         createUniformBuffers();
         createDescriptorPool();
@@ -289,6 +322,9 @@ private:
 
         vkDestroyBuffer(device, indexBuffer, nullptr);
         vkFreeMemory(device, indexBufferMemory, nullptr);
+
+        vkDestroyBuffer(device, instanceBuffer, nullptr);
+        vkFreeMemory(device, instanceBufferMemory, nullptr);
 
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vkFreeMemory(device, vertexBufferMemory, nullptr);
@@ -635,12 +671,18 @@ private:
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-        auto bindingDescription = Vertex::getBindingDescription();
-        auto attributeDescriptions = Vertex::getAttributeDescriptions();
+        std::array<VkVertexInputBindingDescription, 2> bindingDescription = {Vertex::getBindingDescription(), InstanceInfo::getBindingDescription()};
+        auto vertexAttributeDescriptions = Vertex::getAttributeDescriptions();
 
-        vertexInputInfo.vertexBindingDescriptionCount = 1;
-        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        auto instanceAttributeDescriptions = InstanceInfo::getAttributeDescriptions();
+
+        std::array<VkVertexInputAttributeDescription, vertexAttributeDescriptions.size() + instanceAttributeDescriptions.size()> attributeDescriptions{};
+        std::copy(vertexAttributeDescriptions.begin(), vertexAttributeDescriptions.end(), attributeDescriptions.begin());
+        std::copy(instanceAttributeDescriptions.begin(), instanceAttributeDescriptions.end(), attributeDescriptions.begin() + vertexAttributeDescriptions.size());
+
+        vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)(bindingDescription.size());
+        vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)(attributeDescriptions.size());
+        vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data();
         vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -1011,6 +1053,26 @@ private:
         vkFreeMemory(device, stagingBufferMemory, nullptr);
     }
 
+    void createInstanceBuffer() {
+        VkDeviceSize bufferSize = sizeof(instances[0]) * instances.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+        void* data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, instances.data(), (size_t)bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, instanceBuffer, instanceBufferMemory);
+
+        copyBuffer(stagingBuffer, instanceBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+
     void createIndexBuffer() {
         VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
@@ -1245,15 +1307,15 @@ private:
         scissor.extent = swapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        VkBuffer vertexBuffers[] = { vertexBuffer };
-        VkDeviceSize offsets[] = { 0 };
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        VkBuffer vertexBuffers[] = { vertexBuffer, instanceBuffer };
+        VkDeviceSize offsets[] = { 0, 0 };
+        vkCmdBindVertexBuffers(commandBuffer, 0, 2, vertexBuffers, offsets);
 
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, (uint32_t)(indices.size()), (uint32_t)(instances.size()), 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
 
@@ -1291,7 +1353,7 @@ private:
 
         UniformBufferObject ubo{};
         ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
         ubo.proj[1][1] *= -1;
 
