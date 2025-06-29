@@ -83,7 +83,7 @@ namespace vk {
             create_info.pNext = nullptr;
         }
 
-        if (vkCreateInstance(&create_info, nullptr, &m_instance) != VK_SUCCESS) {
+        if (vkCreateInstance(&create_info, nullptr, &m_handle) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
         }
 
@@ -94,12 +94,12 @@ namespace vk {
 	}
 
     Instance::~Instance() {
-        if (m_instance != VK_NULL_HANDLE) {
+        if (m_handle != VK_NULL_HANDLE) {
             if (m_debug_messanger != VK_NULL_HANDLE) {
-                debug_utils::vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messanger, nullptr);
+                debug_utils::vkDestroyDebugUtilsMessengerEXT(m_handle, m_debug_messanger, nullptr);
                 dbg_log("destroyed debug messanger");
             }
-            vkDestroyInstance(m_instance, nullptr);
+            vkDestroyInstance(m_handle, nullptr);
             dbg_log("destroyed instance");
 
         }
@@ -108,7 +108,7 @@ namespace vk {
 
     std::vector<PhysicalDevice> Instance::query_physical_devices() const {
         uint32_t device_count = 0;
-        vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
+        vkEnumeratePhysicalDevices(m_handle, &device_count, nullptr);
 
         if (device_count == 0) {
             return std::vector<PhysicalDevice>(0);
@@ -117,7 +117,7 @@ namespace vk {
         auto physical_device_handles = new VkPhysicalDevice[device_count];
         std::vector<PhysicalDevice> physical_devices(device_count);
 
-        vkEnumeratePhysicalDevices(m_instance, &device_count, physical_device_handles);
+        vkEnumeratePhysicalDevices(m_handle, &device_count, physical_device_handles);
 
         for (int i = 0; i < device_count; i++) {
             physical_devices[i] = physical_device_handles[i];
@@ -147,9 +147,9 @@ namespace vk {
     void Instance::create_debug_messanger() {
         if (!USE_VALIDATION_LAYERS) return;
 
-        debug_utils::load(m_instance);
+        debug_utils::load(m_handle);
 
-        if (debug_utils::vkCreateDebugUtilsMessengerEXT(m_instance, &DEBUG_MSG_CREATE_INFO, nullptr, &m_debug_messanger) != VK_SUCCESS) {
+        if (debug_utils::vkCreateDebugUtilsMessengerEXT(m_handle, &DEBUG_MSG_CREATE_INFO, nullptr, &m_debug_messanger) != VK_SUCCESS) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }

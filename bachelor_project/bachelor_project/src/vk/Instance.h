@@ -6,13 +6,13 @@
 
 #include "../utils/NoCopy.h"
 #include "PhysicalDevice.h"
+#include "Handle.h"
 
 namespace vk {
 
-	class Instance : ::utils::NoCopy
+	class Instance : public ::utils::NoCopy, public Handle<VkInstance>
 	{
 	private:
-		VkInstance m_instance = VK_NULL_HANDLE;
 		VkDebugUtilsMessengerEXT m_debug_messanger = VK_NULL_HANDLE;
 
 	public:
@@ -20,10 +20,6 @@ namespace vk {
 
 		Instance(const char* app_name);
 		~Instance();
-
-		inline VkInstance handle() const {
-			return m_instance;
-		}
 
 		std::vector<PhysicalDevice> query_physical_devices() const;
 

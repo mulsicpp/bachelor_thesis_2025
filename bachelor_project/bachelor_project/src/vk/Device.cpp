@@ -6,8 +6,8 @@ namespace vk {
 	}
 
 	Device::~Device() {
-		if (m_device != VK_NULL_HANDLE) {
-			vkDestroyDevice(m_device, nullptr);
+		if (m_handle != VK_NULL_HANDLE) {
+			vkDestroyDevice(m_handle, nullptr);
 		}
 	}
 }

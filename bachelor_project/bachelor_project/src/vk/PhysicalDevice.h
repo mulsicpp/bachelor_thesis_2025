@@ -2,16 +2,12 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Handle.h"
+
 namespace vk {
-	class PhysicalDevice {
-	private:
-		VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
+	class PhysicalDevice : public Handle<VkPhysicalDevice> {
 	public:
 		PhysicalDevice() = default;
 		PhysicalDevice(VkPhysicalDevice physical_device_handle);
-
-		inline VkPhysicalDevice handle() const {
-			return m_physical_device;
-		}
 	};
 }

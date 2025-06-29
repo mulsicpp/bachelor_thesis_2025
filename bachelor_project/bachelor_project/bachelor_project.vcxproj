@@ -166,6 +166,7 @@
     <ClInclude Include="src\utils\defines.h" />
     <ClInclude Include="src\vk\Context.h" />
     <ClInclude Include="src\vk\Device.h" />
+    <ClInclude Include="src\vk\Handle.h" />
     <ClInclude Include="src\vk\Instance.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
     <ClInclude Include="src\vk\PhysicalDevice.h" />
