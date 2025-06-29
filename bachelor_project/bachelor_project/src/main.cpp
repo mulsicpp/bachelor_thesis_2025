@@ -1,11 +1,17 @@
 #include <cstdio>
-#include "vk_context/Instance.h"
+#include "vk/Context.h"
 #include <stdexcept>
 #include <cstdio>
 
 int main(void) {
 	try {
-		vk::Instance instance("My Renderer");
+		vk::Instance instance{ "Test" };
+
+		auto devices = instance.query_physical_devices();
+
+		for (const auto& device : devices) {
+			printf("device %p\n", device.handle());
+		}
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "exception was thrown: %s\n", e.what());

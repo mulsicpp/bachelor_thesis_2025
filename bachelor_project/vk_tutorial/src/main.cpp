@@ -154,9 +154,9 @@ const std::vector<Vertex> vertices = {
 };
 
 const std::vector<InstanceInfo> instances = {
-    {{0.0f, 0.0f, 0.5f},  {1.0f, 0.0f, 0.0f}},
-    {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-    {{0.0f, 0.0f, -0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{0.0f, 0.0f, 0.5f},  {1.0f, 1.0f, 0.0f}},
+    {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 1.0f}},
+    {{0.0f, 0.0f, -0.5f}, {1.0f, 0.0f, 1.0f}},
 };
 
 const std::vector<uint16_t> indices = {

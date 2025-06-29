@@ -155,14 +155,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\vk_context\Instance.cpp" />
+    <ClCompile Include="src\vk\Context.cpp" />
+    <ClCompile Include="src\vk\Device.cpp" />
+    <ClCompile Include="src\vk\Instance.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vk\PhysicalDevice.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\defines.h" />
-    <ClInclude Include="src\vk_context\Instance.h" />
+    <ClInclude Include="src\vk\Context.h" />
+    <ClInclude Include="src\vk\Device.h" />
+    <ClInclude Include="src\vk\Instance.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
+    <ClInclude Include="src\vk\PhysicalDevice.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
   </ItemGroup>

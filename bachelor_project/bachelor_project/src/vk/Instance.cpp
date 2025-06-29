@@ -94,11 +94,41 @@ namespace vk {
 	}
 
     Instance::~Instance() {
-        debug_utils::vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messanger, nullptr);
-        dbg_log("destroyed debug messanger");
-        vkDestroyInstance(m_instance, nullptr);
-        dbg_log("destroyed instance");
+        if (m_instance != VK_NULL_HANDLE) {
+            if (m_debug_messanger != VK_NULL_HANDLE) {
+                debug_utils::vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_messanger, nullptr);
+                dbg_log("destroyed debug messanger");
+            }
+            vkDestroyInstance(m_instance, nullptr);
+            dbg_log("destroyed instance");
+
+        }
     }
+
+
+    std::vector<PhysicalDevice> Instance::query_physical_devices() const {
+        uint32_t device_count = 0;
+        vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
+
+        if (device_count == 0) {
+            return std::vector<PhysicalDevice>(0);
+        }
+
+        auto physical_device_handles = new VkPhysicalDevice[device_count];
+        std::vector<PhysicalDevice> physical_devices(device_count);
+
+        vkEnumeratePhysicalDevices(m_instance, &device_count, physical_device_handles);
+
+        for (int i = 0; i < device_count; i++) {
+            physical_devices[i] = physical_device_handles[i];
+        }
+
+        delete[] physical_device_handles;
+
+        return physical_devices;
+    }
+
+
 
     std::vector<const char*> Instance::get_extensions() {
         uint32_t glfwExtensionCount = 0;
