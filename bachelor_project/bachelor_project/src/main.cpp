@@ -1,20 +1,19 @@
 #include <cstdio>
-#include "vk/Context.h"
 #include <stdexcept>
-#include <cstdio>
+
+#include "utils/LibManager.h"
+#include "App.h"
 
 int main(void) {
 	try {
-		vk::Instance instance{ "Test" };
 
-		auto devices = instance.query_physical_devices();
+		utils::LibManager lib_manager;
+		App app{};
 
-		for (const auto& device : devices) {
-			printf("device %p\n", device.handle());
-		}
+		app.run();
 	}
 	catch (const std::exception& e) {
-		fprintf(stderr, "exception was thrown: %s\n", e.what());
+		fprintf(stderr, "EXCEPTION: %s\n", e.what());
 		return -1;
 	}
 	return 0;

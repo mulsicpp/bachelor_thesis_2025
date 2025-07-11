@@ -7,9 +7,7 @@ namespace utils {
 		NoCopy() = default;
 
 		NoCopy(const NoCopy& other) = delete;
-		NoCopy(NoCopy&& other) = delete;
 
 		NoCopy& operator=(const NoCopy&) = delete;
-		NoCopy& operator=(NoCopy&&) = delete;
 	};
 }

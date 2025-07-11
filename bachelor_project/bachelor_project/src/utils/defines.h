@@ -24,4 +24,10 @@
 #define USE_LOGGING true
 #endif
 
-#endif 
+#endif
+
+#ifdef RAYTRACING
+#define USE_RAYTRACING true
+#else
+#define USE_RAYTRACING false
+#endif
