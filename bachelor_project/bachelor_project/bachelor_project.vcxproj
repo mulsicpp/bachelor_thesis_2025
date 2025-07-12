@@ -155,31 +155,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\vulkan-guide\third_party\vkbootstrap\VkBootstrap.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\external\VkBootstrap.cpp" />
     <ClCompile Include="src\utils\LibManager.cpp" />
     <ClCompile Include="src\utils\LibManager.h" />
+    <ClCompile Include="src\vk\CommandManager.cpp" />
     <ClCompile Include="src\vk\Context.cpp" />
-    <ClCompile Include="src\vk\Device.cpp" />
-    <ClCompile Include="src\vk\Instance.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\vk\PhysicalDeviceDetails.cpp" />
-    <ClCompile Include="src\vk\Surface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\vulkan-guide\third_party\vkbootstrap\VkBootstrap.h" />
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\external\VkBootstrap.h" />
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\defines.h" />
+    <ClInclude Include="src\vk\CommandManager.h" />
     <ClInclude Include="src\vk\Context.h" />
-    <ClInclude Include="src\vk\Device.h" />
-    <ClInclude Include="src\vk\Handle.h" />
-    <ClInclude Include="src\vk\Instance.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
-    <ClInclude Include="src\vk\PhysicalDeviceDetails.h" />
-    <ClInclude Include="src\vk\Surface.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
   </ItemGroup>

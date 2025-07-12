@@ -5,12 +5,11 @@
 class App {
 private:
 	GLFWwindow* m_window;
-	vk::Context m_context;
+	std::unique_ptr<vk::Context> m_context;
 
 public:
 	App();
-
-	App(const App& other) = default;
+	~App();
 
 	void run();
 };

@@ -2,11 +2,6 @@
 
 #include "utils/defines.h"
 
-#define WINDOW_WIDTH  1280
-#define WINDOW_HEIGHT  720
-
-#define APP_NAME "Raytracing App"
-
 const std::vector<const char*> REQUIRED_EXTENSIONS = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -20,16 +15,13 @@ const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 };
 
 namespace vk {
-	Context::Context() {
+	Context::Context(GLFWwindow* window, const char* app_name) {
 
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-		m_window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
+		m_window = window;
 
 		vkb::InstanceBuilder instance_builder;
 
-		instance_builder.set_app_name(APP_NAME);
+		instance_builder.set_app_name(app_name);
 
 		if (USE_VALIDATION_LAYERS) {
 			instance_builder.request_validation_layers();
@@ -63,7 +55,13 @@ namespace vk {
 
 		m_physical_device = physical_device_result.value();
 
+		QueueInfo queue_info = QueueInfo::get_from_physical_device(m_physical_device);
+
+
+
 		vkb::DeviceBuilder device_builder(m_physical_device);
+
+		device_builder.custom_queue_setup(queue_info.get_custom_queue_descriptions());
 
 		auto device_result = device_builder.build();
 		if (!device_result) {
@@ -81,17 +79,19 @@ namespace vk {
 
 		m_swapchain = swapchain_result.value();
 
+		m_command_manager = CommandManager::create(m_device, queue_info);
+
 		dbg_log("created");
 	}
 
 	Context::~Context() {
+		CommandManager::destroy(m_command_manager);
+
 		vkb::destroy_swapchain(m_swapchain);
 		vkb::destroy_device(m_device);
 		if (m_instance.instance != VK_NULL_HANDLE)
 			vkDestroySurfaceKHR(m_instance.instance, m_surface, nullptr);
 		vkb::destroy_instance(m_instance);
-		if(m_window != nullptr)
-			glfwDestroyWindow(m_window);
 
 		dbg_log("destroyed");
 	}

@@ -2,7 +2,12 @@
 #include "external/VkBootstrap.h" 
 #include "utils/dbg_log.h"
 #include "utils/NoCopy.h"
+
+#include "CommandManager.h"
+
 #include <GLFW/glfw3.h>
+
+#include <memory>
 
 namespace vk {
 
@@ -24,11 +29,15 @@ namespace vk {
 
 		vkb::Swapchain m_swapchain;
 
-	public:
-		Context();
-		~Context();
+		vk::CommandManager m_command_manager;
 
-		inline bool window_should_close() { return glfwWindowShouldClose(m_window); }
-		inline void poll_events() { glfwPollEvents(); }
+	public:
+		static inline std::unique_ptr<Context> create(GLFWwindow* window, const char* app_name) {
+			return std::unique_ptr<Context>(new Context(window, app_name));
+		}
+
+		~Context();
+	private:
+		Context(GLFWwindow* window, const char* app_name);
 	};
 }
