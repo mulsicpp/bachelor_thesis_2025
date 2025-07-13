@@ -65,20 +65,12 @@ namespace vk {
 
 		auto device_result = device_builder.build();
 		if (!device_result) {
-			throw std::runtime_error("Device creation failed! " + physical_device_result.error().message());
+			throw std::runtime_error("Device creation failed! " + device_result.error().message());
 		}
 
 		m_device = device_result.value();
 
-		vkb::SwapchainBuilder swapchain_builder(m_device);
-
-		auto swapchain_result = swapchain_builder.build();
-		if (!swapchain_result) {
-			throw std::runtime_error("Swapchain creation failed! " + physical_device_result.error().message());
-		}
-
-		m_swapchain = swapchain_result.value();
-
+		m_swapchain = Swapchain::create(m_device);
 		m_command_manager = CommandManager::create(m_device, queue_info);
 
 		dbg_log("created");
@@ -86,8 +78,8 @@ namespace vk {
 
 	Context::~Context() {
 		CommandManager::destroy(m_command_manager);
+		Swapchain::destroy(m_swapchain);
 
-		vkb::destroy_swapchain(m_swapchain);
 		vkb::destroy_device(m_device);
 		if (m_instance.instance != VK_NULL_HANDLE)
 			vkDestroySurfaceKHR(m_instance.instance, m_surface, nullptr);

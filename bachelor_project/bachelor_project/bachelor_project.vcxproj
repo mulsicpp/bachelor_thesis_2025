@@ -162,6 +162,7 @@
     <ClCompile Include="src\vk\CommandManager.cpp" />
     <ClCompile Include="src\vk\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vk\Swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="src\vk\CommandManager.h" />
     <ClInclude Include="src\vk\Context.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
+    <ClInclude Include="src\vk\Swapchain.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
   </ItemGroup>

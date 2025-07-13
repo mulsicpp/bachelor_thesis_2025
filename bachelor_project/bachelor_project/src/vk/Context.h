@@ -3,6 +3,7 @@
 #include "utils/dbg_log.h"
 #include "utils/NoCopy.h"
 
+#include "Swapchain.h"
 #include "CommandManager.h"
 
 #include <GLFW/glfw3.h>
@@ -27,7 +28,7 @@ namespace vk {
 		VkQueue m_compute_queue = VK_NULL_HANDLE;
 		VkQueue m_present_queue = VK_NULL_HANDLE;
 
-		vkb::Swapchain m_swapchain;
+		vk::Swapchain m_swapchain;
 
 		vk::CommandManager m_command_manager;
 
