@@ -10,10 +10,13 @@ App::App() {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
-    context = vk::Context::create(window, APP_NAME);
+    
+    vk::Context::create(window, APP_NAME);
 }
 
 App::~App() {
+    vk::Context::destroy();
+
     glfwDestroyWindow(window);
 }
 

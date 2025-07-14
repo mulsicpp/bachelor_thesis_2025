@@ -16,6 +16,9 @@ namespace vk {
 
 	class Context : utils::NoCopy {
 	private:
+		static Context* context;
+
+	public:
 		GLFWwindow* window;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 
@@ -31,13 +34,26 @@ namespace vk {
 		VmaAllocator allocator;
 
 	public:
-		static inline ptr::Owned<Context> create(GLFWwindow* window, const char* app_name) {
-			return ptr::Owned<Context>(new Context(window, app_name));
+		static inline Context* create(GLFWwindow* window, const char* app_name) {
+			if (context != nullptr)
+				delete context;
+			context = new Context(window, app_name);
+			return context;
 		}
 
-		~Context();
+		static inline void destroy() {
+			if (context != nullptr)
+				delete context;
+		}
+
+		static inline Context* get() {
+			assert(context != nullptr);
+			return context;
+		}
+
 	private:
 		Context(GLFWwindow* window, const char* app_name);
+		~Context();
 
 		void create_allocator();
 	};

@@ -164,6 +164,7 @@
     <ClCompile Include="src\vk_core\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
+    <ClCompile Include="src\vk_resources\Buffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="src\vk_core\Swapchain.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
+    <ClInclude Include="src\vk_resources\Buffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

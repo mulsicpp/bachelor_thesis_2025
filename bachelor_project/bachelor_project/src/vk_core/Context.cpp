@@ -15,6 +15,7 @@ const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 };
 
 namespace vk {
+	Context* Context::context = nullptr;
 
 	Context::Context(GLFWwindow* window, const char* app_name) {
 

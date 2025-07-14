@@ -5,7 +5,6 @@
 class App {
 private:
 	GLFWwindow* window;
-	ptr::Owned<vk::Context> context;
 
 public:
 	App();
