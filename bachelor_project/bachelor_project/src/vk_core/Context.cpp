@@ -15,6 +15,7 @@ const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 };
 
 namespace vk {
+
 	Context::Context(GLFWwindow* window, const char* app_name) {
 
 		window = window;
@@ -73,13 +74,35 @@ namespace vk {
 		command_manager = CommandManager::create(device, queue_info);
 		swapchain = Swapchain::create(device, command_manager);
 
-		allocator = Allocator::create(instance, physical_device, device);
+		create_allocator();
 
 		dbg_log("created");
 	}
 
+	void Context::create_allocator() {
+		VmaAllocatorCreateInfo allocator_info;
+
+		allocator_info.instance = instance.instance;
+		allocator_info.physicalDevice = physical_device.physical_device;
+		allocator_info.device = device.device;
+
+		allocator_info.frameInUseCount = 0;
+
+		allocator_info.vulkanApiVersion = 0;
+		allocator_info.flags = 0;
+		allocator_info.preferredLargeHeapBlockSize = 0;
+
+		allocator_info.pAllocationCallbacks = nullptr;
+		allocator_info.pDeviceMemoryCallbacks = nullptr;
+		allocator_info.pHeapSizeLimit = nullptr;
+		allocator_info.pVulkanFunctions = nullptr;
+		allocator_info.pRecordSettings = nullptr;
+
+		vmaCreateAllocator(&allocator_info, &allocator);
+	}
+
 	Context::~Context() {
-		Allocator::destroy(allocator);
+		vmaDestroyAllocator(allocator);
 
 		CommandManager::destroy(device, command_manager);
 		Swapchain::destroy(swapchain);

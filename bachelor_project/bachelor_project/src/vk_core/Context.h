@@ -9,7 +9,6 @@
 
 #include "Swapchain.h"
 #include "CommandManager.h"
-#include "Allocator.h"
 
 #include <GLFW/glfw3.h>
 
@@ -29,7 +28,7 @@ namespace vk {
 
 		CommandManager command_manager;
 
-		Allocator allocator;
+		VmaAllocator allocator;
 
 	public:
 		static inline ptr::Owned<Context> create(GLFWwindow* window, const char* app_name) {
@@ -39,5 +38,7 @@ namespace vk {
 		~Context();
 	private:
 		Context(GLFWwindow* window, const char* app_name);
+
+		void create_allocator();
 	};
 }
