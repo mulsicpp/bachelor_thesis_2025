@@ -172,6 +172,7 @@
     <ClInclude Include="src\external\vk_mem_alloc.h" />
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\defines.h" />
+    <ClInclude Include="src\utils\ptr_alias.h" />
     <ClInclude Include="src\vk_core\Allocator.h" />
     <ClInclude Include="src\vk_core\CommandManager.h" />
     <ClInclude Include="src\vk_core\Context.h" />
