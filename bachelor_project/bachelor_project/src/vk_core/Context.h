@@ -8,6 +8,7 @@
 
 #include "Swapchain.h"
 #include "CommandManager.h"
+#include "Allocator.h"
 
 #include <GLFW/glfw3.h>
 
@@ -25,11 +26,11 @@ namespace vk {
 		vkb::PhysicalDevice physical_device;
 		vkb::Device device;
 
-		vk::Swapchain swapchain;
+		Swapchain swapchain;
 
-		vk::CommandManager command_manager;
+		CommandManager command_manager;
 
-		VmaAllocator allocator;
+		Allocator allocator;
 
 	public:
 		static inline std::unique_ptr<Context> create(GLFWwindow* window, const char* app_name) {
@@ -39,7 +40,5 @@ namespace vk {
 		~Context();
 	private:
 		Context(GLFWwindow* window, const char* app_name);
-
-		void create_allocator();
 	};
 }

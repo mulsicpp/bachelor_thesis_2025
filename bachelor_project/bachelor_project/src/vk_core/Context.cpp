@@ -73,13 +73,13 @@ namespace vk {
 		command_manager = CommandManager::create(device, queue_info);
 		swapchain = Swapchain::create(device, command_manager);
 
-		create_allocator();
+		allocator = Allocator::create(instance, physical_device, device);
 
 		dbg_log("created");
 	}
 
 	Context::~Context() {
-		vmaDestroyAllocator(allocator);
+		Allocator::destroy(allocator);
 
 		CommandManager::destroy(device, command_manager);
 		Swapchain::destroy(swapchain);
@@ -90,26 +90,5 @@ namespace vk {
 		vkb::destroy_instance(instance);
 
 		dbg_log("destroyed");
-	}
-
-	void Context::create_allocator() {
-		VmaAllocatorCreateInfo allocator_info;
-		allocator_info.instance = instance.instance;
-		allocator_info.physicalDevice = physical_device.physical_device;
-		allocator_info.device = device.device;
-
-		allocator_info.frameInUseCount = 0;
-
-		allocator_info.vulkanApiVersion = 0;
-		allocator_info.flags = 0;
-		allocator_info.preferredLargeHeapBlockSize = 0;
-
-		allocator_info.pAllocationCallbacks = nullptr;
-		allocator_info.pDeviceMemoryCallbacks = nullptr;
-		allocator_info.pHeapSizeLimit = nullptr;
-		allocator_info.pVulkanFunctions = nullptr;
-		allocator_info.pRecordSettings = nullptr;
-
-		vmaCreateAllocator(&allocator_info, &allocator);
 	}
 }
