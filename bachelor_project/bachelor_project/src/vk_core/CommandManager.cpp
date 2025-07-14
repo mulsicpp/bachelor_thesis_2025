@@ -104,40 +104,40 @@ namespace vk {
 		return command_pool;
 	}
 
-	CommandManager CommandManager::create(vkb::Device device, QueueInfo queue_info) {
+	CommandManager CommandManager::create(const vkb::Device& device, const QueueInfo& queue_info) {
 		CommandManager manager;
 
-		manager.m_device = device.device;
-		manager.m_command_pools = std::vector<VkCommandPool>(queue_info.queue_family_count);
+		manager.device = device.device;
+		manager.command_pools = std::vector<VkCommandPool>(queue_info.queue_family_count);
 
-		for (auto& pool : manager.m_command_pools) {
+		for (auto& pool : manager.command_pools) {
 			pool = VK_NULL_HANDLE;
 		}
 
 		for (const auto idx : queue_info.used_families) {
-			manager.m_command_pools[idx] = create_command_pool(device.device, idx);
+			manager.command_pools[idx] = create_command_pool(device.device, idx);
 		}
 
 		for (int i = 0; i < QUEUE_TYPE_COUNT; i++) {
-			vkGetDeviceQueue(device.device, queue_info.queue_family_indices[i], 0, &manager.m_queues[i].queue);
-			manager.m_queues[i].pool_index = queue_info.queue_family_indices[i];
+			vkGetDeviceQueue(device.device, queue_info.queue_family_indices[i], 0, &manager.queues[i].queue);
+			manager.queues[i].family_index = queue_info.queue_family_indices[i];
 		}
 
-		for (const auto command_pool : manager.m_command_pools) {
+		for (const auto command_pool : manager.command_pools) {
 			dbg_log("pool: %p", command_pool);
 		}
 
-		for (const auto queue : manager.m_queues) {
-			dbg_log("queue: %p pool_index: %i", queue.queue, queue.pool_index);
+		for (const auto queue : manager.queues) {
+			dbg_log("queue: %p pool_index: %i", queue.queue, queue.family_index);
 		}
 
 		return manager;
 	}
 
-	void CommandManager::destroy(CommandManager& manager) {
-		for (const auto command_pool : manager.m_command_pools) {
+	void CommandManager::destroy(const vkb::Device& device, const CommandManager& manager) {
+		for (const auto command_pool : manager.command_pools) {
 			if(command_pool != VK_NULL_HANDLE)
-				vkDestroyCommandPool(manager.m_device, command_pool, nullptr);
+				vkDestroyCommandPool(device.device, command_pool, nullptr);
 		}
 
 	}

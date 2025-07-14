@@ -29,16 +29,24 @@ namespace vk {
 
 	struct Queue {
 		VkQueue queue = VK_NULL_HANDLE;
-		uint32_t pool_index = -1;
+		int32_t family_index = -1;
 	};
 
 	class CommandManager {
 	private:
-		VkDevice m_device = VK_NULL_HANDLE;
-		std::array<Queue, QUEUE_TYPE_COUNT> m_queues;
-		std::vector<VkCommandPool> m_command_pools;
+		VkDevice device = VK_NULL_HANDLE;
+		std::array<Queue, QUEUE_TYPE_COUNT> queues;
+		std::vector<VkCommandPool> command_pools;
 	public:
-		static CommandManager create(vkb::Device device, QueueInfo queue_info);
-		static void destroy(CommandManager& manager);
+		static CommandManager create(const vkb::Device& device, const QueueInfo& queue_info);
+		static void destroy(const vkb::Device& device, const CommandManager& manager);
+
+		inline const Queue& operator[](QueueType type) const {
+			return queues[(uint32_t)type];
+		}
+
+		inline Queue& operator[](QueueType type) {
+			return queues[(uint32_t)type];
+		}
 	};
 }

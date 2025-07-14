@@ -1,5 +1,8 @@
 #pragma once
-#include "external/VkBootstrap.h" 
+
+#include "external/vk_mem_alloc.h"
+#include "external/VkBootstrap.h"
+
 #include "utils/dbg_log.h"
 #include "utils/NoCopy.h"
 
@@ -14,23 +17,19 @@ namespace vk {
 
 	class Context : utils::NoCopy {
 	private:
-		GLFWwindow* m_window;
-		VkSurfaceKHR m_surface = VK_NULL_HANDLE;
+		GLFWwindow* window;
+		VkSurfaceKHR surface = VK_NULL_HANDLE;
 
-		vkb::Instance m_instance;
+		vkb::Instance instance;
 
-		vkb::PhysicalDevice m_physical_device;
-		vkb::Device m_device;
+		vkb::PhysicalDevice physical_device;
+		vkb::Device device;
 
-		// TODO handle queues
-		VkQueue m_graphics_queue = VK_NULL_HANDLE;
-		VkQueue m_transfer_queue = VK_NULL_HANDLE;
-		VkQueue m_compute_queue = VK_NULL_HANDLE;
-		VkQueue m_present_queue = VK_NULL_HANDLE;
+		vk::Swapchain swapchain;
 
-		vk::Swapchain m_swapchain;
+		vk::CommandManager command_manager;
 
-		vk::CommandManager m_command_manager;
+		VmaAllocator allocator;
 
 	public:
 		static inline std::unique_ptr<Context> create(GLFWwindow* window, const char* app_name) {
@@ -40,5 +39,7 @@ namespace vk {
 		~Context();
 	private:
 		Context(GLFWwindow* window, const char* app_name);
+
+		void create_allocator();
 	};
 }

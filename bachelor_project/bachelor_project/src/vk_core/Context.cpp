@@ -17,7 +17,7 @@ const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 namespace vk {
 	Context::Context(GLFWwindow* window, const char* app_name) {
 
-		m_window = window;
+		window = window;
 
 		vkb::InstanceBuilder instance_builder;
 
@@ -26,6 +26,7 @@ namespace vk {
 		if (USE_VALIDATION_LAYERS) {
 			instance_builder.request_validation_layers();
 			instance_builder.use_default_debug_messenger();
+			instance_builder.require_api_version(1, 2);
 		}
 
 		auto instance_result = instance_builder.build();
@@ -33,15 +34,15 @@ namespace vk {
 			throw std::runtime_error("Instance creation failed! " + instance_result.error().message());
 		}
 
-		m_instance = instance_result.value();
+		instance = instance_result.value();
 
-		if (glfwCreateWindowSurface(m_instance.instance, m_window, nullptr, &m_surface) != VK_SUCCESS) {
+		if (glfwCreateWindowSurface(instance.instance, window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("Surface creation failed!");
 		}
 
-		vkb::PhysicalDeviceSelector selector(m_instance);
+		vkb::PhysicalDeviceSelector selector(instance);
 		selector.set_minimum_version(1, 2);
-		selector.set_surface(m_surface);
+		selector.set_surface(surface);
 		selector.add_required_extensions(REQUIRED_EXTENSIONS);
 
 		if (USE_RAYTRACING) {
@@ -53,13 +54,12 @@ namespace vk {
 			throw std::runtime_error("Physical device selection failed! " + physical_device_result.error().message());
 		}
 
-		m_physical_device = physical_device_result.value();
+		physical_device = physical_device_result.value();
 
-		QueueInfo queue_info = QueueInfo::get_from_physical_device(m_physical_device);
+		QueueInfo queue_info = QueueInfo::get_from_physical_device(physical_device);
 
 
-
-		vkb::DeviceBuilder device_builder(m_physical_device);
+		vkb::DeviceBuilder device_builder(physical_device);
 
 		device_builder.custom_queue_setup(queue_info.get_custom_queue_descriptions());
 
@@ -68,23 +68,48 @@ namespace vk {
 			throw std::runtime_error("Device creation failed! " + device_result.error().message());
 		}
 
-		m_device = device_result.value();
+		device = device_result.value();
 
-		m_swapchain = Swapchain::create(m_device);
-		m_command_manager = CommandManager::create(m_device, queue_info);
+		command_manager = CommandManager::create(device, queue_info);
+		swapchain = Swapchain::create(device, command_manager);
+
+		create_allocator();
 
 		dbg_log("created");
 	}
 
 	Context::~Context() {
-		CommandManager::destroy(m_command_manager);
-		Swapchain::destroy(m_swapchain);
+		vmaDestroyAllocator(allocator);
 
-		vkb::destroy_device(m_device);
-		if (m_instance.instance != VK_NULL_HANDLE)
-			vkDestroySurfaceKHR(m_instance.instance, m_surface, nullptr);
-		vkb::destroy_instance(m_instance);
+		CommandManager::destroy(device, command_manager);
+		Swapchain::destroy(swapchain);
+
+		vkb::destroy_device(device);
+		if (instance.instance != VK_NULL_HANDLE)
+			vkDestroySurfaceKHR(instance.instance, surface, nullptr);
+		vkb::destroy_instance(instance);
 
 		dbg_log("destroyed");
+	}
+
+	void Context::create_allocator() {
+		VmaAllocatorCreateInfo allocator_info;
+		allocator_info.instance = instance.instance;
+		allocator_info.physicalDevice = physical_device.physical_device;
+		allocator_info.device = device.device;
+
+		allocator_info.frameInUseCount = 0;
+
+		allocator_info.vulkanApiVersion = 0;
+		allocator_info.flags = 0;
+		allocator_info.preferredLargeHeapBlockSize = 0;
+
+		allocator_info.pAllocationCallbacks = nullptr;
+		allocator_info.pDeviceMemoryCallbacks = nullptr;
+		allocator_info.pHeapSizeLimit = nullptr;
+		allocator_info.pVulkanFunctions = nullptr;
+		allocator_info.pRecordSettings = nullptr;
+
+		vmaCreateAllocator(&allocator_info, &allocator);
 	}
 }

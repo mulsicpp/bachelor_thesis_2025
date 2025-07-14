@@ -18,7 +18,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vk\Context.cpp">
+    <ClCompile Include="src\vk_core\Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\external\VkBootstrap.cpp">
@@ -33,10 +33,13 @@
     <ClCompile Include="src\utils\LibManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vk\CommandManager.cpp">
+    <ClCompile Include="src\vk_core\CommandManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vk\Swapchain.cpp">
+    <ClCompile Include="src\vk_core\Swapchain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\external\vk_mem_alloc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,7 +59,7 @@
     <ClInclude Include="src\utils\dbg_log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk\Context.h">
+    <ClInclude Include="src\vk_core\Context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\external\VkBootstrap.h">
@@ -65,10 +68,13 @@
     <ClInclude Include="src\App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk\CommandManager.h">
+    <ClInclude Include="src\vk_core\CommandManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk\Swapchain.h">
+    <ClInclude Include="src\vk_core\Swapchain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\external\vk_mem_alloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,17 +9,17 @@ App::App() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    m_window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
-    m_context = vk::Context::create(m_window, APP_NAME);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
+    context = vk::Context::create(window, APP_NAME);
 }
 
 App::~App() {
-    glfwDestroyWindow(m_window);
+    glfwDestroyWindow(window);
 }
 
 void App::run() {
     dbg_log("run");
-    while (!glfwWindowShouldClose(m_window)) {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
     }
 }

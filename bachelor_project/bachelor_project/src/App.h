@@ -1,11 +1,11 @@
 #pragma once
 
-#include "vk/Context.h"
+#include "vk_core/Context.h"
 
 class App {
 private:
-	GLFWwindow* m_window;
-	std::unique_ptr<vk::Context> m_context;
+	GLFWwindow* window;
+	std::unique_ptr<vk::Context> context;
 
 public:
 	App();

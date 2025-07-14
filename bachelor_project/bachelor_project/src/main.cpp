@@ -8,8 +8,8 @@ int main(void) {
 	try {
 
 		utils::LibManager lib_manager;
-		App app{};
 
+		App app{};
 		app.run();
 	}
 	catch (const std::exception& e) {
