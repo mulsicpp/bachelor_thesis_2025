@@ -5,14 +5,13 @@
 
 #include "utils/dbg_log.h"
 #include "utils/NoCopy.h"
+#include "utils/ptr_alias.h"
 
 #include "Swapchain.h"
 #include "CommandManager.h"
 #include "Allocator.h"
 
 #include <GLFW/glfw3.h>
-
-#include <memory>
 
 namespace vk {
 
@@ -33,8 +32,8 @@ namespace vk {
 		Allocator allocator;
 
 	public:
-		static inline std::unique_ptr<Context> create(GLFWwindow* window, const char* app_name) {
-			return std::unique_ptr<Context>(new Context(window, app_name));
+		static inline ptr::Owned<Context> create(GLFWwindow* window, const char* app_name) {
+			return ptr::Owned<Context>(new Context(window, app_name));
 		}
 
 		~Context();

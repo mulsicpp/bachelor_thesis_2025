@@ -5,7 +5,7 @@
 class App {
 private:
 	GLFWwindow* window;
-	std::unique_ptr<vk::Context> context;
+	ptr::Owned<vk::Context> context;
 
 public:
 	App();
