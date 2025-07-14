@@ -2,6 +2,8 @@
 
 #include "utils/dbg_log.h"
 
+#include "Context.h"
+
 #include <map>
 #include <set>
 #include <string>
@@ -89,6 +91,7 @@ namespace vk {
 		return custom_queue_descriptions;
 	}
 
+
 	VkCommandPool create_command_pool(VkDevice device, uint32_t family_index) {
 		VkCommandPool command_pool;
 
@@ -119,8 +122,10 @@ namespace vk {
 		}
 
 		for (int i = 0; i < QUEUE_TYPE_COUNT; i++) {
-			vkGetDeviceQueue(device.device, queue_info.queue_family_indices[i], 0, &manager.queues[i].queue);
-			manager.queues[i].family_index = queue_info.queue_family_indices[i];
+			auto family_index = queue_info.queue_family_indices[i];
+			vkGetDeviceQueue(device.device, family_index, 0, &manager.queues[i].queue);
+			manager.queues[i].family_index = family_index;
+			manager.queues[i].command_pool = manager.command_pools[family_index];
 		}
 
 		for (const auto command_pool : manager.command_pools) {

@@ -11,6 +11,7 @@ namespace vk {
 	Buffer::~Buffer() {
 		if (buffer == VK_NULL_HANDLE) return;
 
-		vmaDestroyBuffer(Context::get()->allocator, buffer, allocation);
+		// TODO
+		//vmaDestroyBuffer(Context::get()->allocator, buffer, allocation);
 	}
 }

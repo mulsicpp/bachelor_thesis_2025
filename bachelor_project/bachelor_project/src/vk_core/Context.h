@@ -18,12 +18,10 @@ namespace vk {
 	private:
 		static Context* context;
 
-	public:
 		GLFWwindow* window;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 
 		vkb::Instance instance;
-
 		vkb::PhysicalDevice physical_device;
 		vkb::Device device;
 
@@ -50,6 +48,17 @@ namespace vk {
 			assert(context != nullptr);
 			return context;
 		}
+
+		GLFWwindow* get_window() const { return window; }
+		VkSurfaceKHR get_surface() const { return surface; }
+
+		VkInstance get_instance() const { return instance.instance; }
+		VkPhysicalDevice get_physical_device() const { return physical_device.physical_device; }
+		VkDevice get_device() const { return device.device; }
+
+		const CommandManager& get_command_manager() const { return command_manager; }
+		const Swapchain& get_swapchain() const { return swapchain; }
+		VmaAllocator get_allocator() const { return allocator; }
 
 	private:
 		Context(GLFWwindow* window, const char* app_name);

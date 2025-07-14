@@ -5,10 +5,13 @@
 
 #include <array>
 #include <set>
+#include <functional>
 
 #define QUEUE_TYPE_COUNT 4
 
 namespace vk {
+
+	using CommandRecorder = std::function<void(VkCommandBuffer)>;
 
 	enum QueueType {
 		Present = 0,
@@ -30,9 +33,12 @@ namespace vk {
 	struct Queue {
 		VkQueue queue = VK_NULL_HANDLE;
 		int32_t family_index = -1;
+		VkCommandPool command_pool;
 	};
 
+
 	class CommandManager {
+		friend class CommandBuffer;
 	private:
 		VkDevice device = VK_NULL_HANDLE;
 		std::array<Queue, QUEUE_TYPE_COUNT> queues;

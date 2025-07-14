@@ -11,22 +11,20 @@ namespace vk {
 		Staging
 	};
 
-	struct BufferBuilder {
+	struct BufferInfo {
 		uint32_t size;
 		BufferType type;
 		void* data;
-
-
 	};
 
 	class Buffer {
-		friend class BufferBuidler;
-	private:
+	public:
 		VkBuffer buffer;
 		VmaAllocation allocation;
+
 	public:
 		Buffer();
 		~Buffer();
-	private:
 	};
+
 }

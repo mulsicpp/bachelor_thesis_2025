@@ -160,11 +160,13 @@
     <ClCompile Include="src\external\vk_mem_alloc.cpp" />
     <ClCompile Include="src\utils\LibManager.cpp" />
     <ClCompile Include="src\utils\LibManager.h" />
+    <ClCompile Include="src\vk_core\CommandBuffer.cpp" />
     <ClCompile Include="src\vk_core\CommandManager.cpp" />
     <ClCompile Include="src\vk_core\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
     <ClCompile Include="src\vk_resources\Buffer.cpp" />
+    <ClCompile Include="src\vk_resources\Image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -173,6 +175,7 @@
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\defines.h" />
     <ClInclude Include="src\utils\ptr_alias.h" />
+    <ClInclude Include="src\vk_core\CommandBuffer.h" />
     <ClInclude Include="src\vk_core\CommandManager.h" />
     <ClInclude Include="src\vk_core\Context.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
@@ -180,6 +183,7 @@
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
     <ClInclude Include="src\vk_resources\Buffer.h" />
+    <ClInclude Include="src\vk_resources\Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
