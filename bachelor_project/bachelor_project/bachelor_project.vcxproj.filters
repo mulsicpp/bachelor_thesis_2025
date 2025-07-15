@@ -101,5 +101,8 @@
     <ClInclude Include="src\utils\move.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_resources\Format.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

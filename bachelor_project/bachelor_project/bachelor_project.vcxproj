@@ -184,6 +184,7 @@
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
     <ClInclude Include="src\vk_resources\Buffer.h" />
+    <ClInclude Include="src\vk_resources\Format.h" />
     <ClInclude Include="src\vk_resources\Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

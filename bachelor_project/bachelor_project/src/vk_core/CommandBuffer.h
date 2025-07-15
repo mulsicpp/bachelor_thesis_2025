@@ -45,7 +45,6 @@ namespace vk {
 		Ref submit(const SubmitInfo& info = {});
 
 		Ref wait();
-		Ref reset_fence();
 	private:
 		void destroy();
 

@@ -7,6 +7,27 @@
 
 #include "vk_core/CommandBuffer.h"
 
+class Test {
+public:
+	int* val{};
+
+	Test() = default;
+
+	static Test create(int val) { 
+		dbg_log("created %i", val);
+		Test test;
+		test.val = new int{val};
+		return test;
+	}
+
+private:
+	void destroy() { dbg_log("destroyed %i", *val); delete val; }
+	void mark_moved() { dbg_log("moved %i", val ? *val : -1); val = nullptr; }
+	bool was_moved() { return val == nullptr; }
+
+	MOVE_SEMANTICS(Test)
+};
+
 int main(void) {
 	try {
 
@@ -28,6 +49,14 @@ int main(void) {
 		}
 
 		app.run();
+
+		/*Test t1 = Test::create(1);
+
+		Test t2 = Test::create(2);
+
+		t1 = std::move(t2);
+
+		t1 = std::move(t2);*/
 
 	}
 	catch (const std::exception& e) {
