@@ -13,7 +13,7 @@ namespace vk {
 
 	using CommandRecorder = std::function<void(VkCommandBuffer)>;
 
-	enum QueueType {
+	enum class QueueType {
 		Present = 0,
 		Graphics = 1,
 		Compute = 2,

@@ -11,29 +11,22 @@ namespace vk {
 		, used{ false }
 	{}
 
-	CommandBuffer::~CommandBuffer() {
-		if (command_buffer == VK_NULL_HANDLE) return;
-
+	void CommandBuffer::destroy() {
 		const auto& context = *Context::get();
-		vkFreeCommandBuffers(context.get_device(), queue.command_pool, 1, &command_buffer);
-		command_buffer = VK_NULL_HANDLE;
 
-		if (fence != VK_NULL_HANDLE) {
-			vkDestroyFence(context.get_device(), fence, nullptr);
-			fence = VK_NULL_HANDLE;
-		}
+		wait();
+		vkFreeCommandBuffers(context.get_device(), queue.command_pool, 1, &command_buffer);
+		vkDestroyFence(context.get_device(), fence, nullptr);
+
+		command_buffer = VK_NULL_HANDLE;
 	}
 
 	CommandBuffer::Ref CommandBuffer::record(CommandRecorder recorder) {
 		if (is_single_use && used) {
-			throw std::runtime_error("Cannot rerecord signle-use buffer!");
+			throw std::runtime_error("Cannot rerecord single-use buffer!");
 		}
 
 		const auto& context = *Context::get();
-
-		if (fence != VK_NULL_HANDLE) {
-			vkResetFences(context.get_device(), 1, &fence);
-		}
 
 		vkResetCommandBuffer(command_buffer, /*VkCommandBufferResetFlagBits*/ 0);
 
@@ -55,18 +48,20 @@ namespace vk {
 	}
 
 	CommandBuffer::Ref CommandBuffer::submit(const SubmitInfo& info) {
-		VkSubmitInfo submit_info;
+		VkSubmitInfo submit_info{};
 		submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 		submit_info.waitSemaphoreCount = info.wait_semaphores.size();
 		submit_info.pWaitSemaphores = info.wait_semaphores.data();
-		submit_info.pWaitDstStageMask = info.wait_dst_stage_masks.data();;
+		submit_info.pWaitDstStageMask = info.wait_dst_stage_masks.data();
+
+		submit_info.signalSemaphoreCount = info.signal_semaphores.size();
+		submit_info.pSignalSemaphores = info.signal_semaphores.data();
 
 		submit_info.commandBufferCount = 1;
 		submit_info.pCommandBuffers = &command_buffer;
 
-		submit_info.signalSemaphoreCount = info.signal_semaphores.size();
-		submit_info.pSignalSemaphores = info.signal_semaphores.data();
+		vkResetFences(Context::get()->get_device(), 1, &fence);
 
 		if (vkQueueSubmit(queue.queue, 1, &submit_info, fence) != VK_SUCCESS) {
 			throw std::runtime_error("Command buffer submission failed!");
@@ -81,17 +76,7 @@ namespace vk {
 
 
 	CommandBuffer::Ref CommandBuffer::wait() {
-		if (fence != VK_NULL_HANDLE) {
-			vkWaitForFences(Context::get()->get_device(), 1, &fence, VK_TRUE, UINT64_MAX);
-		}
-
-		return *this;
-	}
-
-	CommandBuffer::Ref CommandBuffer::reset_fence() {
-		if (fence != VK_NULL_HANDLE) {
-			vkResetFences(Context::get()->get_device(), 1, &fence);
-		}
+		vkWaitForFences(Context::get()->get_device(), 1, &fence, VK_TRUE, UINT64_MAX);
 
 		return *this;
 	}
@@ -101,8 +86,6 @@ namespace vk {
 	CommandBufferBuilder::CommandBufferBuilder(QueueType queue_type)
 		: queue_type{ queue_type }
 		, is_single_use{ false }
-		, has_fence{ true }
-		, fence_start_state{ FenceState::Unsignaled }
 	{}
 
 	CommandBuffer CommandBufferBuilder::build() {
@@ -124,17 +107,12 @@ namespace vk {
 			throw std::runtime_error("Command buffer allocation failed!");
 		}
 
-		if (has_fence) {
-			VkFenceCreateInfo fence_info{};
-			fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fence_info.flags = fence_start_state == FenceState::Signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
+		VkFenceCreateInfo fence_info{};
+		fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-			if (vkCreateFence(context.get_device(), &fence_info, nullptr, &cmd_buffer.fence) != VK_SUCCESS) {
-				throw std::runtime_error("Fence creation failed!");
-			}
-		}
-		else {
-			cmd_buffer.fence = VK_NULL_HANDLE;
+		if (vkCreateFence(context.get_device(), &fence_info, nullptr, &cmd_buffer.fence) != VK_SUCCESS) {
+			throw std::runtime_error("Fence creation failed!");
 		}
 
 		cmd_buffer.is_single_use = is_single_use;

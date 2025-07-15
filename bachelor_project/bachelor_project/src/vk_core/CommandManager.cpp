@@ -40,7 +40,7 @@ namespace vk {
 
 			vkGetPhysicalDeviceSurfaceSupportKHR(device.physical_device, i, device.surface, &present_support);
 			if (present_support) {
-				queue_info.queue_family_indices[QueueType::Present] = i;
+				queue_info.queue_family_indices[(int)QueueType::Present] = i;
 				queue_info.used_families.insert(i);
 				break;
 			}
@@ -49,7 +49,7 @@ namespace vk {
 		for (uint32_t i = 0; i < queue_families.size(); i++) {
 
 			if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-				queue_info.queue_family_indices[QueueType::Graphics] = i;
+				queue_info.queue_family_indices[(int)QueueType::Graphics] = i;
 				queue_info.used_families.insert(i);
 				break;
 			}
@@ -58,7 +58,7 @@ namespace vk {
 		for (uint32_t i = 0; i < queue_families.size(); i++) {
 
 			if (queue_families[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
-				queue_info.queue_family_indices[QueueType::Compute] = i;
+				queue_info.queue_family_indices[(int)QueueType::Compute] = i;
 				queue_info.used_families.insert(i);
 				break;
 			}
@@ -67,7 +67,7 @@ namespace vk {
 		for (uint32_t i = 0; i < queue_families.size(); i++) {
 
 			if (queue_families[i].queueFlags & VK_QUEUE_TRANSFER_BIT) {
-				queue_info.queue_family_indices[QueueType::Transfer] = i;
+				queue_info.queue_family_indices[(int)QueueType::Transfer] = i;
 				queue_info.used_families.insert(i);
 				break;
 			}

@@ -2,50 +2,33 @@
 #include <stdexcept>
 
 #include "utils/LibManager.h"
-#include "utils/move.h"
 
 #include "App.h"
 
-class Test {
-public:
-	int* val;
-
-	Test() : val{ nullptr } {}
-
-	Test(int i) : val{ new int(i) } {
-		dbg_log("created %i", *val);
-	}
-
-	void destroy() {
-		dbg_log("destroyed %i", *val);
-		delete val;
-	}
-
-	void mark_moved() {
-		dbg_log("moved %i", *val);
-		val = nullptr;
-	}
-
-	bool was_moved() {
-		return val == nullptr;
-	}
-
-	MOVE_SEMANTICS(Test)
-};
+#include "vk_core/CommandBuffer.h"
 
 int main(void) {
 	try {
 
 		utils::LibManager lib_manager;
 
-		// App app{};
-		// app.run();
+		App app{};
 
-		Test t1{ 3 };
+		{
+			auto command_buffer = vk::CommandBufferBuilder(vk::QueueType::Graphics).build();
 
-		Test t2{ 5 };
+			auto recorder = [](VkCommandBuffer commandbuffer) {};
 
-		std::swap(t1, t2);
+			command_buffer
+				.record(recorder)
+				.submit()
+				.wait();
+
+			dbg_log("command buffer finished");
+		}
+
+		app.run();
+
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());
