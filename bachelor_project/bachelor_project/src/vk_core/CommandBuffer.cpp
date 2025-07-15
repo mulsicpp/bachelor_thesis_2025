@@ -17,8 +17,6 @@ namespace vk {
 		wait();
 		vkFreeCommandBuffers(context.get_device(), queue.command_pool, 1, &command_buffer);
 		vkDestroyFence(context.get_device(), fence, nullptr);
-
-		command_buffer = VK_NULL_HANDLE;
 	}
 
 	CommandBuffer::Ref CommandBuffer::record(CommandRecorder recorder) {

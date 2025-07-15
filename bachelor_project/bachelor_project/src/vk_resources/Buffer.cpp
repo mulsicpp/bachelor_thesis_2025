@@ -8,10 +8,7 @@ namespace vk {
 		, allocation{VK_NULL_HANDLE}
 	{}
 
-	Buffer::~Buffer() {
-		if (buffer == VK_NULL_HANDLE) return;
-
-		// TODO
-		//vmaDestroyBuffer(Context::get()->allocator, buffer, allocation);
+	void Buffer::destroy() {
+		vmaDestroyBuffer(Context::get()->get_allocator(), buffer, allocation);
 	}
 }

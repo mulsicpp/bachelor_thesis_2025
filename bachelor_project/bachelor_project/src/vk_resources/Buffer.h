@@ -24,7 +24,17 @@ namespace vk {
 
 	public:
 		Buffer();
-		~Buffer();
+
+	private:
+		void destroy();
+
+		inline void mark_mowed() {
+			buffer = VK_NULL_HANDLE;
+		}
+
+		inline bool was_mowed() {
+			return buffer == VK_NULL_HANDLE;
+		}
 	};
 
 }

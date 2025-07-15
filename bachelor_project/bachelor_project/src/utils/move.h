@@ -24,6 +24,7 @@ public:                                                					\
 	inline ~class_name() {										        \
 		if (was_moved()) return;										\
 		destroy();														\
+		mark_moved();													\
 	}																	\
 																		\
 private:																\
