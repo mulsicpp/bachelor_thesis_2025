@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.h>
 #include "external/vk_mem_alloc.h"
 
+#include "utils/move.h"
+
 namespace vk {
 	enum class BufferType {
 		Vertex,
@@ -28,13 +30,7 @@ namespace vk {
 	private:
 		void destroy();
 
-		inline void mark_mowed() {
-			buffer = VK_NULL_HANDLE;
-		}
-
-		inline bool was_mowed() {
-			return buffer == VK_NULL_HANDLE;
-		}
+		MOVE_SEMANTICS_VK_HANDLE(Buffer, buffer)
 	};
 
 }

@@ -48,10 +48,7 @@ namespace vk {
 	private:
 		void destroy();
 
-		inline void mark_moved() { command_buffer = VK_NULL_HANDLE; }
-		inline bool was_moved() { return command_buffer == VK_NULL_HANDLE; }
-
-		MOVE_SEMANTICS(CommandBuffer)
+		MOVE_SEMANTICS_VK_HANDLE(CommandBuffer, command_buffer)
 	};
 
 	class CommandBufferBuilder {

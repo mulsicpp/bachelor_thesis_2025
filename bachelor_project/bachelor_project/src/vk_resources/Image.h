@@ -29,15 +29,7 @@ namespace vk {
 	private:
 		void destroy();
 
-		inline void mark_moved() {
-			image = VK_NULL_HANDLE;
-		}
-
-		inline bool was_moved() {
-			return image == VK_NULL_HANDLE;
-		}
-
-		MOVE_SEMANTICS(Image)
+		MOVE_SEMANTICS_VK_HANDLE(Image, image)
 	};
 
 	class ImageBuilder {

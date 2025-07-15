@@ -104,5 +104,8 @@
     <ClInclude Include="src\vk_resources\Format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_pipeline\RenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

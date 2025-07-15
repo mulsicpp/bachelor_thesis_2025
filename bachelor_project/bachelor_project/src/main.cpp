@@ -22,10 +22,8 @@ public:
 
 private:
 	void destroy() { dbg_log("destroyed %i", *val); delete val; }
-	void mark_moved() { dbg_log("moved %i", val ? *val : -1); val = nullptr; }
-	bool was_moved() { return val == nullptr; }
 
-	MOVE_SEMANTICS(Test)
+	MOVE_SEMANTICS_VK_HANDLE(Test, val)
 };
 
 int main(void) {
@@ -33,7 +31,7 @@ int main(void) {
 
 		utils::LibManager lib_manager;
 
-		App app{};
+		/*App app{};
 
 		{
 			auto command_buffer = vk::CommandBufferBuilder(vk::QueueType::Graphics).build();
@@ -48,16 +46,15 @@ int main(void) {
 			dbg_log("command buffer finished");
 		}
 
-		app.run();
+		app.run();*/
 
-		/*Test t1 = Test::create(1);
+		Test t1 = Test::create(1);
 
 		Test t2 = Test::create(2);
 
-		t1 = std::move(t2);
+		t2 = std::move(t1);
 
-		t1 = std::move(t2);*/
-
+		t2 = std::move(t1);
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());

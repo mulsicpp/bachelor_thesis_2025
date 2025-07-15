@@ -1,7 +1,5 @@
 #pragma once
 
-#include "dbg_log.h"
-
 #define MOVE_SEMANTICS(class_name)                     					\
 public:                                                					\
 	inline class_name(class_name&& other) noexcept {   					\
@@ -28,4 +26,13 @@ public:                                                					\
 																		\
 private:																\
 	class_name(const class_name& other) = default;						\
-	class_name& operator=(const class_name& other) = default;			\
+	class_name& operator=(const class_name& other) = default;			
+
+
+#define MOVE_MARKER(handle, value)										\
+inline void mark_moved() { handle = value; }							\
+inline bool was_moved() { return handle == value; }
+
+#define MOVE_MARKER_VK_HANDLE(handle) MOVE_MARKER(handle, VK_NULL_HANDLE)
+
+#define MOVE_SEMANTICS_VK_HANDLE(class_name, handle) MOVE_MARKER_VK_HANDLE(handle) MOVE_SEMANTICS(class_name)
