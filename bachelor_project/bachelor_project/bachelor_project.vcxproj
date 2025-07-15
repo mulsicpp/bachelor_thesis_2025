@@ -172,6 +172,7 @@
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\external\VkBootstrap.h" />
     <ClInclude Include="src\external\vk_mem_alloc.h" />
+    <ClInclude Include="src\utils\builder.h" />
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\defines.h" />
     <ClInclude Include="src\utils\move.h" />
@@ -185,7 +186,6 @@
     <ClInclude Include="src\vk_ext\ext_macros.h" />
     <ClInclude Include="src\vk_pipeline\RenderPass.h" />
     <ClInclude Include="src\vk_resources\Buffer.h" />
-    <ClInclude Include="src\vk_resources\Format.h" />
     <ClInclude Include="src\vk_resources\Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

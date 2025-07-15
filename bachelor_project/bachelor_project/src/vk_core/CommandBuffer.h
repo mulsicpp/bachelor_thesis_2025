@@ -56,14 +56,14 @@ namespace vk {
 		using Ref = CommandBufferBuilder&;
 
 		QueueType queue_type;
-		bool is_single_use;
+		bool single_use;
 	public:
 		CommandBufferBuilder(QueueType queue_type);
 
 		CommandBuffer build();
 
-		inline Ref with_single_use(bool is_single_use) {
-			this->is_single_use = is_single_use;
+		inline Ref set_single_use(bool is_single_use) {
+			this->single_use = is_single_use;
 			return *this;
 		}
 	};

@@ -83,7 +83,7 @@ namespace vk {
 
 	CommandBufferBuilder::CommandBufferBuilder(QueueType queue_type)
 		: queue_type{ queue_type }
-		, is_single_use{ false }
+		, single_use{ false }
 	{}
 
 	CommandBuffer CommandBufferBuilder::build() {
@@ -113,7 +113,7 @@ namespace vk {
 			throw std::runtime_error("Fence creation failed!");
 		}
 
-		cmd_buffer.is_single_use = is_single_use;
+		cmd_buffer.is_single_use = single_use;
 		cmd_buffer.used = false;
 
 		return cmd_buffer;

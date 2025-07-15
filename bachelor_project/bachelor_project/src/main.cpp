@@ -31,30 +31,8 @@ int main(void) {
 
 		utils::LibManager lib_manager;
 
-		/*App app{};
-
-		{
-			auto command_buffer = vk::CommandBufferBuilder(vk::QueueType::Graphics).build();
-
-			auto recorder = [](VkCommandBuffer commandbuffer) {};
-
-			command_buffer
-				.record(recorder)
-				.submit()
-				.wait();
-
-			dbg_log("command buffer finished");
-		}
-
-		app.run();*/
-
-		Test t1 = Test::create(1);
-
-		Test t2 = Test::create(2);
-
-		t2 = std::move(t1);
-
-		t2 = std::move(t1);
+		App app{};
+		app.run();
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());

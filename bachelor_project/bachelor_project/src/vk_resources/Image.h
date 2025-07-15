@@ -5,8 +5,6 @@
 
 #include "utils/move.h"
 
-#include "Format.h"
-
 namespace vk {
 
 	struct ImageExtent {
@@ -20,7 +18,7 @@ namespace vk {
 		VmaAllocation allocation;
 		VkImageView image_view;
 
-		Format format;
+		VkFormat format;
 		ImageExtent extent;
 
 	public:

@@ -101,10 +101,10 @@
     <ClInclude Include="src\utils\move.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_resources\Format.h">
+    <ClInclude Include="src\vk_pipeline\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vk_pipeline\RenderPass.h">
+    <ClInclude Include="src\utils\builder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
