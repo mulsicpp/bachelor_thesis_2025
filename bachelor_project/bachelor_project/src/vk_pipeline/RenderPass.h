@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
+
 #include "utils/move.h"
 
 #include "vk_resources/Image.h"
@@ -21,7 +22,7 @@ namespace vk {
 
 		inline VkRenderPass handle() { return render_pass; }
 
-		MOVE_SEMANTICS_VK_HANDLE(RenderPass, render_pass)
+		MOVE_SEMANTICS_VK_DEFAULT(RenderPass, render_pass)
 	};
 
 	struct AttachmentInfo {
@@ -30,7 +31,6 @@ namespace vk {
 		VkFormat format;
 		VkAttachmentLoadOp load_op;
 		VkAttachmentStoreOp store_op;
-		VkImageLayout layout;
 		VkImageLayout final_layout;
 
 		AttachmentInfo();
@@ -38,8 +38,9 @@ namespace vk {
 		inline Ref set_format(VkFormat format) { this->format = format; return *this; }
 		inline Ref set_load_op(VkAttachmentLoadOp load_op) { this->load_op = load_op; return *this; }
 		inline Ref set_store_op(VkAttachmentStoreOp store_op) { this->store_op = store_op; return *this; }
-		inline Ref set_layout(VkImageLayout layout) { this->layout = layout; return *this; }
 		inline Ref set_final_layout(VkImageLayout final_layout) { this->final_layout = final_layout; return *this; }
+
+		Ref use_swapchain();
 	};
 
 	class RenderPassBuilder {
@@ -48,12 +49,26 @@ namespace vk {
 
 		AttachmentInfo color_attachment;
 		AttachmentInfo depth_attachment;
+		bool use_depth_attachment;
 
 		RenderPassBuilder();
 
 		RenderPass build();
 
-		inline Ref set_color_attachment(AttachmentInfo attachment_info) { color_attachment = attachment_info; return *this; }
-		inline Ref set_depth_attachment(AttachmentInfo attachment_info) { depth_attachment = attachment_info; return *this; }
+		inline Ref set_color_attachment(AttachmentInfo attachment_info) { 
+			color_attachment = attachment_info;
+			return *this;
+		}
+
+		inline Ref set_depth_attachment(AttachmentInfo attachment_info) {
+			depth_attachment = attachment_info;
+			use_depth_attachment = true;
+			return *this;
+		}
+
+		inline Ref no_depth_attachment() {
+			use_depth_attachment = false;
+			return *this;
+		}
 	};
 }

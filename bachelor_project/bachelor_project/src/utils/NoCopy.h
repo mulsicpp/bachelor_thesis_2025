@@ -6,10 +6,11 @@ namespace utils {
 	public:
 		NoCopy() = default;
 
-		NoCopy(const NoCopy& other) = delete;
-		NoCopy(NoCopy&& other) = delete;
+	protected:
+		NoCopy(const NoCopy& other) = default;
+		NoCopy(NoCopy&& other) = default;
 
-		NoCopy& operator=(const NoCopy&) = delete;
-		NoCopy& operator=(NoCopy&&) = delete;
+		NoCopy& operator=(const NoCopy&) = default;
+		NoCopy& operator=(NoCopy&&) = default;
 	};
 }

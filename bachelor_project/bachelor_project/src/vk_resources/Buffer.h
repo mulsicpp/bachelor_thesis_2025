@@ -30,7 +30,7 @@ namespace vk {
 	private:
 		void destroy();
 
-		MOVE_SEMANTICS_VK_HANDLE(Buffer, buffer)
+		MOVE_SEMANTICS_VK_DEFAULT(Buffer, buffer)
 	};
 
 }

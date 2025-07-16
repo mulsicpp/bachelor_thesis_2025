@@ -48,7 +48,7 @@ namespace vk {
 	private:
 		void destroy();
 
-		MOVE_SEMANTICS_VK_HANDLE(CommandBuffer, command_buffer)
+		MOVE_SEMANTICS_VK_DEFAULT(CommandBuffer, command_buffer)
 	};
 
 	class CommandBufferBuilder {

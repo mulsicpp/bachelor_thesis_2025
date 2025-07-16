@@ -37,7 +37,7 @@ namespace vk {
 	};
 
 
-	class CommandManager {
+	class CommandManager : public utils::NoCopy {
 		friend class CommandBuffer;
 	private:
 		VkDevice device = VK_NULL_HANDLE;

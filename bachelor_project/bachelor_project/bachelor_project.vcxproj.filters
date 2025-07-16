@@ -51,6 +51,12 @@
     <ClCompile Include="src\vk_core\CommandBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_pipeline\RenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rasterizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\NoCopy.h">
@@ -104,7 +110,7 @@
     <ClInclude Include="src\vk_pipeline\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\builder.h">
+    <ClInclude Include="src\Rasterizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

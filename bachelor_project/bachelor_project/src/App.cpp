@@ -12,11 +12,11 @@ App::App() {
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
     
     vk::Context::create(window, APP_NAME);
+
+    rasterizer = RasterizerBuilder().build();
 }
 
 App::~App() {
-    vk::Context::destroy();
-
     glfwDestroyWindow(window);
 }
 

@@ -158,6 +158,7 @@
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\external\VkBootstrap.cpp" />
     <ClCompile Include="src\external\vk_mem_alloc.cpp" />
+    <ClCompile Include="src\Rasterizer.cpp" />
     <ClCompile Include="src\utils\LibManager.cpp" />
     <ClCompile Include="src\utils\LibManager.h" />
     <ClCompile Include="src\vk_core\CommandBuffer.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="src\vk_core\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
+    <ClCompile Include="src\vk_pipeline\RenderPass.cpp" />
     <ClCompile Include="src\vk_resources\Buffer.cpp" />
     <ClCompile Include="src\vk_resources\Image.cpp" />
   </ItemGroup>
@@ -172,7 +174,6 @@
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\external\VkBootstrap.h" />
     <ClInclude Include="src\external\vk_mem_alloc.h" />
-    <ClInclude Include="src\utils\builder.h" />
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\defines.h" />
     <ClInclude Include="src\utils\move.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="src\vk_core\Swapchain.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
+    <ClInclude Include="src\Rasterizer.h" />
     <ClInclude Include="src\vk_pipeline\RenderPass.h" />
     <ClInclude Include="src\vk_resources\Buffer.h" />
     <ClInclude Include="src\vk_resources\Image.h" />

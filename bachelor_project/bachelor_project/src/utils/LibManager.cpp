@@ -4,6 +4,9 @@
 
 #include <stdexcept>
 
+#include "vk_core/Context.h"
+
+
 namespace utils {
     LibManager::LibManager() {
         if (!glfwInit()) {
@@ -12,6 +15,7 @@ namespace utils {
     }
 
     LibManager::~LibManager() {
+        vk::Context::destroy();
         glfwTerminate();
     }
 }

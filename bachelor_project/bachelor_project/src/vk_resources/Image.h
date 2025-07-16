@@ -27,7 +27,7 @@ namespace vk {
 	private:
 		void destroy();
 
-		MOVE_SEMANTICS_VK_HANDLE(Image, image)
+		MOVE_SEMANTICS_VK_DEFAULT(Image, image)
 	};
 
 	class ImageBuilder {

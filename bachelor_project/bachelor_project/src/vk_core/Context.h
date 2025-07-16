@@ -14,7 +14,7 @@
 
 namespace vk {
 
-	class Context : utils::NoCopy {
+	class Context : public utils::NoCopy {
 	private:
 		static Context* context;
 
@@ -42,6 +42,7 @@ namespace vk {
 		static inline void destroy() {
 			if (context != nullptr)
 				delete context;
+			context = nullptr;
 		}
 
 		static inline Context* get() {
