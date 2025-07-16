@@ -7,6 +7,8 @@
 
 #include "vk_core/CommandBuffer.h"
 
+#include "vk_resources/Buffer.h"
+
 class Test {
 public:
 	int* val{};
@@ -27,8 +29,8 @@ private:
 };
 
 void test_move_semantics();
-
 void test_command_buffer();
+void test_buffer();
 
 int main(void) {
 	try {
@@ -37,9 +39,7 @@ int main(void) {
 
 		App app{};
 
-		test_command_buffer();
-
-		app.run();
+		test_buffer();
 
 		// test_move_semantics();
 	}
@@ -70,4 +70,35 @@ void test_command_buffer() {
 		.record(recorder)
 		.submit()
 		.wait();
+}
+
+void test_buffer() {
+	const char data1[] = "Hi I'm buffer#1!!";
+	const char data2[] = "Hi I'm buffer#2!!";
+
+	const uint32_t size1 = sizeof(data1) / sizeof(char);
+	const uint32_t size2 = sizeof(data2) / sizeof(char);
+
+	vk::Buffer b1 = vk::BufferBuilder()
+		.as_staging_buffer()
+		.from_data(data1, size1)
+		.build();
+
+	vk::Buffer b2 = vk::BufferBuilder()
+		.as_staging_buffer()
+		.from_data(data2, size2)
+		.add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.build();
+
+	char* mapped_data1 = b1.get_mapped_data<char>();
+	char* mapped_data2 = b2.get_mapped_data<char>();
+
+	printf("mapped_data1: %s\n", mapped_data1);
+	printf("mapped_data2: %s\n", mapped_data2);
+
+	b1.copy_into(&b2);
+
+	printf("copied buffer#1 to buffer#2\n");
+	printf("mapped_data1: %s\n", mapped_data1);
+	printf("mapped_data2: %s\n", mapped_data2);
 }

@@ -146,4 +146,20 @@ namespace vk {
 		}
 
 	}
+
+	std::vector<uint32_t> CommandManager::get_required_families(std::vector<QueueType> types) const {
+		std::set<uint32_t> family_indices{};
+
+		for (const auto type : types) {
+			family_indices.insert(queues[(int)type].family_index);
+		}
+
+		std::vector<uint32_t> ret;
+
+		for (const auto idx : family_indices) {
+			ret.push_back(idx);
+		}
+
+		return ret;
+	}
 }

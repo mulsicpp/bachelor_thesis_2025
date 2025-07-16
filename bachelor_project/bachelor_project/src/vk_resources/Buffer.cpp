@@ -1,14 +1,118 @@
 #include "Buffer.h"
 
 #include "vk_core/Context.h"
+#include "vk_core/CommandBuffer.h"
 
 namespace vk {
+
 	Buffer::Buffer()
-		: buffer{VK_NULL_HANDLE}
-		, allocation{VK_NULL_HANDLE}
+		: buffer{ VK_NULL_HANDLE }
+		, allocation{ VK_NULL_HANDLE }
+		, size{ 0 }
+		, mapped_data{ nullptr }
+		, host_coherent{ false }
 	{}
 
 	void Buffer::destroy() {
 		vmaDestroyBuffer(Context::get()->get_allocator(), buffer, allocation);
+	}
+
+	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
+		if (copy_regions.size() > 0) {
+			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer, dst_buffer->buffer, copy_regions.size(), copy_regions.data());
+			return;
+		}
+
+		VkBufferCopy copy_region{};
+		copy_region.size = size;
+		copy_region.srcOffset = 0;
+		copy_region.dstOffset = 0;
+
+		vkCmdCopyBuffer(cmd_buf.handle(), this->buffer, dst_buffer->buffer, 1, &copy_region);
+	}
+
+	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
+		CommandBuffer command_buffer = CommandBufferBuilder(QueueType::Transfer)
+			.set_single_use(true)
+			.build();
+
+		command_buffer
+			.record([&](ReadyCommandBuffer cmd_buf) { this->cmd_copy_into(cmd_buf, dst_buffer, copy_regions); })
+			.submit()
+			.wait();
+	}
+
+
+
+	BufferBuilder::BufferBuilder()
+		: size{ 0 }
+		, data{ nullptr }
+		, usage{ VK_BUFFER_USAGE_TRANSFER_SRC_BIT }
+		, memory_usage{ VMA_MEMORY_USAGE_CPU_ONLY }
+		, queue_types{}
+		, use_mapping{ true }
+	{}
+
+
+	BufferBuilder::Ref BufferBuilder::as_staging_buffer() {
+		usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		memory_usage = VMA_MEMORY_USAGE_CPU_ONLY;
+		queue_types = { QueueType::Transfer };
+
+		return *this;
+	}
+
+
+	Buffer BufferBuilder::build() {
+		Buffer buffer{};
+
+		const auto& context = *Context::get();
+
+		VkBufferCreateInfo buffer_info{};
+		buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		buffer_info.size = size;
+		buffer_info.usage = usage;
+
+		if (queue_types.size() == 0) {
+			throw std::runtime_error("Buffer creation failed! No queue types specified");
+		}
+
+		const auto families = context.get_command_manager().get_required_families(queue_types);
+		buffer_info.sharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
+		buffer_info.queueFamilyIndexCount = families.size();
+		buffer_info.pQueueFamilyIndices = families.data();
+
+
+		VmaAllocationCreateInfo allocation_info{};
+		allocation_info.usage = memory_usage;
+		allocation_info.flags = use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+
+		VmaAllocationInfo alloc_info{};
+		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &buffer.buffer, &buffer.allocation, &alloc_info) != VK_SUCCESS) {
+			throw std::runtime_error("Buffer creation failed!");
+		}
+
+		buffer.size = size;
+		VkMemoryPropertyFlags props;
+		vmaGetMemoryTypeProperties(context.get_allocator(), alloc_info.memoryType, &props);
+
+		buffer.host_coherent = (props & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0;
+
+		buffer.mapped_data = alloc_info.pMappedData;
+
+		if (data == nullptr)
+			return buffer;
+
+		if (buffer.mapped_data != nullptr) {
+			memcpy(buffer.mapped_data, data, size);
+		}
+		else {
+			Buffer staging_buffer = BufferBuilder()
+				.as_staging_buffer()
+				.from_data((uint8_t*)data, size)
+				.build();
+
+			staging_buffer.copy_into(&buffer);
+		}
 	}
 }

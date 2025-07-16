@@ -51,5 +51,7 @@ namespace vk {
 		inline Queue& operator[](QueueType type) {
 			return queues[(uint32_t)type];
 		}
+
+		std::vector<uint32_t> get_required_families(std::vector<QueueType> types) const;
 	};
 }
