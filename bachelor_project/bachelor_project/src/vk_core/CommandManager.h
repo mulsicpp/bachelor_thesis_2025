@@ -5,13 +5,10 @@
 
 #include <array>
 #include <set>
-#include <functional>
 
 #define QUEUE_TYPE_COUNT 4
 
 namespace vk {
-
-	using CommandRecorder = std::function<void(VkCommandBuffer)>;
 
 	enum class QueueType {
 		Present = 0,

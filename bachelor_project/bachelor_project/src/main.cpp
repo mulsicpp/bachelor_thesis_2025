@@ -64,7 +64,7 @@ void test_command_buffer() {
 		.set_single_use(true)
 		.build();
 
-	auto recorder = [](VkCommandBuffer cmd_buffer) {};
+	auto recorder = [](vk::ReadyCommandBuffer cmd_buffer) {};
 
 	command_buffer
 		.record(recorder)

@@ -4,9 +4,12 @@
 
 #include "utils/move.h"
 
+#include <functional>
+
 namespace vk {
 
-	class CommandBufferBuilder;
+	class ReadyCommandBuffer;
+	using CommandRecorder = std::function<void(ReadyCommandBuffer)>;
 
 	struct SubmitInfo {
 		using Ref = SubmitInfo&;
@@ -25,6 +28,8 @@ namespace vk {
 			return *this;
 		}
 	};
+
+	class CommandBufferBuilder;
 
 	class CommandBuffer {
 		friend class CommandBufferBuilder;
@@ -49,6 +54,17 @@ namespace vk {
 		void destroy();
 
 		MOVE_SEMANTICS_VK_DEFAULT(CommandBuffer, command_buffer)
+	};
+
+	class ReadyCommandBuffer {
+		friend class CommandBuffer;
+	private:
+		VkCommandBuffer command_buffer;
+
+		inline ReadyCommandBuffer(VkCommandBuffer handle) : command_buffer{handle} {}
+
+	public:
+		inline VkCommandBuffer handle() { return command_buffer; }
 	};
 
 	class CommandBufferBuilder {
