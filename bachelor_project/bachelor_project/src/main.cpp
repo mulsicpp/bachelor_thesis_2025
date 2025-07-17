@@ -64,7 +64,7 @@ void test_move_semantics() {
 
 void test_command_buffer() {
 	vk::CommandBuffer command_buffer = vk::CommandBufferBuilder(vk::QueueType::Transfer)
-		.set_single_use(true)
+		.single_use(true)
 		.build();
 
 	auto recorder = [](vk::ReadyCommandBuffer cmd_buffer) {};

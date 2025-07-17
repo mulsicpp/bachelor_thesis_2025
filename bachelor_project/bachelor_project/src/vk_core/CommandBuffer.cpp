@@ -82,8 +82,8 @@ namespace vk {
 
 
 	CommandBufferBuilder::CommandBufferBuilder(QueueType queue_type)
-		: queue_type{ queue_type }
-		, single_use{ false }
+		: _queue_type{ queue_type }
+		, _single_use{ false }
 	{}
 
 	CommandBuffer CommandBufferBuilder::build() {
@@ -93,7 +93,7 @@ namespace vk {
 
 		auto command_manager = context.get_command_manager();
 
-		cmd_buffer.queue = command_manager[queue_type];
+		cmd_buffer.queue = command_manager[_queue_type];
 
 		VkCommandBufferAllocateInfo alloc_info{};
 		alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -113,7 +113,7 @@ namespace vk {
 			throw std::runtime_error("Fence creation failed!");
 		}
 
-		cmd_buffer.is_single_use = single_use;
+		cmd_buffer.is_single_use = _single_use;
 		cmd_buffer.used = false;
 
 		return cmd_buffer;

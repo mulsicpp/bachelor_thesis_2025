@@ -71,15 +71,15 @@ namespace vk {
 	public:
 		using Ref = CommandBufferBuilder&;
 
-		QueueType queue_type;
-		bool single_use;
+		QueueType _queue_type;
+		bool _single_use;
 	public:
 		CommandBufferBuilder(QueueType queue_type);
 
 		CommandBuffer build();
 
-		inline Ref set_single_use(bool is_single_use) {
-			this->single_use = is_single_use;
+		inline Ref single_use(bool single_use) {
+			_single_use = single_use;
 			return *this;
 		}
 	};

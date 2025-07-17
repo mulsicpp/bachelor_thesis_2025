@@ -33,7 +33,7 @@ namespace vk {
 
 	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
 		CommandBuffer command_buffer = CommandBufferBuilder(QueueType::Transfer)
-			.set_single_use(true)
+			.single_use(true)
 			.build();
 
 		command_buffer
