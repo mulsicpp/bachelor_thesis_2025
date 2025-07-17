@@ -19,7 +19,7 @@ namespace vk {
 		, final_layout{ VK_IMAGE_LAYOUT_UNDEFINED }
 	{}
 
-    AttachmentInfo::Ref AttachmentInfo::use_swapchain() {
+    AttachmentInfo::Ref AttachmentInfo::from_swapchain() {
         const auto& swapchain = Context::get()->get_swapchain();
 
         format = swapchain.get_format();
@@ -31,9 +31,9 @@ namespace vk {
     }
 
 	RenderPassBuilder::RenderPassBuilder()
-		: color_attachment{}
-		, depth_attachment{}
-        , use_depth_attachment{false}
+		: _color_attachment{}
+		, _depth_attachment{}
+        , _use_depth_attachment{ false }
 	{}
 
 	RenderPass RenderPassBuilder::build() {
@@ -46,10 +46,10 @@ namespace vk {
         base_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         VkAttachmentDescription color_description = base_description;
-        color_description.format = color_attachment.format;
-        color_description.loadOp = color_attachment.load_op;
-        color_description.storeOp = color_attachment.store_op;
-        color_description.finalLayout = color_attachment.final_layout;
+        color_description.format = _color_attachment.format;
+        color_description.loadOp = _color_attachment.load_op;
+        color_description.storeOp = _color_attachment.store_op;
+        color_description.finalLayout = _color_attachment.final_layout;
 
         VkAttachmentReference color_ref{};
         color_ref.attachment = 0;
@@ -58,13 +58,13 @@ namespace vk {
         VkAttachmentDescription depth_description{};
         VkAttachmentReference depth_ref{};
 
-        if (use_depth_attachment) {
+        if (_use_depth_attachment) {
             depth_description = base_description;
 
-            depth_description.format = depth_attachment.format;
-            depth_description.loadOp = depth_attachment.load_op;
-            depth_description.storeOp = depth_attachment.store_op;
-            depth_description.finalLayout = depth_attachment.final_layout;
+            depth_description.format = _depth_attachment.format;
+            depth_description.loadOp = _depth_attachment.load_op;
+            depth_description.storeOp = _depth_attachment.store_op;
+            depth_description.finalLayout = _depth_attachment.final_layout;
 
             depth_ref.attachment = 1;
             depth_ref.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
@@ -74,7 +74,7 @@ namespace vk {
         subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass_description.colorAttachmentCount = 1;
         subpass_description.pColorAttachments = &color_ref;
-        subpass_description.pDepthStencilAttachment = use_depth_attachment ? &depth_ref : nullptr;
+        subpass_description.pDepthStencilAttachment = _use_depth_attachment ? &depth_ref : nullptr;
 
         VkSubpassDependency dependency{};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -85,7 +85,7 @@ namespace vk {
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         std::vector<VkAttachmentDescription> attachments = { color_description };
-        if (use_depth_attachment) {
+        if (_use_depth_attachment) {
             attachments.push_back(depth_description);
         }
 

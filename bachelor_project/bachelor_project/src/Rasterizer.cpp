@@ -14,8 +14,7 @@ Rasterizer RasterizerBuilder::build() {
 	Rasterizer rasterizer;
 
 	rasterizer.render_pass = vk::RenderPassBuilder()
-		.set_color_attachment(vk::AttachmentInfo().use_swapchain())
-		.no_depth_attachment()
+		.color_attachment(vk::AttachmentInfo().from_swapchain())
 		.build();
 
 	dbg_log("created render pass");

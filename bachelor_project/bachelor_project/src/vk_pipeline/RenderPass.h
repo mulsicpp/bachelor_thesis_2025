@@ -40,34 +40,29 @@ namespace vk {
 		inline Ref set_store_op(VkAttachmentStoreOp store_op) { this->store_op = store_op; return *this; }
 		inline Ref set_final_layout(VkImageLayout final_layout) { this->final_layout = final_layout; return *this; }
 
-		Ref use_swapchain();
+		Ref from_swapchain();
 	};
 
 	class RenderPassBuilder {
 	public:
 		using Ref = RenderPassBuilder&;
 
-		AttachmentInfo color_attachment;
-		AttachmentInfo depth_attachment;
-		bool use_depth_attachment;
+		AttachmentInfo _color_attachment;
+		AttachmentInfo _depth_attachment;
+		bool _use_depth_attachment;
 
 		RenderPassBuilder();
 
 		RenderPass build();
 
-		inline Ref set_color_attachment(AttachmentInfo attachment_info) { 
-			color_attachment = attachment_info;
+		inline Ref color_attachment(AttachmentInfo attachment_info) { 
+			_color_attachment = attachment_info;
 			return *this;
 		}
 
-		inline Ref set_depth_attachment(AttachmentInfo attachment_info) {
-			depth_attachment = attachment_info;
-			use_depth_attachment = true;
-			return *this;
-		}
-
-		inline Ref no_depth_attachment() {
-			use_depth_attachment = false;
+		inline Ref depth_attachment(AttachmentInfo attachment_info) {
+			_depth_attachment = attachment_info;
+			_use_depth_attachment = true;
 			return *this;
 		}
 	};
