@@ -41,16 +41,19 @@ namespace vk {
 
 
 
-	struct BufferBuilder {
+	class BufferBuilder {
+	public:
 		using Ref = BufferBuilder&;
 
+	private:
 		uint32_t _size;
 		void* _data;
 		VkBufferUsageFlagBits _usage;
 		VmaMemoryUsage _memory_usage;
 		std::vector<QueueType> _queue_types;
 		bool _use_mapping;
-
+	
+	public:
 		BufferBuilder();
 
 		inline Ref size(uint32_t size) { _size = size; return *this; }

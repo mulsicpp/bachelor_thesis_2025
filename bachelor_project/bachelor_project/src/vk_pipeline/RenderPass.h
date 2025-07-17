@@ -47,10 +47,12 @@ namespace vk {
 	public:
 		using Ref = RenderPassBuilder&;
 
+	private:
 		AttachmentInfo _color_attachment;
 		AttachmentInfo _depth_attachment;
 		bool _use_depth_attachment;
 
+	public:
 		RenderPassBuilder();
 
 		RenderPass build();

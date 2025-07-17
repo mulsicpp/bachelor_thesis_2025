@@ -71,8 +71,10 @@ namespace vk {
 	public:
 		using Ref = CommandBufferBuilder&;
 
+	private:
 		QueueType _queue_type;
 		bool _single_use;
+
 	public:
 		CommandBufferBuilder(QueueType queue_type);
 
