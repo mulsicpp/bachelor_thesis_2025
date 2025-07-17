@@ -19,7 +19,7 @@ namespace vk {
 	public:
 		RenderPass();
 
-		inline VkRenderPass handle() { return render_pass; }
+		inline VkRenderPass handle() const { return render_pass; }
 
 	private:
 		void destroy();

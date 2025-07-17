@@ -22,7 +22,7 @@ namespace vk {
 
 		inline VkShaderModule handle() const { return shader_module; }
 
-		VkPipelineShaderStageCreateInfo get_create_info();
+		VkPipelineShaderStageCreateInfo get_create_info() const;
 
 	private:
 		void destroy();

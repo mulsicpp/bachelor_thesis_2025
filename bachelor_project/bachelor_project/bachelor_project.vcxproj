@@ -167,6 +167,7 @@
     <ClCompile Include="src\vk_core\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
+    <ClCompile Include="src\vk_pipeline\Pipeline.cpp" />
     <ClCompile Include="src\vk_pipeline\RenderPass.cpp" />
     <ClCompile Include="src\vk_pipeline\Shader.cpp" />
     <ClCompile Include="src\vk_resources\Buffer.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
     <ClInclude Include="src\Rasterizer.h" />
+    <ClInclude Include="src\vk_pipeline\Pipeline.h" />
     <ClInclude Include="src\vk_pipeline\RenderPass.h" />
     <ClInclude Include="src\vk_pipeline\Shader.h" />
     <ClInclude Include="src\vk_resources\Buffer.h" />

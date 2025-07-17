@@ -1,6 +1,8 @@
 #pragma once
 
-#include "vk_pipeline/RenderPass.h"
+#include "utils/ptr_alias.h"
+
+#include "vk_pipeline/Pipeline.h"
 
 #include "vk_resources/Image.h"
 
@@ -8,7 +10,9 @@ class Rasterizer : public utils::Move {
 	friend class RasterizerBuilder;
 private:
 	vk::Image depth_buffer;
-	vk::RenderPass render_pass;
+	ptr::Shared<vk::RenderPass> render_pass;
+
+	vk::Pipeline pipeline;
 
 public:
 	Rasterizer();

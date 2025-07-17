@@ -10,9 +10,10 @@ namespace vk {
 
 	Shader::Shader()
 		: shader_module{ VK_NULL_HANDLE }
+		, stage { VK_SHADER_STAGE_VERTEX_BIT }
 	{}
 
-	VkPipelineShaderStageCreateInfo Shader::get_create_info() {
+	VkPipelineShaderStageCreateInfo Shader::get_create_info() const {
 		VkPipelineShaderStageCreateInfo info{};
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		info.stage = stage;

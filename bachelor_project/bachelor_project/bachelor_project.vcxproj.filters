@@ -63,6 +63,9 @@
     <ClCompile Include="src\utils\load_file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vk_pipeline\Pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\NoCopy.h">
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\load_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_pipeline\Pipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

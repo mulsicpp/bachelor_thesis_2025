@@ -1,5 +1,8 @@
 #pragma once
 
+#include "ptr_alias.h"
+
+#define MOVE_SEMANTICS_DEBUG
 #ifdef MOVE_SEMANTICS_DEBUG
 #include "dbg_log.h"
 #define MOVE_LOG(...) dbg_log(__VA_ARGS__)
@@ -32,6 +35,10 @@ public:                                                					\
 		if (was_moved()) return;										\
 		MOVE_LOG(#class_name " destroy");                               \
 		destroy();														\
+	}																	\
+																		\
+	inline ptr::Shared<class_name> to_shared() {						\
+		return ptr::make_shared<class_name>(std::move(*this));          \
 	}																	\
 																		\
 private:																\
