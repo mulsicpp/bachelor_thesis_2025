@@ -15,10 +15,10 @@ public:
 
 	Test() = default;
 
-	static Test create(int val) { 
+	static Test create(int val) {
 		dbg_log("created %i", val);
 		Test test;
-		test.val = new int{val};
+		test.val = new int{ val };
 		return test;
 	}
 
@@ -30,7 +30,8 @@ private:
 
 void test_move_semantics();
 void test_command_buffer();
-void test_buffer();
+void test_buffer_copy();
+void test_buffer_with_staging();
 
 int main(void) {
 	try {
@@ -39,7 +40,9 @@ int main(void) {
 
 		App app{};
 
-		test_buffer();
+
+
+		test_buffer_copy();
 
 		// test_move_semantics();
 	}
@@ -72,7 +75,7 @@ void test_command_buffer() {
 		.wait();
 }
 
-void test_buffer() {
+void test_buffer_copy() {
 	const char data1[] = "Hi I'm buffer#1!!";
 	const char data2[] = "Hi I'm buffer#2!!";
 
@@ -80,13 +83,15 @@ void test_buffer() {
 	const uint32_t size2 = sizeof(data2) / sizeof(char);
 
 	vk::Buffer b1 = vk::BufferBuilder()
-		.as_staging_buffer()
-		.from_data(data1, size1)
+		.staging_buffer()
+		.size(size1)
+		.data((void*)data1)
 		.build();
 
 	vk::Buffer b2 = vk::BufferBuilder()
-		.as_staging_buffer()
-		.from_data(data2, size2)
+		.staging_buffer()
+		.size(size2)
+		.data((void*)data2)
 		.add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
 		.build();
 
@@ -101,4 +106,15 @@ void test_buffer() {
 	printf("copied buffer#1 to buffer#2\n");
 	printf("mapped_data1: %s\n", mapped_data1);
 	printf("mapped_data2: %s\n", mapped_data2);
+}
+
+void test_buffer_with_staging() {
+	vk::Buffer b = vk::BufferBuilder()
+		.size(6)
+		.data((void*)"hello")
+		.memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.add_queue_type(vk::QueueType::Transfer)
+		.use_mapping(false)
+		.build();
 }

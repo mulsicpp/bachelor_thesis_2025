@@ -12,7 +12,7 @@
 namespace vk {
 
 	class BufferBuilder;
-	
+
 	class Buffer {
 		friend class BufferBuilder;
 	private:
@@ -44,28 +44,29 @@ namespace vk {
 	struct BufferBuilder {
 		using Ref = BufferBuilder&;
 
-		uint32_t size;
-		void* data;
-		VkBufferUsageFlagBits usage;
-		VmaMemoryUsage memory_usage;
-		std::vector<QueueType> queue_types;
-		bool use_mapping;
+		uint32_t _size;
+		void* _data;
+		VkBufferUsageFlagBits _usage;
+		VmaMemoryUsage _memory_usage;
+		std::vector<QueueType> _queue_types;
+		bool _use_mapping;
 
 		BufferBuilder();
 
-		inline Ref set_size(uint32_t size) { this->size = size; return* this; }
+		inline Ref size(uint32_t size) { _size = size; return *this; }
+		inline Ref data(void* data) { _data = data; return *this; }
 
-		template<class T = uint8_t>
-		inline Ref from_data(T* data, uint32_t size) {
-			this->data = (void*)data;
-			this->size = size * sizeof(T);
-			return *this;
-		}
+		inline Ref usage(VkBufferUsageFlagBits usage) { _usage = usage; return *this; }
+		inline Ref add_usage(VkBufferUsageFlagBits usage) { _usage = (VkBufferUsageFlagBits)(_usage | usage); return *this; }
 
-		inline Ref set_usage(VkBufferUsageFlagBits usage) { this->usage = usage; return *this; }
-		inline Ref add_usage(VkBufferUsageFlagBits usage) { this->usage = (VkBufferUsageFlagBits)(this->usage | usage); return *this; }
+		inline Ref memory_usage(VmaMemoryUsage memory_usage) { _memory_usage = memory_usage; return *this; }
 
-		Ref as_staging_buffer();
+		inline Ref queue_types(const std::vector<QueueType>& queue_types) { _queue_types = queue_types; return *this; }
+		inline Ref add_queue_type(QueueType queue_type) { _queue_types.push_back(queue_type); return *this; }
+
+		inline Ref use_mapping(bool use_mapping) { _use_mapping = use_mapping; return *this; }
+
+		Ref staging_buffer();
 
 		Buffer build();
 	};

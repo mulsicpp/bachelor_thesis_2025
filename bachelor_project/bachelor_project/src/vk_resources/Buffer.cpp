@@ -24,7 +24,7 @@ namespace vk {
 		}
 
 		VkBufferCopy copy_region{};
-		copy_region.size = size;
+		copy_region.size = dst_buffer->size < size ? dst_buffer->size : size;
 		copy_region.srcOffset = 0;
 		copy_region.dstOffset = 0;
 
@@ -45,19 +45,20 @@ namespace vk {
 
 
 	BufferBuilder::BufferBuilder()
-		: size{ 0 }
-		, data{ nullptr }
-		, usage{ VK_BUFFER_USAGE_TRANSFER_SRC_BIT }
-		, memory_usage{ VMA_MEMORY_USAGE_CPU_ONLY }
-		, queue_types{}
-		, use_mapping{ true }
+		: _size{ 0 }
+		, _data{ nullptr }
+		, _usage{ VK_BUFFER_USAGE_TRANSFER_SRC_BIT }
+		, _memory_usage{ VMA_MEMORY_USAGE_CPU_ONLY }
+		, _queue_types{}
+		, _use_mapping{ true }
 	{}
 
 
-	BufferBuilder::Ref BufferBuilder::as_staging_buffer() {
-		usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		memory_usage = VMA_MEMORY_USAGE_CPU_ONLY;
-		queue_types = { QueueType::Transfer };
+	BufferBuilder::Ref BufferBuilder::staging_buffer() {
+		_usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		_memory_usage = VMA_MEMORY_USAGE_CPU_ONLY;
+		_queue_types = { QueueType::Transfer };
+		_use_mapping = true;
 
 		return *this;
 	}
@@ -70,29 +71,29 @@ namespace vk {
 
 		VkBufferCreateInfo buffer_info{};
 		buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		buffer_info.size = size;
-		buffer_info.usage = usage;
+		buffer_info.size = _size;
+		buffer_info.usage = _usage;
 
-		if (queue_types.size() == 0) {
+		if (_queue_types.size() == 0) {
 			throw std::runtime_error("Buffer creation failed! No queue types specified");
 		}
 
-		const auto families = context.get_command_manager().get_required_families(queue_types);
+		const auto families = context.get_command_manager().get_required_families(_queue_types);
 		buffer_info.sharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
 		buffer_info.queueFamilyIndexCount = families.size();
 		buffer_info.pQueueFamilyIndices = families.data();
 
 
 		VmaAllocationCreateInfo allocation_info{};
-		allocation_info.usage = memory_usage;
-		allocation_info.flags = use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+		allocation_info.usage = _memory_usage;
+		allocation_info.flags = _use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
 
 		VmaAllocationInfo alloc_info{};
 		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &buffer.buffer, &buffer.allocation, &alloc_info) != VK_SUCCESS) {
 			throw std::runtime_error("Buffer creation failed!");
 		}
 
-		buffer.size = size;
+		buffer.size = _size;
 		VkMemoryPropertyFlags props;
 		vmaGetMemoryTypeProperties(context.get_allocator(), alloc_info.memoryType, &props);
 
@@ -100,19 +101,22 @@ namespace vk {
 
 		buffer.mapped_data = alloc_info.pMappedData;
 
-		if (data == nullptr)
+		if (_data == nullptr)
 			return buffer;
 
 		if (buffer.mapped_data != nullptr) {
-			memcpy(buffer.mapped_data, data, size);
+			memcpy(buffer.mapped_data, _data, _size);
 		}
 		else {
-			Buffer staging_buffer = BufferBuilder()
-				.as_staging_buffer()
-				.from_data((uint8_t*)data, size)
-				.build();
+			if ((_usage & VK_BUFFER_USAGE_TRANSFER_DST_BIT) != 0) {
+				Buffer staging_buffer = BufferBuilder()
+					.staging_buffer()
+					.size(_size)
+					.data(_data)
+					.build();
 
-			staging_buffer.copy_into(&buffer);
+				staging_buffer.copy_into(&buffer);
+			}
 		}
 	}
 }

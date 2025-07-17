@@ -1,6 +1,5 @@
 #pragma once
 
-#define MOVE_SEMANTICS_DEBUG
 #ifdef MOVE_SEMANTICS_DEBUG
 #include "dbg_log.h"
 #define MOVE_LOG(...) dbg_log(__VA_ARGS__)
