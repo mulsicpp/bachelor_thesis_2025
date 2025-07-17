@@ -78,11 +78,12 @@ namespace vk {
 	public:
 		CommandBufferBuilder(QueueType queue_type);
 
-		CommandBuffer build();
-
 		inline Ref single_use(bool single_use) {
 			_single_use = single_use;
 			return *this;
 		}
+
+
+		CommandBuffer build();
 	};
 }

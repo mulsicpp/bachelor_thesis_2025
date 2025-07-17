@@ -9,6 +9,8 @@
 
 namespace vk {
 
+	class RenderPassBuilder;
+
 	class RenderPass {
 		friend class RenderPassBuilder;
 	private:
@@ -17,10 +19,10 @@ namespace vk {
 	public:
 		RenderPass();
 
+		inline VkRenderPass handle() { return render_pass; }
+
 	private:
 		void destroy();
-
-		inline VkRenderPass handle() { return render_pass; }
 
 		MOVE_SEMANTICS_VK_DEFAULT(RenderPass, render_pass)
 	};
@@ -55,7 +57,6 @@ namespace vk {
 	public:
 		RenderPassBuilder();
 
-		RenderPass build();
 
 		inline Ref color_attachment(AttachmentInfo attachment_info) { 
 			_color_attachment = attachment_info;
@@ -67,5 +68,8 @@ namespace vk {
 			_use_depth_attachment = true;
 			return *this;
 		}
+
+
+		RenderPass build();
 	};
 }

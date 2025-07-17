@@ -8,6 +8,7 @@
 #include "vk_core/CommandBuffer.h"
 
 #include "vk_resources/Buffer.h"
+#include "vk_pipeline/Shader.h"
 
 class Test {
 public:
@@ -32,6 +33,7 @@ void test_move_semantics();
 void test_command_buffer();
 void test_buffer_copy();
 void test_buffer_with_staging();
+void test_shaders();
 
 int main(void) {
 	try {
@@ -40,11 +42,7 @@ int main(void) {
 
 		App app{};
 
-
-
-		test_buffer_copy();
-
-		// test_move_semantics();
+		test_shaders();
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());
@@ -117,4 +115,28 @@ void test_buffer_with_staging() {
 		.add_queue_type(vk::QueueType::Transfer)
 		.use_mapping(false)
 		.build();
+}
+
+void test_shaders() {
+	vk::Shader vertex_shader = vk::ShaderBuilder()
+		.vertex()
+		.load_spirv("assets/shaders/vert.spv")
+		.build();
+	dbg_log("loaded vertex shader");
+
+	vk::Shader fragment_shader = vk::ShaderBuilder()
+		.fragment()
+		.load_spirv("assets/shaders/frag.spv")
+		.build();
+	dbg_log("loaded fragment shader");
+
+	try {
+		vk::Shader invlaid_sahder = vk::ShaderBuilder()
+			.fragment()
+			.load_spirv("assets/shaders/bla.spv")
+			.build();
+	}
+	catch (std::runtime_error& e) {
+		dbg_log("expected error: %s", e.what());
+	}
 }

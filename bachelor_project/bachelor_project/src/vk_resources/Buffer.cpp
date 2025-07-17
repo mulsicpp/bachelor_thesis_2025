@@ -47,8 +47,8 @@ namespace vk {
 	BufferBuilder::BufferBuilder()
 		: _size{ 0 }
 		, _data{ nullptr }
-		, _usage{ VK_BUFFER_USAGE_TRANSFER_SRC_BIT }
-		, _memory_usage{ VMA_MEMORY_USAGE_CPU_ONLY }
+		, _usage{ 0 }
+		, _memory_usage{ VMA_MEMORY_USAGE_UNKNOWN }
 		, _queue_types{}
 		, _use_mapping{ true }
 	{}

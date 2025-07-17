@@ -48,7 +48,7 @@ namespace vk {
 	private:
 		uint32_t _size;
 		void* _data;
-		VkBufferUsageFlagBits _usage;
+		VkBufferUsageFlags _usage;
 		VmaMemoryUsage _memory_usage;
 		std::vector<QueueType> _queue_types;
 		bool _use_mapping;
@@ -59,8 +59,8 @@ namespace vk {
 		inline Ref size(uint32_t size) { _size = size; return *this; }
 		inline Ref data(void* data) { _data = data; return *this; }
 
-		inline Ref usage(VkBufferUsageFlagBits usage) { _usage = usage; return *this; }
-		inline Ref add_usage(VkBufferUsageFlagBits usage) { _usage = (VkBufferUsageFlagBits)(_usage | usage); return *this; }
+		inline Ref usage(VkBufferUsageFlags usage) { _usage = usage; return *this; }
+		inline Ref add_usage(VkBufferUsageFlagBits usage) { _usage |= usage; return *this; }
 
 		inline Ref memory_usage(VmaMemoryUsage memory_usage) { _memory_usage = memory_usage; return *this; }
 
@@ -70,6 +70,7 @@ namespace vk {
 		inline Ref use_mapping(bool use_mapping) { _use_mapping = use_mapping; return *this; }
 
 		Ref staging_buffer();
+
 
 		Buffer build();
 	};
