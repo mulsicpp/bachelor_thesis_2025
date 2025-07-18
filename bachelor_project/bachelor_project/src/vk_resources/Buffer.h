@@ -1,10 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+
 #include "external/vk_mem_alloc.h"
 
 #include "utils/move.h"
+#include "utils/ptr.h"
 
+#include "vk_core/Handle.h"
 #include "vk_core/CommandBuffer.h"
 
 #include <vector>
@@ -13,30 +16,25 @@ namespace vk {
 
 	class BufferBuilder;
 
-	class Buffer {
+	class Buffer : public utils::Move, public ptr::ToShared<Buffer> {
 		friend class BufferBuilder;
 	private:
-		VkBuffer buffer;
-		VmaAllocation allocation;
+		Handle<VmaAllocation> allocation{};
+		Handle<VkBuffer> buffer{};
 
-		uint32_t size;
-		void* mapped_data;
-		bool host_coherent;
+		uint32_t size{ 0 };
+		void* mapped_data{ nullptr };
+		bool host_coherent{ false };
 
 	public:
-		Buffer();
+		Buffer() = default;
 
-		inline VkBuffer handle() const { return buffer; }
+		inline VkBuffer handle() const { return *buffer; }
 		template<class T = uint8_t>
 		inline T* get_mapped_data() { return (T*)mapped_data; }
 
 		void cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions = {});
 		void copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions = {});
-
-	private:
-		void destroy();
-
-		MOVE_SEMANTICS_VK_DEFAULT(Buffer, buffer)
 	};
 
 

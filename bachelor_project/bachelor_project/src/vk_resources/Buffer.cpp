@@ -1,25 +1,12 @@
 #include "Buffer.h"
 
 #include "vk_core/Context.h"
-#include "vk_core/CommandBuffer.h"
 
 namespace vk {
 
-	Buffer::Buffer()
-		: buffer{ VK_NULL_HANDLE }
-		, allocation{ VK_NULL_HANDLE }
-		, size{ 0 }
-		, mapped_data{ nullptr }
-		, host_coherent{ false }
-	{}
-
-	void Buffer::destroy() {
-		vmaDestroyBuffer(Context::get()->get_allocator(), buffer, allocation);
-	}
-
 	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
 		if (copy_regions.size() > 0) {
-			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer, dst_buffer->buffer, copy_regions.size(), copy_regions.data());
+			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), copy_regions.size(), copy_regions.data());
 			return;
 		}
 
@@ -28,7 +15,7 @@ namespace vk {
 		copy_region.srcOffset = 0;
 		copy_region.dstOffset = 0;
 
-		vkCmdCopyBuffer(cmd_buf.handle(), this->buffer, dst_buffer->buffer, 1, &copy_region);
+		vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), 1, &copy_region);
 	}
 
 	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
@@ -89,7 +76,7 @@ namespace vk {
 		allocation_info.flags = _use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
 
 		VmaAllocationInfo alloc_info{};
-		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &buffer.buffer, &buffer.allocation, &alloc_info) != VK_SUCCESS) {
+		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &*buffer.buffer, &*buffer.allocation, &alloc_info) != VK_SUCCESS) {
 			throw std::runtime_error("Buffer creation failed!");
 		}
 

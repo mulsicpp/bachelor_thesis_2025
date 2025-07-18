@@ -24,7 +24,7 @@ int main(void) {
 
 		App app{};
 
-		test_move_semantics();
+		test_buffer_copy();
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());
