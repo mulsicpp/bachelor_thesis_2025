@@ -3,16 +3,9 @@
 
 namespace vk {
 
-	Image::Image()
-		: image{ VK_NULL_HANDLE }
-		, allocation { VK_NULL_HANDLE }
-		, image_view { VK_NULL_HANDLE }
-	{}
-	
-	void Image::destroy() {
-		const auto& context = *Context::get();
+	Image ImageBuilder::build() {
+		Image image;
 
-		vkDestroyImageView(context.get_device(), image_view, nullptr);
-		vmaDestroyImage(context.get_allocator(), image, allocation);
+		return image;
 	}
 }

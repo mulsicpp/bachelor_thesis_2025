@@ -1,33 +1,28 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+
 #include "external/vk_mem_alloc.h"
 
 #include "utils/move.h"
+#include "utils/ptr.h"
+
+#include "vk_core/Handle.h"
+
 
 namespace vk {
 
-	struct ImageExtent {
-		uint32_t width;
-		uint32_t height;
-	};
-
-	class Image {
+	class Image : public utils::Move, public ptr::ToShared<Image> {
 	public:
-		VkImage image;
-		VmaAllocation allocation;
-		VkImageView image_view;
+		Handle<VmaAllocation> allocation{};
+		Handle<VkImage> image{};
+		Handle<VkImageView> image_view{};
 
-		VkFormat format;
-		ImageExtent extent;
+		VkFormat format{ VK_FORMAT_UNDEFINED };
+		VkExtent2D extent{ 0, 0 };
 
 	public:
-		Image();
-
-	private:
-		void destroy();
-
-		MOVE_SEMANTICS_VK_DEFAULT(Image, image)
+		Image() = default;
 	};
 
 	class ImageBuilder {
