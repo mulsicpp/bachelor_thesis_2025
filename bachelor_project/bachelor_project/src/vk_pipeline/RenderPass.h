@@ -6,8 +6,12 @@
 #include "utils/ptr.h"
 
 #include "vk_core/Handle.h"
+#include "vk_core/CommandBuffer.h"
 
 #include "vk_resources/Image.h"
+
+#include <array>
+#include <vector>
 
 namespace vk {
 
@@ -18,26 +22,37 @@ namespace vk {
 	private:
 		Handle<VkRenderPass> render_pass{};
 
+		std::vector<VkClearValue> clear_values{};
+
 	public:
 		RenderPass() = default;
 
 		inline VkRenderPass handle() const { return *render_pass; }
 	};
 
-	struct AttachmentInfo {
-		using Ref = AttachmentInfo&;
+	enum class AttachmentType {
+		Color,
+		Depth
+	};
 
+	struct Attachment {
+		using Ref = Attachment&;
+
+		AttachmentType type;
 		VkFormat format;
 		VkAttachmentLoadOp load_op;
 		VkAttachmentStoreOp store_op;
 		VkImageLayout final_layout;
 
-		AttachmentInfo();
+		Attachment();
 
 		inline Ref set_format(VkFormat format) { this->format = format; return *this; }
 		inline Ref set_load_op(VkAttachmentLoadOp load_op) { this->load_op = load_op; return *this; }
 		inline Ref set_store_op(VkAttachmentStoreOp store_op) { this->store_op = store_op; return *this; }
 		inline Ref set_final_layout(VkImageLayout final_layout) { this->final_layout = final_layout; return *this; }
+
+		inline Ref color() { type = AttachmentType::Color; return *this; }
+		inline Ref depth() { type = AttachmentType::Depth; return *this; }
 
 		Ref from_swapchain();
 	};
@@ -47,22 +62,19 @@ namespace vk {
 		using Ref = RenderPassBuilder&;
 
 	private:
-		AttachmentInfo _color_attachment;
-		AttachmentInfo _depth_attachment;
-		bool _use_depth_attachment;
+		std::vector<Attachment> _attachments;
 
 	public:
 		RenderPassBuilder();
 
 
-		inline Ref color_attachment(AttachmentInfo attachment_info) { 
-			_color_attachment = attachment_info;
+		inline Ref attachments(const std::vector<Attachment>& attachments) { 
+			_attachments = attachments;
 			return *this;
 		}
 
-		inline Ref depth_attachment(AttachmentInfo attachment_info) {
-			_depth_attachment = attachment_info;
-			_use_depth_attachment = true;
+		inline Ref add_attachment(Attachment attachment) {
+			_attachments.push_back(attachment);
 			return *this;
 		}
 

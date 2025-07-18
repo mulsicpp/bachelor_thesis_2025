@@ -24,5 +24,6 @@ void App::run() {
     dbg_log("run");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        rasterizer.draw();
     }
 }

@@ -16,6 +16,8 @@ private:
 
 public:
 	Rasterizer();
+
+	void draw();
 };
 
 class RasterizerBuilder {

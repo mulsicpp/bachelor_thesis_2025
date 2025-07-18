@@ -7,6 +7,12 @@ Rasterizer::Rasterizer()
 	, render_pass{}
 {}
 
+void Rasterizer::draw() {
+
+}
+
+
+
 RasterizerBuilder::RasterizerBuilder()
 {}
 
@@ -14,7 +20,7 @@ Rasterizer RasterizerBuilder::build() {
 	Rasterizer rasterizer;
 
 	rasterizer.render_pass = vk::RenderPassBuilder()
-		.color_attachment(vk::AttachmentInfo().from_swapchain())
+		.add_attachment(vk::Attachment().color().from_swapchain())
 		.build().to_shared();
 
 	dbg_log("created render pass");
