@@ -4,8 +4,11 @@
 #include "utils/ptr.h"
 
 #include "vk_pipeline/Pipeline.h"
+#include "vk_pipeline/Framebuffer.h"
 
 #include "vk_resources/Image.h"
+
+#include <vector>
 
 
 class RasterizerBuilder;
@@ -17,6 +20,8 @@ private:
 	ptr::Shared<vk::RenderPass> render_pass{};
 
 	vk::Pipeline pipeline{};
+
+	std::vector<vk::Framebuffer> framebuffers{};
 
 public:
 	Rasterizer() = default;

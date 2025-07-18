@@ -2,6 +2,7 @@
 
 #include "utils/dbg_log.h"
 
+#include "vk_core/Context.h"
 
 
 void Rasterizer::draw() {
@@ -21,7 +22,7 @@ Rasterizer RasterizerBuilder::build() {
 		.build().to_shared();
 
 	dbg_log("created render pass");
-	
+
 	vk::Shader vertex_shader = vk::ShaderBuilder()
 		.vertex()
 		.load_spirv("assets/shaders/vert.spv")
@@ -41,6 +42,19 @@ Rasterizer RasterizerBuilder::build() {
 		.build();
 
 	dbg_log("created pipeline");
+
+	const auto& context = *vk::Context::get();
+
+	const auto& swapchain_images = context.get_swapchain().images();
+
+	for (const auto& image : swapchain_images) {
+		rasterizer.framebuffers.emplace_back(
+			vk::FramebufferBuilder()
+			.render_pass(rasterizer.render_pass)
+			.add_image(image)
+			.build()
+		);
+	}
 
 	return rasterizer;
 }
