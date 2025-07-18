@@ -16,13 +16,14 @@
 namespace vk {
 
 	class RenderPassBuilder;
+	struct Attachment;
 
 	class RenderPass : public utils::Move, public ptr::ToShared<RenderPass> {
 		friend class RenderPassBuilder;
 	private:
 		Handle<VkRenderPass> render_pass{};
 
-		std::vector<VkClearValue> clear_values{};
+		std::vector<Attachment> attachments{};
 
 	public:
 		RenderPass() = default;
