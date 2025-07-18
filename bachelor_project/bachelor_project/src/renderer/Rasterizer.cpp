@@ -2,10 +2,7 @@
 
 #include "utils/dbg_log.h"
 
-Rasterizer::Rasterizer()
-	: depth_buffer{}
-	, render_pass{}
-{}
+
 
 void Rasterizer::draw() {
 

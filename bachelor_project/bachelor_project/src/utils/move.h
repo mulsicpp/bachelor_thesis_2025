@@ -61,6 +61,7 @@ namespace utils {
 	class Move {
 	public:
 		Move() = default;
+		~Move() = default;
 
 	protected:
 		Move(const Move& other) = delete;

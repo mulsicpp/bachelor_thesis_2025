@@ -149,6 +149,9 @@
     <ClInclude Include="src\vk_sync\Semaphore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_pipeline\Framebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\compile_shaders.bat">

@@ -36,6 +36,7 @@ namespace vk {
 			if (context != nullptr)
 				delete context;
 			context = new Context(window, app_name);
+			context->swapchain.create_images();
 			return context;
 		}
 

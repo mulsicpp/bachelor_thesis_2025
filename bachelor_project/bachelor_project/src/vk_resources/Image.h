@@ -12,17 +12,23 @@
 
 namespace vk {
 
+	class Swapchain;
+
 	class Image : public utils::Move, public ptr::ToShared<Image> {
-	public:
+		friend class Swapchain;
+	private:
 		Handle<VmaAllocation> allocation{};
 		Handle<VkImage> image{};
-		Handle<VkImageView> image_view{};
 
-		VkFormat format{ VK_FORMAT_UNDEFINED };
-		VkExtent2D extent{ 0, 0 };
+		VkFormat _format{ VK_FORMAT_UNDEFINED };
+		VkExtent2D _extent{ 0, 0 };
 
 	public:
 		Image() = default;
+
+		inline VkImage handle() const { return *image; }
+		inline VkFormat format() const { return _format; }
+		inline VkExtent2D extent() const { return _extent; }
 	};
 
 	class ImageBuilder {

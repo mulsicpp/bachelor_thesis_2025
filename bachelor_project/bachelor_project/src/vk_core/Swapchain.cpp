@@ -17,23 +17,38 @@ namespace vk {
 		}
 		swapchain.swapchain = swapchain_result.value();
 
-		auto images_result = swapchain.swapchain.get_images();
-		if (!images_result) {
-			throw std::runtime_error("Swapchain images aquisition failed! " + images_result.error().message());
-		}
-		swapchain.images = images_result.value();
-
-		auto image_views_result = swapchain.swapchain.get_image_views();
-		if (!image_views_result) {
-			throw std::runtime_error("Swapchain images aquisition failed! " + image_views_result.error().message());
-		}
-		swapchain.image_views = image_views_result.value();
+		swapchain._images = {};
 
 		return swapchain;
 	}
 
+	void Swapchain::create_images() {
+		_images = {};
+
+		auto images_result = swapchain.get_images();
+		if (!images_result) {
+			throw std::runtime_error("Swapchain images aquisition failed! " + images_result.error().message());
+		}
+
+		for (const auto raw_image : images_result.value()) {
+			Image image;
+
+			*image.allocation = VK_NULL_HANDLE;
+			*image.image = raw_image;
+
+			image._format = swapchain.image_format;
+			image._extent = swapchain.extent;
+
+			_images.push_back(std::move(image).to_shared());
+		}
+	}
+
 	void Swapchain::destroy(Swapchain& swapchain) {
-		swapchain.swapchain.destroy_image_views(swapchain.image_views);
+
+		for (auto& image : swapchain._images) {
+			*(image->image) = VK_NULL_HANDLE;
+		}
+		swapchain._images.clear();
 		vkb::destroy_swapchain(swapchain.swapchain);
 	}
 }

@@ -105,5 +105,7 @@ namespace vk {
 				staging_buffer.copy_into(&buffer);
 			}
 		}
+
+		return buffer;
 	}
 }

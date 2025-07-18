@@ -14,7 +14,7 @@ namespace vk {
     Attachment::Ref Attachment::from_swapchain() {
         const auto& swapchain = Context::get()->get_swapchain();
 
-        format = swapchain.get_format();
+        format = swapchain.format();
         load_op = VK_ATTACHMENT_LOAD_OP_CLEAR;
         store_op = VK_ATTACHMENT_STORE_OP_STORE;
         final_layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;

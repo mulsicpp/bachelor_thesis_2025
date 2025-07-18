@@ -6,24 +6,26 @@
 
 #include "CommandManager.h"
 
+#include "vk_resources/Image.h"
+
 namespace vk {
 	class Swapchain : public utils::NoCopy {
 	private:
 		vkb::Swapchain swapchain;
-		std::vector<VkImage> images;
-		std::vector<VkImageView> image_views;
+		std::vector<ptr::Shared<Image>> _images;
 
 	public:
 		static Swapchain create(const vkb::Device& device, const CommandManager& command_manager);
 		static void destroy(Swapchain& swapchain);
 
+		void create_images();
+
 		inline VkSwapchainKHR handle() const { return swapchain.swapchain; }
 
-		inline uint32_t get_image_count() const { return swapchain.image_count; }
-		inline const std::vector<VkImage>& get_images() const { return images; }
-		inline const std::vector<VkImageView>& get_image_views() const { return image_views; }
+		inline uint32_t image_count() const { return swapchain.image_count; }
+		inline const std::vector<ptr::Shared<Image>>& images() const { return _images; }
 
-		inline VkFormat get_format() const { return swapchain.image_format; }
-		inline VkExtent2D get_extent() const { return swapchain.extent; }
+		inline VkFormat format() const { return swapchain.image_format; }
+		inline VkExtent2D extent() const { return swapchain.extent; }
 	};
 }

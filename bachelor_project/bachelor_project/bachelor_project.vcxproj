@@ -194,6 +194,7 @@
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
     <ClInclude Include="src\renderer\Rasterizer.h" />
+    <ClInclude Include="src\vk_pipeline\Framebuffer.h" />
     <ClInclude Include="src\vk_pipeline\Pipeline.h" />
     <ClInclude Include="src\vk_pipeline\RenderPass.h" />
     <ClInclude Include="src\vk_pipeline\Shader.h" />

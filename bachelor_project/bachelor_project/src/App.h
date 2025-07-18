@@ -4,7 +4,7 @@
 
 #include "renderer/Rasterizer.h"
 
-class App {
+class App : public utils::Move {
 private:
 	GLFWwindow* window;
 
