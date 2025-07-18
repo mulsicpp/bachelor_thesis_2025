@@ -58,3 +58,5 @@ namespace vk {
 	template<class T>
 	void destroy_handle(T handle);
 }
+
+#undef HANDLE_LOG
