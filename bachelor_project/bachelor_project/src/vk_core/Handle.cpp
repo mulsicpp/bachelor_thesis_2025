@@ -8,6 +8,7 @@ IMPL_DESTROY(Fence)
 IMPL_DESTROY(Semaphore)
 
 IMPL_DESTROY(RenderPass)
+IMPL_DESTROY(Framebuffer)
 IMPL_DESTROY(ShaderModule)
 IMPL_DESTROY(PipelineLayout)
 IMPL_DESTROY(Pipeline)

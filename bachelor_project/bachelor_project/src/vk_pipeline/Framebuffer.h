@@ -6,19 +6,50 @@
 #include "utils/ptr.h"
 
 #include "vk_core/Handle.h"
+#include "vk_resources/ImageView.h"
+#include "RenderPass.h"
+
+#include <vector>
+
 
 namespace vk {
 
-	class RenderPass;
+	class FramebufferBuilder;
 
 	class Framebuffer : public utils::Move, public ptr::ToShared<Framebuffer> {
-		friend class RenderPass;
+		friend class FramebufferBuilder;
 	private:
+		ptr::Shared<const RenderPass> _render_pass{};
+		std::vector<ImageView> _image_views{};
 		Handle<VkFramebuffer> framebuffer{};
 
 	public:
 		Framebuffer() = default;
 
 		inline VkFramebuffer handle() const { return *framebuffer; }
+
+		inline const ptr::Shared<const RenderPass>& render_pass() const { return _render_pass; }
+		inline const std::vector<ImageView>& image_views() const { return _image_views; }
+	};
+
+	class FramebufferBuilder {
+	public:
+		using Ref = FramebufferBuilder&;
+
+	private:
+		ptr::Shared<const RenderPass> _render_pass{};
+		std::vector<ptr::Shared<const Image>> _images{};
+
+	public:
+		FramebufferBuilder() = default;
+
+		Ref render_pass(RenderPass&& render_pass) { _render_pass = std::move(render_pass).to_shared(); return *this; }
+		Ref render_pass(const ptr::Shared<RenderPass>& render_pass) { _render_pass = render_pass; return *this; }
+
+		Ref images(const std::vector<ptr::Shared<const Image>>& images) { _images = images; return *this; }
+		Ref add_image(Image&& image) { _images.push_back(std::move(image).to_shared()); return *this; }
+		Ref add_image(const ptr::Shared<const Image>& image) { _images.push_back(image); return *this; }
+
+		Framebuffer build();
 	};
 }

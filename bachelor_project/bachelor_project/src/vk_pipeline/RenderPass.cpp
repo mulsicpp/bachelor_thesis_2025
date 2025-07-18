@@ -89,7 +89,7 @@ namespace vk {
             throw std::runtime_error("Render pass creation failed!");
         }
 
-        render_pass.attachments = _attachments;
+        render_pass._attachments = _attachments;
 
         dbg_log("render_pass: %p", *render_pass.render_pass);
 

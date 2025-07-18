@@ -168,6 +168,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vk_core\Handle.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
+    <ClCompile Include="src\vk_pipeline\Framebuffer.cpp" />
     <ClCompile Include="src\vk_pipeline\Pipeline.cpp" />
     <ClCompile Include="src\vk_pipeline\RenderPass.cpp" />
     <ClCompile Include="src\vk_pipeline\Shader.cpp" />

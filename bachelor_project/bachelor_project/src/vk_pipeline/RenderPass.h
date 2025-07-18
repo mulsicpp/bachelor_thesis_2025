@@ -23,12 +23,13 @@ namespace vk {
 	private:
 		Handle<VkRenderPass> render_pass{};
 
-		std::vector<Attachment> attachments{};
+		std::vector<Attachment> _attachments{};
 
 	public:
 		RenderPass() = default;
 
 		inline VkRenderPass handle() const { return *render_pass; }
+		inline const std::vector<Attachment>& attachments() const { return _attachments; }
 	};
 
 	enum class AttachmentType {
