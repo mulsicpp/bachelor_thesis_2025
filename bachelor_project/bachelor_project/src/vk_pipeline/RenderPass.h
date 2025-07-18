@@ -2,8 +2,10 @@
 
 #include <vulkan/vulkan.h>
 
-
 #include "utils/move.h"
+#include "utils/ptr.h"
+
+#include "vk_core/Handle.h"
 
 #include "vk_resources/Image.h"
 
@@ -11,20 +13,15 @@ namespace vk {
 
 	class RenderPassBuilder;
 
-	class RenderPass {
+	class RenderPass : public utils::Move, public ptr::ToShared<RenderPass> {
 		friend class RenderPassBuilder;
 	private:
-		VkRenderPass render_pass;
+		Handle<VkRenderPass> render_pass{};
 
 	public:
-		RenderPass();
+		RenderPass() = default;
 
-		inline VkRenderPass handle() const { return render_pass; }
-
-	private:
-		void destroy();
-
-		MOVE_SEMANTICS_VK_DEFAULT(RenderPass, render_pass)
+		inline VkRenderPass handle() const { return *render_pass; }
 	};
 
 	struct AttachmentInfo {

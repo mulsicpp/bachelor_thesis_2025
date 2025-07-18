@@ -2,17 +2,8 @@
 #include "vk_core/Context.h"
 
 namespace vk {
-	RenderPass::RenderPass()
-		: render_pass{ VK_NULL_HANDLE }
-	{}
-
-	void RenderPass::destroy() {
-		vkDestroyRenderPass(Context::get()->get_device(), render_pass, nullptr);
-	}
-
-
-
-	AttachmentInfo::AttachmentInfo()
+	
+    AttachmentInfo::AttachmentInfo()
 		: format{ VK_FORMAT_UNDEFINED }
 		, load_op{ VK_ATTACHMENT_LOAD_OP_CLEAR }
 		, store_op{ VK_ATTACHMENT_STORE_OP_STORE }
@@ -98,11 +89,11 @@ namespace vk {
         info.dependencyCount = 1;
         info.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(Context::get()->get_device(), &info, nullptr, &render_pass.render_pass) != VK_SUCCESS) {
+        if (vkCreateRenderPass(Context::get()->get_device(), &info, nullptr, &*render_pass.render_pass) != VK_SUCCESS) {
             throw std::runtime_error("Render pass creation failed!");
         }
 
-        dbg_log("render_pass: %p", render_pass.render_pass);
+        dbg_log("render_pass: %p", *render_pass.render_pass);
 
         return render_pass;
 	}

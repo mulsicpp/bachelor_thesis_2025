@@ -8,23 +8,14 @@
 
 namespace vk {
 
-	Shader::Shader()
-		: shader_module{ VK_NULL_HANDLE }
-		, stage { VK_SHADER_STAGE_VERTEX_BIT }
-	{}
-
 	VkPipelineShaderStageCreateInfo Shader::get_create_info() const {
 		VkPipelineShaderStageCreateInfo info{};
 		info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		info.stage = stage;
-		info.module = shader_module;
+		info.module = *shader_module;
 		info.pName = "main";
 
 		return info;
-	}
-
-	void Shader::destroy() {
-		vkDestroyShaderModule(Context::get()->get_device(), shader_module, nullptr);
 	}
 
 	ShaderBuilder::ShaderBuilder()
@@ -60,12 +51,9 @@ namespace vk {
 		create_info.pCode = _code;
 		create_info.codeSize = _size;
 
-		VkShaderModule shader_module;
-		if (vkCreateShaderModule(Context::get()->get_device(), &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+		if (vkCreateShaderModule(Context::get()->get_device(), &create_info, nullptr, &*shader.shader_module) != VK_SUCCESS) {
 			throw std::runtime_error("Shader creation failed!");
 		}
-
-		shader.shader_module = shader_module;
 		shader.stage = _stage;
 
 		return shader;

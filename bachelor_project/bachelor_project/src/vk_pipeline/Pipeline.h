@@ -3,34 +3,32 @@
 #include <vulkan/vulkan.h>
 
 #include "utils/move.h"
-#include "utils/ptr_alias.h"
+#include "utils/ptr.h"
+
+#include "vk_core/Handle.h"
 
 #include "RenderPass.h"
 #include "Shader.h"
 
+#include <vector>
 
 namespace vk {
 
 	class PipelineBuilder;
 
-	class Pipeline {
+	class Pipeline : public utils::Move, public ptr::ToShared<Pipeline> {
 		friend class PipelineBuilder;
 	private:
-		VkPipeline pipeline;
-		VkPipelineLayout layout;
+		ptr::Shared<const RenderPass> render_pass{};
+		std::vector<ptr::Shared<const Shader>> shaders{};
 
-		ptr::Shared<const RenderPass> render_pass;
-		std::vector<ptr::Shared<const Shader>> shaders;
+		Handle<VkPipelineLayout> layout{};
+		Handle<VkPipeline> pipeline{};
 
 	public:
-		Pipeline();
+		Pipeline() = default;
 
-		inline VkPipeline handle() const { return pipeline; }
-
-	private:
-		void destroy();
-
-		MOVE_SEMANTICS_VK_DEFAULT(Pipeline, pipeline)
+		inline VkPipeline handle() const { return *pipeline; }
 	};
 
 	class PipelineBuilder {

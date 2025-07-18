@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/ptr_alias.h"
+#include "utils/ptr.h"
 
 #include "vk_pipeline/Pipeline.h"
 

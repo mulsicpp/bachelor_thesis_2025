@@ -5,7 +5,7 @@
 
 #include "utils/dbg_log.h"
 #include "utils/NoCopy.h"
-#include "utils/ptr_alias.h"
+#include "utils/ptr.h"
 
 #include "Swapchain.h"
 #include "CommandManager.h"

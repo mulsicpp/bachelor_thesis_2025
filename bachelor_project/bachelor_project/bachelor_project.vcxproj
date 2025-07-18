@@ -166,6 +166,7 @@
     <ClCompile Include="src\vk_core\CommandManager.cpp" />
     <ClCompile Include="src\vk_core\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vk_core\Handle.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
     <ClCompile Include="src\vk_pipeline\Pipeline.cpp" />
     <ClCompile Include="src\vk_pipeline\RenderPass.cpp" />
@@ -181,11 +182,12 @@
     <ClInclude Include="src\utils\defines.h" />
     <ClInclude Include="src\utils\load_file.h" />
     <ClInclude Include="src\utils\move.h" />
-    <ClInclude Include="src\utils\ptr_alias.h" />
+    <ClInclude Include="src\utils\ptr.h" />
     <ClInclude Include="src\vk_core\CommandBuffer.h" />
     <ClInclude Include="src\vk_core\CommandManager.h" />
     <ClInclude Include="src\vk_core\Context.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
+    <ClInclude Include="src\vk_core\Handle.h" />
     <ClInclude Include="src\vk_core\Swapchain.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />

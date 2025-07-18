@@ -13,10 +13,10 @@ namespace ptr {
 
 	using std::make_shared;
 
-	template <typename T>
+	template <class T>
 	class ToShared {
 	public:
-		Shared<T> to_shared()&& {
+		Shared<T> to_shared() && {
 			return make_shared<T>(std::move(static_cast<T&>(*this)));
 		}
 	};

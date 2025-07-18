@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ptr_alias.h"
+#include "ptr.h"
 
 #define MOVE_SEMANTICS_DEBUG
 #ifdef MOVE_SEMANTICS_DEBUG

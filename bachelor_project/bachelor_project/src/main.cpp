@@ -6,28 +6,11 @@
 #include "App.h"
 
 #include "vk_core/CommandBuffer.h"
+#include "vk_core/Handle.h"
 
 #include "vk_resources/Buffer.h"
 #include "vk_pipeline/Shader.h"
 
-class Test {
-public:
-	int* val{};
-
-	Test() = default;
-
-	static Test create(int val) {
-		dbg_log("created %i", val);
-		Test test;
-		test.val = new int{ val };
-		return test;
-	}
-
-private:
-	void destroy() { dbg_log("destroyed %i", *val); delete val; }
-
-	MOVE_SEMANTICS_VK_DEFAULT(Test, val)
-};
 
 void test_move_semantics();
 void test_command_buffer();
@@ -37,12 +20,11 @@ void test_shaders();
 
 int main(void) {
 	try {
-
 		utils::LibManager lib_manager;
 
 		App app{};
 
-		test_shaders();
+		test_move_semantics();
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());
@@ -51,13 +33,19 @@ int main(void) {
 	return 0;
 }
 
+vk::Handle<int*> create_int_handle(int i) {
+	vk::Handle<int*> handle;
+	*handle = new int{ i };
+	return handle;
+}
+
 void test_move_semantics() {
-	Test t1 = Test::create(1);
-	Test t2 = Test::create(2);
 
-	Test t3 = std::move(t2);
+	vk::Handle<int*> h1 = create_int_handle(1);
+	vk::Handle<int*> h2 = create_int_handle(2);
+	vk::Handle<int*> h3 = std::move(h1);
 
-	t1 = std::move(t3);
+	h2 = std::move(h3);
 }
 
 void test_command_buffer() {

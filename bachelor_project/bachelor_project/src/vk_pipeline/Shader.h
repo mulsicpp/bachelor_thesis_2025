@@ -1,8 +1,11 @@
 #pragma once
 
-#include "utils/move.h"
-
 #include <vulkan/vulkan.h>
+
+#include "utils/move.h"
+#include "utils/ptr.h"
+
+#include "vk_core/Handle.h"
 
 #include <string>
 #include <vector>
@@ -11,23 +14,18 @@ namespace vk {
 
 	class ShaderBuidler;
 
-	class Shader {
+	class Shader : public utils::Move, public ptr::ToShared<Shader> {
 		friend class ShaderBuilder;
 	private:
-		VkShaderModule shader_module;
-		VkShaderStageFlagBits stage;
+		Handle<VkShaderModule> shader_module{};
+		VkShaderStageFlagBits stage{ VK_SHADER_STAGE_VERTEX_BIT };
 
 	public:
-		Shader();
+		Shader() = default;
 
-		inline VkShaderModule handle() const { return shader_module; }
+		inline VkShaderModule handle() const { return *shader_module; }
 
 		VkPipelineShaderStageCreateInfo get_create_info() const;
-
-	private:
-		void destroy();
-
-		MOVE_SEMANTICS_VK_DEFAULT(Shader, shader_module)
 	};
 
 	class ShaderBuilder {

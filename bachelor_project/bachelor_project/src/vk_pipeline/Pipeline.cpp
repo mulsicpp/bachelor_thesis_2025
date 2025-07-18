@@ -4,20 +4,6 @@
 
 namespace vk {
 
-	Pipeline::Pipeline()
-		: pipeline{ VK_NULL_HANDLE }
-        , layout{ VK_NULL_HANDLE }
-        , render_pass{}
-        , shaders{}
-	{}
-
-	void Pipeline::destroy() {
-        const auto device = Context::get()->get_device();
-
-        vkDestroyPipelineLayout(device, layout, nullptr);
-		vkDestroyPipeline(device, pipeline, nullptr);
-	}
-
 	PipelineBuilder::PipelineBuilder()
 		: _render_pass{}
 		, _shaders{}
@@ -105,7 +91,7 @@ namespace vk {
 
         const auto device = Context::get()->get_device();
 
-        if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &pipeline.layout) != VK_SUCCESS) {
+        if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &*pipeline.layout) != VK_SUCCESS) {
             throw std::runtime_error("Pipeline layout creation failed!");
         }
 
@@ -121,12 +107,12 @@ namespace vk {
         pipelineInfo.pDepthStencilState = nullptr;
         pipelineInfo.pColorBlendState = &color_blending;
         pipelineInfo.pDynamicState = &dynamic_state;
-        pipelineInfo.layout = pipeline.layout;
+        pipelineInfo.layout = *pipeline.layout;
         pipelineInfo.renderPass = _render_pass->handle();
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.pipeline) != VK_SUCCESS) {
+        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &*pipeline.pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Pipeline creation failed!");
         }
 
