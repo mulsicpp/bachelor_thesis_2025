@@ -26,12 +26,12 @@ namespace vk {
 			destroy_handle<T>(handle);
 		}
 
-		inline Handle(Handle<T>&& other) : handle{ other.handle } {
+		inline Handle(Handle<T>&& other) noexcept : handle{ other.handle } {
 			other.handle = VK_NULL_HANDLE;
 			HANDLE_LOG("moved in constructor");
 		}
 
-		inline Handle<T>& operator=(Handle<T>&& other) {
+		inline Handle<T>& operator=(Handle<T>&& other) noexcept {
 			if (this == &other) return *this;
 
 			if (handle != VK_NULL_HANDLE) {
