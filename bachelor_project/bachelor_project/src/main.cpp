@@ -20,7 +20,7 @@ void test_shaders();
 
 int main(void) {
 	try {
-		utils::LibManager lib_manager;
+		utils::LibManager lib_manager{};
 
 		App app{};
 		app.run();

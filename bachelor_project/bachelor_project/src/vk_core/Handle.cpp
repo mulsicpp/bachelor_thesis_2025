@@ -2,7 +2,12 @@
 
 #include "Context.h"
 
-#define IMPL_DESTROY(name) template<> void vk::destroy_handle<Vk##name>(Vk##name handle) { vkDestroy##name(Context::get()->get_device(), handle, nullptr); }
+#define IMPL_DESTROY(name)													\
+template<> void vk::destroy_handle<Vk##name>(Vk##name handle) {				\
+const auto p_context = Context::get_noexcept();								\
+if (p_context == nullptr) return;											\
+vkDestroy##name(p_context->get_device(), handle, nullptr);	\
+}
 
 IMPL_DESTROY(Fence)
 IMPL_DESTROY(Semaphore)
@@ -20,7 +25,9 @@ IMPL_DESTROY(ImageView)
 
 template<>
 void vk::destroy_handle<VmaAllocation>(VmaAllocation handle) {
-	vmaFreeMemory(Context::get()->get_allocator(), handle);
+	const auto p_context = Context::get_noexcept();
+	if (p_context == nullptr) return;
+	vmaFreeMemory(p_context->get_allocator(), handle);
 }
 
 template<>

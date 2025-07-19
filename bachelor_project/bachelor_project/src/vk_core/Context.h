@@ -47,7 +47,13 @@ namespace vk {
 		}
 
 		static inline Context* get() {
-			assert(context != nullptr);
+			if (context == nullptr) {
+				throw std::runtime_error("No Vulkan context present");
+			}
+			return context;
+		}
+
+		static inline Context* get_noexcept() noexcept {
 			return context;
 		}
 

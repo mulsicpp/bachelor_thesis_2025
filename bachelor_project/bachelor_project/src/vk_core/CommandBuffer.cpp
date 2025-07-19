@@ -120,10 +120,11 @@ namespace vk {
 
 
 	void CommandBuffer::destroy() {
-		const auto& context = *Context::get();
+		const auto p_context = Context::get_noexcept();
+		if (p_context == nullptr) return;
 
 		wait();
-		vkFreeCommandBuffers(context.get_device(), queue.command_pool, 1, &command_buffer);
+		vkFreeCommandBuffers(p_context->get_device(), queue.command_pool, 1, &command_buffer);
 	}
 
 
