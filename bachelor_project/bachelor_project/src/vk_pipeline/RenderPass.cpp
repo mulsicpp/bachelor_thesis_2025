@@ -97,7 +97,7 @@ namespace vk {
 
         VkSubpassDescription subpass_description{};
         subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass_description.colorAttachmentCount = color_refs.size();
+        subpass_description.colorAttachmentCount = static_cast<uint32_t>(color_refs.size());
         subpass_description.pColorAttachments = color_refs.data();
         subpass_description.pDepthStencilAttachment = depth_refs.size() > 0 ?  &depth_refs.back() : nullptr;
 

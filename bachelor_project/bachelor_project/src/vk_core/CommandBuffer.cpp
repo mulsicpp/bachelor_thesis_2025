@@ -1,13 +1,15 @@
 #include "CommandBuffer.h"
 #include "Context.h"
 
-// #define DEBUG_HANDLE
-#ifdef DEBUG_HANDLE
+#include "utils/defines.h"
+
+
+#if DEBUG_MOVE
 #include "utils/dbg_log.h"
 #include <typeinfo>
-#define HANDLE_LOG(msg) { dbg_log("%s %p %s", typeid(VkCommandBuffer).name(), command_buffer, msg); }
+#define HANDLE_LOG(msg) dbg_log("%s %p %s", typeid(VkCommandBuffer).name(), command_buffer, msg)
 #else
-#define HANDLE_LOG(msg) 
+#define HANDLE_LOG(msg) {}
 #endif
 
 namespace vk {
@@ -90,11 +92,11 @@ namespace vk {
 			signal_semaphores.push_back(s.handle());
 		}
 
-		submit_info.waitSemaphoreCount = wait_semaphores.size();
+		submit_info.waitSemaphoreCount = static_cast<uint32_t>(wait_semaphores.size());
 		submit_info.pWaitSemaphores = wait_semaphores.data();
 		submit_info.pWaitDstStageMask = info.wait_dst_stage_masks.data();
 
-		submit_info.signalSemaphoreCount = signal_semaphores.size();
+		submit_info.signalSemaphoreCount = static_cast<uint32_t>(signal_semaphores.size());
 		submit_info.pSignalSemaphores = signal_semaphores.data();
 
 		submit_info.commandBufferCount = 1;

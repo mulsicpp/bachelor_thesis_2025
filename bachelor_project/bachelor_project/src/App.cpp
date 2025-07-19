@@ -11,7 +11,12 @@ App::App() {
 
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
     
-    vk::Context::create(window, APP_NAME);
+    auto context_info = vk::ContextInfo()
+        .window(window)
+        .app_name(APP_NAME)
+        .use_raytracing(false);
+
+    vk::Context::create(context_info);
 
     rasterizer = RasterizerBuilder().build();
 }

@@ -1,7 +1,5 @@
 #include "Context.h"
 
-#include "utils/defines.h"
-
 const std::vector<const char*> REQUIRED_EXTENSIONS = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -17,19 +15,19 @@ const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 namespace vk {
 	Context* Context::context = nullptr;
 
-	Context::Context(GLFWwindow* window, const char* app_name) {
+	Context::Context(const ContextInfo& info) {
 
-		window = window;
+		this->window = info._window;
 
 		vkb::InstanceBuilder instance_builder;
 
-		instance_builder.set_app_name(app_name);
+		instance_builder.set_app_name(info._app_name.c_str());
 
-		if (USE_VALIDATION_LAYERS) {
+		if (info._use_debugging) {
 			instance_builder.request_validation_layers();
 			instance_builder.use_default_debug_messenger();
-			instance_builder.require_api_version(1, 2);
 		}
+		instance_builder.require_api_version(1, 2);
 
 		auto instance_result = instance_builder.build();
 		if (!instance_result) {
@@ -47,7 +45,7 @@ namespace vk {
 		selector.set_surface(surface);
 		selector.add_required_extensions(REQUIRED_EXTENSIONS);
 
-		if (USE_RAYTRACING) {
+		if (info._use_raytracing) {
 			selector.add_required_extensions(REQUIRED_RAYTRACING_EXTENSIONS);
 		}
 

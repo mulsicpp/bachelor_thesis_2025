@@ -28,7 +28,7 @@ namespace vk {
 		QueueInfo queue_info;
 
 		auto queue_families = device.get_queue_families();
-		queue_info.queue_family_count = queue_families.size();
+		queue_info.queue_family_count = static_cast<uint32_t>(queue_families.size());
 
 		for (auto& idx : queue_info.queue_family_indices) {
 			idx = -1;

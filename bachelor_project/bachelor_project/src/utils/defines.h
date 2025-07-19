@@ -4,30 +4,7 @@
 #error "Only supported on windows"
 #endif
 
-#ifdef NDEBUG
+// #define DEBUG_LOG false
+#define DEBUG_MOVE false
 
-#ifndef USE_VALIDATION_LAYERS
-#define USE_VALIDATION_LAYERS false
-#endif
-
-#ifndef USE_LOGGING
-#define USE_LOGGING false
-#endif
-
-#else
-
-#ifndef USE_VALIDATION_LAYERS
-#define USE_VALIDATION_LAYERS true
-#endif
-
-#ifndef USE_LOGGING
-#define USE_LOGGING true
-#endif
-
-#endif
-
-#ifdef RAYTRACING
-#define USE_RAYTRACING true
-#else
-#define USE_RAYTRACING false
-#endif
+#include "default_defines.h"

@@ -24,10 +24,10 @@ namespace vk {
         vkCmdBindPipeline(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
 
         VkViewport new_viewport{};
-        new_viewport.x = viewport.offset.x;
-        new_viewport.y = viewport.offset.y;
-        new_viewport.width = viewport_extent.width;
-        new_viewport.height = viewport_extent.height;
+        new_viewport.x = static_cast<float>(viewport.offset.x);
+        new_viewport.y = static_cast<float>(viewport.offset.y);
+        new_viewport.width = static_cast<float>(viewport_extent.width);
+        new_viewport.height = static_cast<float>(viewport_extent.height);
         new_viewport.minDepth = 0.0f;
         new_viewport.maxDepth = 1.0f;
         vkCmdSetViewport(cmd_buffer.handle(), 0, 1, &new_viewport);
@@ -131,7 +131,7 @@ namespace vk {
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineInfo.stageCount = shader_infos.size();
+        pipelineInfo.stageCount = static_cast<uint32_t>(shader_infos.size());
         pipelineInfo.pStages = shader_infos.data();
         pipelineInfo.pVertexInputState = &vertex_input_info;
         pipelineInfo.pInputAssemblyState = &input_assembly;

@@ -28,9 +28,9 @@ namespace vk {
 	};
 
 	struct Queue {
-		VkQueue queue = VK_NULL_HANDLE;
-		int32_t family_index = -1;
-		VkCommandPool command_pool;
+		VkQueue queue{ VK_NULL_HANDLE };
+		int32_t family_index{ -1 };
+		VkCommandPool command_pool{ VK_NULL_HANDLE };
 	};
 
 

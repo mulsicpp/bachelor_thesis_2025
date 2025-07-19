@@ -123,7 +123,7 @@ void test_shaders() {
 			.load_spirv("assets/shaders/bla.spv")
 			.build();
 	}
-	catch (std::runtime_error& e) {
+	catch (const std::runtime_error& e) {
 		dbg_log("expected error: %s", e.what());
 	}
 }

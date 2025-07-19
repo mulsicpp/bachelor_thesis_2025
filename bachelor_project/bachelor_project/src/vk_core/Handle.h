@@ -1,14 +1,15 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include "utils/defines.h"
 
-// #define DEBUG_HANDLE
-#ifdef DEBUG_HANDLE
+
+#if DEBUG_MOVE
 #include "utils/dbg_log.h"
 #include <typeinfo>
-#define HANDLE_LOG(msg) { dbg_log("%s %p %s", typeid(T).name(), handle, msg); }
+#define HANDLE_LOG(msg) dbg_log("%s %p %s", typeid(T).name(), handle, msg)
 #else
-#define HANDLE_LOG(msg)
+#define HANDLE_LOG(msg) {}
 #endif
 
 namespace vk {

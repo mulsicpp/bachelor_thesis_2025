@@ -14,6 +14,8 @@
 
 namespace vk {
 
+	class ContextInfo;
+
 	class Context : public utils::NoCopy {
 	private:
 		static Context* context;
@@ -32,10 +34,10 @@ namespace vk {
 		VmaAllocator allocator;
 
 	public:
-		static inline Context* create(GLFWwindow* window, const char* app_name) {
+		static inline Context* create(const ContextInfo& info) {
 			if (context != nullptr)
 				delete context;
-			context = new Context(window, app_name);
+			context = new Context(info);
 			context->swapchain.create_images();
 			return context;
 		}
@@ -71,9 +73,30 @@ namespace vk {
 		void wait_device_idle() const { vkDeviceWaitIdle(device.device); }
 
 	private:
-		Context(GLFWwindow* window, const char* app_name);
+		Context(const ContextInfo& info);
 		~Context();
 
 		void create_allocator();
+	};
+
+
+	class ContextInfo {
+		friend class Context;
+	public:
+		using Ref = ContextInfo&;
+
+	private:
+		GLFWwindow* _window{ nullptr };
+		std::string _app_name{ "" };
+		bool _use_debugging{ DEBUG_VULKAN };
+		bool _use_raytracing{ false };
+
+	public:
+		ContextInfo() = default;
+
+		inline Ref window(GLFWwindow* window) { _window = window; return *this; }
+		inline Ref app_name(const std::string& app_name) { _app_name = app_name; return *this; }
+		inline Ref use_debugging(bool use_debugging) { _use_debugging = use_debugging; return *this; }
+		inline Ref use_raytracing(bool use_raytracing) { _use_raytracing = use_raytracing; return *this; }
 	};
 }

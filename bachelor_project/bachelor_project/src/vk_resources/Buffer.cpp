@@ -6,7 +6,7 @@ namespace vk {
 
 	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
 		if (copy_regions.size() > 0) {
-			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), copy_regions.size(), copy_regions.data());
+			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), static_cast<uint32_t>(copy_regions.size()), copy_regions.data());
 			return;
 		}
 
@@ -67,7 +67,7 @@ namespace vk {
 
 		const auto families = context.get_command_manager().get_required_families(_queue_types);
 		buffer_info.sharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
-		buffer_info.queueFamilyIndexCount = families.size();
+		buffer_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
 		buffer_info.pQueueFamilyIndices = families.data();
 
 
