@@ -13,9 +13,10 @@
 namespace vk {
 
 	CommandBuffer::~CommandBuffer() {
-		if (command_buffer != VK_NULL_HANDLE)
+		if (command_buffer != VK_NULL_HANDLE) {
 			HANDLE_LOG("destroyed");
-		destroy();
+			destroy();
+		}
 	}
 
 	CommandBuffer::CommandBuffer(CommandBuffer&& other) noexcept 

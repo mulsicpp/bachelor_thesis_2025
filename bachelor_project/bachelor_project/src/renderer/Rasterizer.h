@@ -23,6 +23,8 @@ private:
 
 	std::vector<vk::Framebuffer> framebuffers{};
 
+	vk::CommandBuffer render_cmd_buffer;
+
 public:
 	Rasterizer() = default;
 

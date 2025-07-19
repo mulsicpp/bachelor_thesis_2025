@@ -19,7 +19,8 @@ Rasterizer RasterizerBuilder::build() {
 
 	rasterizer.render_pass = vk::RenderPassBuilder()
 		.add_attachment(vk::Attachment().color().from_swapchain())
-		.build().to_shared();
+		.build()
+		.to_shared();
 
 	dbg_log("created render pass");
 
@@ -55,6 +56,8 @@ Rasterizer RasterizerBuilder::build() {
 			.build()
 		);
 	}
+
+	rasterizer.render_cmd_buffer = vk::CommandBufferBuilder(vk::QueueType::Graphics).single_use(false).build();
 
 	return rasterizer;
 }

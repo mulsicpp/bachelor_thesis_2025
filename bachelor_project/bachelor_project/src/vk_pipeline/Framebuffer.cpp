@@ -4,6 +4,75 @@
 #include <string>
 
 namespace vk {
+
+	ClearValue ClearValue::color(std::array<float, 4> color) {
+		VkClearValue value;
+		for (int i = 0; i < color.size(); i++) {
+			value.color.float32[i] = color[i];
+		}
+		return { value };
+	}
+
+	ClearValue ClearValue::color(std::array<int32_t, 4> color) {
+		VkClearValue value;
+		for (int i = 0; i < color.size(); i++) {
+			value.color.int32[i] = color[i];
+		}
+		return { value };
+	}
+
+	ClearValue ClearValue::color(std::array<uint32_t, 4> color) {
+		VkClearValue value;
+		for (int i = 0; i < color.size(); i++) {
+			value.color.uint32[i] = color[i];
+		}
+		return { value };
+	}
+
+
+
+	ClearValue ClearValue::depth(float depth) {
+		VkClearValue value;
+		value.depthStencil.depth = depth;
+		return { value };
+	}
+
+
+
+	void Framebuffer::cmd_begin_pass(ReadyCommandBuffer cmd_buffer, const PassBeginInfo& info) {
+		VkRenderPassBeginInfo pass_begin_info{};
+		pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		pass_begin_info.renderPass = _render_pass->handle();
+		pass_begin_info.framebuffer = *framebuffer;
+		pass_begin_info.renderArea.offset = info.render_area.offset;
+
+
+		auto extent = info.render_area.extent;
+		if (extent.width == UINT32_MAX) {
+			extent.width = _extent.width - info.render_area.offset.x;
+		}
+
+		if (extent.height == UINT32_MAX) {
+			extent.height = _extent.height - info.render_area.offset.y;
+		}
+
+		pass_begin_info.renderArea.extent = extent;
+
+		std::vector<VkClearValue> clear_values{ info.clear_values.size() };
+		for (int i = 0; i < clear_values.size(); i++) {
+			clear_values[i] = info.clear_values[i].get();
+		}
+
+		pass_begin_info.clearValueCount = static_cast<uint32_t>(clear_values.size());
+		pass_begin_info.pClearValues = clear_values.data();
+
+		vkCmdBeginRenderPass(cmd_buffer.handle(), &pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
+	void Framebuffer::cmd_end_pass(ReadyCommandBuffer cmd_buffer) {
+		vkCmdEndRenderPass(cmd_buffer.handle());
+	}
+
 	Framebuffer FramebufferBuilder::build() {
 		Framebuffer framebuffer;
 
@@ -11,6 +80,10 @@ namespace vk {
 
 		if (attachments.size() != _images.size()) {
 			throw std::runtime_error("Framebuffer creation failed! Image count does not match attachment count");
+		}
+
+		if (attachments.size() == 0) {
+			throw std::runtime_error("Framebuffer creation failed! Framebuffer needs at least one attachment");
 		}
 
 		VkExtent2D image_extent{ 0, 0 };
@@ -57,6 +130,7 @@ namespace vk {
 
 		framebuffer._render_pass = _render_pass;
 		framebuffer._image_views = std::move(image_views);
+		framebuffer._extent = image_extent;
 
 		return framebuffer;
 	}
