@@ -24,6 +24,8 @@ void App::run() {
     dbg_log("run");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        rasterizer.draw();
+        rasterizer.draw_triangle();
     }
+
+    vk::Context::get()->wait_device_idle();
 }

@@ -1,13 +1,13 @@
 #include "CommandBuffer.h"
 #include "Context.h"
 
-#define DEBUG_HANDLE
+// #define DEBUG_HANDLE
 #ifdef DEBUG_HANDLE
 #include "utils/dbg_log.h"
 #include <typeinfo>
 #define HANDLE_LOG(msg) { dbg_log("%s %p %s", typeid(VkCommandBuffer).name(), command_buffer, msg); }
 #else
-#define HANDLE_LOG(msg)
+#define HANDLE_LOG(msg) 
 #endif
 
 namespace vk {

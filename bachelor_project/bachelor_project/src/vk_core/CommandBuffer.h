@@ -2,6 +2,7 @@
 
 #include "CommandManager.h"
 
+#include "utils/move.h"
 #include "utils/ptr.h"
 
 #include "vk_sync/Fence.h"
@@ -14,7 +15,7 @@ namespace vk {
 	class ReadyCommandBuffer;
 	using CommandRecorder = std::function<void(ReadyCommandBuffer)>;
 
-	struct SubmitInfo {
+	struct SubmitInfo : public utils::Move {
 		using Ref = SubmitInfo&;
 		std::vector<Semaphore> signal_semaphores{};
 		std::vector<Semaphore> wait_semaphores{};

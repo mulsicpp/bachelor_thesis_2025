@@ -36,6 +36,15 @@ namespace vk {
 
 		_render_pass->_active = true;
 		_render_pass->_begin_info = info;
+		_render_pass->_begin_info.render_area.extent = extent;
+
+		auto render_area = _render_pass->_begin_info.render_area;
+
+		// dbg_log("render area:");
+		// dbg_log("  x:      %u", render_area.offset.x);
+		// dbg_log("  y:      %u", render_area.offset.y);
+		// dbg_log("  width:  %u", render_area.extent.width);
+		// dbg_log("  height: %u", render_area.extent.height);
 	}
 
 	void Framebuffer::cmd_end_pass(ReadyCommandBuffer cmd_buffer) {

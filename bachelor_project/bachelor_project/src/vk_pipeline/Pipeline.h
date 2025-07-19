@@ -6,6 +6,7 @@
 #include "utils/ptr.h"
 
 #include "vk_core/Handle.h"
+#include "vk_core/CommandBuffer.h"
 
 #include "RenderPass.h"
 #include "Shader.h"
@@ -29,6 +30,8 @@ namespace vk {
 		Pipeline() = default;
 
 		inline VkPipeline handle() const { return *pipeline; }
+
+		void cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport = { {0,0}, {UINT32_MAX, UINT32_MAX} }, const VkRect2D& scissor = { {0,0}, {UINT32_MAX, UINT32_MAX} });
 	};
 
 	class PipelineBuilder {

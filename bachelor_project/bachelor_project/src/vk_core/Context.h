@@ -62,6 +62,8 @@ namespace vk {
 		const Swapchain& get_swapchain() const { return swapchain; }
 		VmaAllocator get_allocator() const { return allocator; }
 
+		void wait_device_idle() const { vkDeviceWaitIdle(device.device); }
+
 	private:
 		Context(GLFWwindow* window, const char* app_name);
 		~Context();

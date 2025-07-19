@@ -22,13 +22,19 @@ private:
 	vk::Pipeline pipeline{};
 
 	std::vector<vk::Framebuffer> framebuffers{};
+	vk::PassBeginInfo pass_begin_info{};
 
-	vk::CommandBuffer render_cmd_buffer;
+	vk::CommandBuffer render_cmd_buffer{};
+
+	vk::SubmitInfo submit_info{};
 
 public:
 	Rasterizer() = default;
 
 	void draw();
+	void draw_triangle();
+
+	vk::CommandRecorder draw_triangle_recorder(uint32_t image_index);
 };
 
 class RasterizerBuilder {

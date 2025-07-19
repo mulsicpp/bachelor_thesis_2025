@@ -2,7 +2,41 @@
 
 #include "vk_core/Context.h"
 
+#include <stdexcept>
+
 namespace vk {
+
+    void Pipeline::cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport, const VkRect2D& scissor) {
+        if (!render_pass->active()) {
+            throw std::runtime_error("Binding pipeline failed! Render pass is not active");
+        }
+
+        const auto& render_extent = render_pass->begin_info().render_area.extent;
+
+        auto viewport_extent = viewport.extent;
+        if (viewport_extent.width == UINT32_MAX) { viewport_extent.width = render_extent.width - viewport.offset.x; }
+        if (viewport_extent.height == UINT32_MAX) { viewport_extent.height = render_extent.height - viewport.offset.x; }
+
+        auto scissor_extent = scissor.extent;
+        if (scissor_extent.width == UINT32_MAX) { scissor_extent.width = render_extent.width - scissor.offset.x; }
+        if (scissor_extent.height == UINT32_MAX) { scissor_extent.height = render_extent.height - scissor.offset.x; }
+
+        vkCmdBindPipeline(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
+
+        VkViewport new_viewport{};
+        new_viewport.x = viewport.offset.x;
+        new_viewport.y = viewport.offset.y;
+        new_viewport.width = viewport_extent.width;
+        new_viewport.height = viewport_extent.height;
+        new_viewport.minDepth = 0.0f;
+        new_viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(cmd_buffer.handle(), 0, 1, &new_viewport);
+
+        VkRect2D new_scissor{};
+        new_scissor.offset = scissor.offset;
+        new_scissor.extent = scissor_extent;
+        vkCmdSetScissor(cmd_buffer.handle(), 0, 1, &new_scissor);
+    }
 
 	PipelineBuilder::PipelineBuilder()
 		: _render_pass{}
@@ -41,7 +75,7 @@ namespace vk {
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -51,8 +85,8 @@ namespace vk {
 
         VkPipelineDepthStencilStateCreateInfo depth_stencil{};
         depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        depth_stencil.depthTestEnable = VK_TRUE;
-        depth_stencil.depthWriteEnable = VK_TRUE;
+        depth_stencil.depthTestEnable = VK_FALSE;
+        depth_stencil.depthWriteEnable = VK_FALSE;
         depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
         depth_stencil.depthBoundsTestEnable = VK_FALSE;
         depth_stencil.stencilTestEnable = VK_FALSE;

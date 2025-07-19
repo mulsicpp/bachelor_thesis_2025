@@ -23,8 +23,7 @@ int main(void) {
 		utils::LibManager lib_manager;
 
 		App app{};
-
-		test_buffer_copy();
+		app.run();
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());

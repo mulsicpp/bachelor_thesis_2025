@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
-#define DEBUG_HANDLE
+// #define DEBUG_HANDLE
 #ifdef DEBUG_HANDLE
 #include "utils/dbg_log.h"
 #include <typeinfo>
