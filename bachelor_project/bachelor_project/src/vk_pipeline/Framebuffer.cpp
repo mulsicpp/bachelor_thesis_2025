@@ -5,40 +5,6 @@
 
 namespace vk {
 
-	ClearValue ClearValue::color(std::array<float, 4> color) {
-		VkClearValue value;
-		for (int i = 0; i < color.size(); i++) {
-			value.color.float32[i] = color[i];
-		}
-		return { value };
-	}
-
-	ClearValue ClearValue::color(std::array<int32_t, 4> color) {
-		VkClearValue value;
-		for (int i = 0; i < color.size(); i++) {
-			value.color.int32[i] = color[i];
-		}
-		return { value };
-	}
-
-	ClearValue ClearValue::color(std::array<uint32_t, 4> color) {
-		VkClearValue value;
-		for (int i = 0; i < color.size(); i++) {
-			value.color.uint32[i] = color[i];
-		}
-		return { value };
-	}
-
-
-
-	ClearValue ClearValue::depth(float depth) {
-		VkClearValue value;
-		value.depthStencil.depth = depth;
-		return { value };
-	}
-
-
-
 	void Framebuffer::cmd_begin_pass(ReadyCommandBuffer cmd_buffer, const PassBeginInfo& info) {
 		VkRenderPassBeginInfo pass_begin_info{};
 		pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -67,10 +33,15 @@ namespace vk {
 		pass_begin_info.pClearValues = clear_values.data();
 
 		vkCmdBeginRenderPass(cmd_buffer.handle(), &pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+
+		_render_pass->_active = true;
+		_render_pass->_begin_info = info;
 	}
 
 	void Framebuffer::cmd_end_pass(ReadyCommandBuffer cmd_buffer) {
 		vkCmdEndRenderPass(cmd_buffer.handle());
+
+		_render_pass->_active = false;
 	}
 
 	Framebuffer FramebufferBuilder::build() {

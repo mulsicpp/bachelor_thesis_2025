@@ -15,21 +15,33 @@
 
 namespace vk {
 
-	class RenderPassBuilder;
-	struct Attachment;
-
-	class RenderPass : public utils::Move, public ptr::ToShared<RenderPass> {
-		friend class RenderPassBuilder;
+	struct ClearValue {
 	private:
-		Handle<VkRenderPass> render_pass{};
+		VkClearValue clear_value;
 
-		std::vector<Attachment> _attachments{};
+		inline ClearValue(const VkClearValue& value) : clear_value{ value } {}
 
 	public:
-		RenderPass() = default;
+		static ClearValue color(std::array<float, 4> color);
+		static ClearValue color(std::array<int32_t, 4> color);
+		static ClearValue color(std::array<uint32_t, 4> color);
 
-		inline VkRenderPass handle() const { return *render_pass; }
-		inline const std::vector<Attachment>& attachments() const { return _attachments; }
+		static ClearValue depth(float depth);
+
+		inline const VkClearValue& get() const { return clear_value; }
+	};
+
+	struct PassBeginInfo {
+		using Ref = PassBeginInfo&;
+		VkRect2D render_area{ { 0,0 }, { UINT32_MAX, UINT32_MAX } };
+		std::vector<ClearValue> clear_values{};
+
+		PassBeginInfo() = default;
+
+		inline Ref set_render_area(VkRect2D render_area) { this->render_area = render_area; return *this; }
+
+		inline Ref set_clear_values(const std::vector<ClearValue>& clear_values) { this->clear_values = clear_values; return *this; }
+		inline Ref add_clear_value(const ClearValue& clear_value) { this->clear_values.push_back(clear_value); return *this; }
 	};
 
 	enum class AttachmentType {
@@ -57,6 +69,30 @@ namespace vk {
 		inline Ref depth() { type = AttachmentType::Depth; return *this; }
 
 		Ref from_swapchain();
+	};
+
+	class RenderPassBuilder;
+	class Framebuffer;
+
+	class RenderPass : public utils::Move, public ptr::ToShared<RenderPass> {
+		friend class RenderPassBuilder;
+		friend class Framebuffer;
+	private:
+		Handle<VkRenderPass> render_pass{};
+
+		std::vector<Attachment> _attachments{};
+
+		bool _active{ false };
+		PassBeginInfo _begin_info;
+
+	public:
+		RenderPass() = default;
+
+		inline VkRenderPass handle() const { return *render_pass; }
+		inline const std::vector<Attachment>& attachments() const { return _attachments; }
+
+		inline bool active() const { return _active; }
+		inline const PassBeginInfo& begin_info() const { return _begin_info; }
 	};
 
 	class RenderPassBuilder {

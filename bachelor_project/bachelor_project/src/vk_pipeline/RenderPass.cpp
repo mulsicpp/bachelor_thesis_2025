@@ -3,6 +3,38 @@
 
 namespace vk {
 	
+    ClearValue ClearValue::color(std::array<float, 4> color) {
+        VkClearValue value;
+        for (int i = 0; i < color.size(); i++) {
+            value.color.float32[i] = color[i];
+        }
+        return { value };
+    }
+
+    ClearValue ClearValue::color(std::array<int32_t, 4> color) {
+        VkClearValue value;
+        for (int i = 0; i < color.size(); i++) {
+            value.color.int32[i] = color[i];
+        }
+        return { value };
+    }
+
+    ClearValue ClearValue::color(std::array<uint32_t, 4> color) {
+        VkClearValue value;
+        for (int i = 0; i < color.size(); i++) {
+            value.color.uint32[i] = color[i];
+        }
+        return { value };
+    }
+
+
+
+    ClearValue ClearValue::depth(float depth) {
+        VkClearValue value;
+        value.depthStencil.depth = depth;
+        return { value };
+    }
+
     Attachment::Attachment()
 		: type{ AttachmentType::Color }
         , format{ VK_FORMAT_UNDEFINED }
@@ -14,6 +46,7 @@ namespace vk {
     Attachment::Ref Attachment::from_swapchain() {
         const auto& swapchain = Context::get()->get_swapchain();
 
+        type = AttachmentType::Color;
         format = swapchain.format();
         load_op = VK_ATTACHMENT_LOAD_OP_CLEAR;
         store_op = VK_ATTACHMENT_STORE_OP_STORE;
