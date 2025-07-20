@@ -4,9 +4,9 @@
 
 #define IMPL_DESTROY(name)													\
 template<> void vk::destroy_handle<Vk##name>(Vk##name handle) {				\
-const auto p_context = Context::get_noexcept();								\
-if (p_context == nullptr) return;											\
-vkDestroy##name(p_context->get_device(), handle, nullptr);	\
+	const auto p_context = Context::get_noexcept();							\
+	if (p_context == nullptr) return;										\
+	vkDestroy##name(p_context->get_device(), handle, nullptr);				\
 }
 
 IMPL_DESTROY(SwapchainKHR)
@@ -26,8 +26,11 @@ IMPL_DESTROY(Image)
 IMPL_DESTROY(ImageView)
 
 template<>
-void vk::destroy_handle<vk::HImage>(vk::HImage handle) {
-	if (!handle.owns) return;
+void vk::destroy_handle<vk::ImageHandle>(vk::ImageHandle handle) {
+	if (!handle.owns) {
+		MOVE_LOG("image destruction ignored");
+		return;
+	}
 	const auto p_context = Context::get_noexcept();
 	if (p_context == nullptr) return;
 	vkDestroyImage(p_context->get_device(), handle, nullptr);

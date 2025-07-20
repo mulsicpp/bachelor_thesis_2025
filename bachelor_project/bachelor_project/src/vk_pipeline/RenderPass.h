@@ -68,7 +68,7 @@ namespace vk {
 		inline Ref color() { type = AttachmentType::Color; return *this; }
 		inline Ref depth() { type = AttachmentType::Depth; return *this; }
 
-		Ref from_swapchain();
+		Ref from_swapchain(const Swapchain* swapchain);
 	};
 
 	class RenderPassBuilder;

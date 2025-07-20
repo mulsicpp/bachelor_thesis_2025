@@ -43,11 +43,9 @@ namespace vk {
 		, final_layout{ VK_IMAGE_LAYOUT_UNDEFINED }
 	{}
 
-    Attachment::Ref Attachment::from_swapchain() {
-        const auto& swapchain = Context::get()->get_swapchain();
-
+    Attachment::Ref Attachment::from_swapchain(const Swapchain* swapchain) {
         type = AttachmentType::Color;
-        format = swapchain.format();
+        format = swapchain->surface_format().format;
         load_op = VK_ATTACHMENT_LOAD_OP_CLEAR;
         store_op = VK_ATTACHMENT_STORE_OP_STORE;
         final_layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;

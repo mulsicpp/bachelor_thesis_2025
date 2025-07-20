@@ -13,7 +13,6 @@ void Rasterizer::draw_triangle() {
 	const auto& context = *vk::Context::get();
 
 	const auto device = context.get_device();
-	const auto swapchain = context.get_swapchain();
 
 	render_cmd_buffer.wait();
 
@@ -56,8 +55,10 @@ RasterizerBuilder::RasterizerBuilder()
 Rasterizer RasterizerBuilder::build() {
 	Rasterizer rasterizer;
 
+	rasterizer.swapchain = vk::SwapchainBuilder().build();
+
 	rasterizer.render_pass = vk::RenderPassBuilder()
-		.add_attachment(vk::Attachment().color().from_swapchain())
+		.add_attachment(vk::Attachment().color().from_swapchain(&rasterizer.swapchain))
 		.build()
 		.to_shared();
 
@@ -85,7 +86,7 @@ Rasterizer RasterizerBuilder::build() {
 
 	const auto& context = *vk::Context::get();
 
-	const auto& swapchain_images = context.get_swapchain().images();
+	const auto& swapchain_images = rasterizer.swapchain.images();
 
 	for (const auto& image : swapchain_images) {
 		rasterizer.framebuffers.emplace_back(

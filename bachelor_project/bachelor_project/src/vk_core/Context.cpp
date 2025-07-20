@@ -72,7 +72,6 @@ namespace vk {
 		device = device_result.value();
 
 		command_manager = CommandManager::create(device, queue_info);
-		swapchain = SwapchainDeprecated::create(device, command_manager);
 
 		create_allocator();
 
@@ -93,7 +92,6 @@ namespace vk {
 		vmaDestroyAllocator(allocator);
 
 		CommandManager::destroy(device, command_manager);
-		SwapchainDeprecated::destroy(swapchain);
 
 		vkb::destroy_device(device);
 		if (instance.instance != VK_NULL_HANDLE)

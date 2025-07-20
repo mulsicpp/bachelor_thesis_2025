@@ -20,7 +20,7 @@ namespace vk {
 		friend class SwapchainBuilder;
 	private:
 		Handle<VmaAllocation> allocation{};
-		Handle<HImage> image{};
+		Handle<ImageHandle> image{};
 
 		VkFormat _format{ VK_FORMAT_UNDEFINED };
 		VkExtent2D _extent{ 0, 0 };

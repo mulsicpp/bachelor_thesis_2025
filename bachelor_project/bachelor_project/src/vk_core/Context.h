@@ -27,8 +27,6 @@ namespace vk {
 		vkb::PhysicalDevice physical_device;
 		vkb::Device device;
 
-		SwapchainDeprecated swapchain;
-
 		CommandManager command_manager;
 
 		VmaAllocator allocator;
@@ -38,7 +36,6 @@ namespace vk {
 			if (context != nullptr)
 				delete context;
 			context = new Context(info);
-			context->swapchain.create_images();
 			return context;
 		}
 
@@ -67,7 +64,6 @@ namespace vk {
 		VkDevice get_device() const { return device.device; }
 
 		const CommandManager& get_command_manager() const { return command_manager; }
-		const SwapchainDeprecated& get_swapchain() const { return swapchain; }
 		VmaAllocator get_allocator() const { return allocator; }
 
 		void wait_device_idle() const { vkDeviceWaitIdle(device.device); }

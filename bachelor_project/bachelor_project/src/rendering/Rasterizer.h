@@ -10,12 +10,15 @@
 
 #include <vector>
 
+#include "vk_core/Swapchain.h"
 
 class RasterizerBuilder;
 
 class Rasterizer : public utils::Move {
 	friend class RasterizerBuilder;
 private:
+	vk::Swapchain swapchain;
+
 	vk::Image depth_buffer{};
 	ptr::Shared<vk::RenderPass> render_pass{};
 

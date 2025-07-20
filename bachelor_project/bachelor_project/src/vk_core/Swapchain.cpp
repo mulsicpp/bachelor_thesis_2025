@@ -133,14 +133,14 @@ namespace vk {
 		create_info.imageColorSpace = surface_format.colorSpace;
 		create_info.imageExtent = extent;
 		create_info.imageArrayLayers = 1;
-		create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		create_info.imageUsage = _image_usage;
 
 		const auto& cmd_manager = context.get_command_manager();
 
 		auto families = cmd_manager.get_required_families({ QueueType::Graphics, QueueType::Present });
 
 		create_info.imageSharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
-		create_info.queueFamilyIndexCount = families.size();
+		create_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
 		create_info.pQueueFamilyIndices = families.data();
 
 		create_info.preTransform = capabilities.currentTransform;
@@ -159,6 +159,9 @@ namespace vk {
 		vkGetSwapchainImagesKHR(device, swapchain.swapchain.get(), &image_count, swapchain_image_handles.data());
 
 		swapchain._surface_format = surface_format;
+		swapchain._present_mode = present_mode;
+		swapchain._image_usage = _image_usage;
+
 		swapchain._extent = extent;
 
 		swapchain._images = {};
@@ -171,6 +174,7 @@ namespace vk {
 
 			image._format = surface_format.format;
 			image._extent = extent;
+			dbg_log("swapchain image: %p", (void*)image_handle);
 			swapchain._images.push_back(std::move(image).to_shared());
 		}
 
