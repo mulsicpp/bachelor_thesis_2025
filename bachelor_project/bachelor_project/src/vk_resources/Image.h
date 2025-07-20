@@ -12,9 +12,11 @@
 
 namespace vk {
 
+	class SwapchainDeprecated;
 	class Swapchain;
 
 	class Image : public utils::Move, public ptr::ToShared<Image> {
+		friend class SwapchainDeprecated;
 		friend class Swapchain;
 	private:
 		Handle<VmaAllocation> allocation{};

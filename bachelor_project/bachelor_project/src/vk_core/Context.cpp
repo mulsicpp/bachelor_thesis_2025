@@ -1,4 +1,5 @@
 #include "Context.h"
+#include "utils/dbg_log.h"
 
 const std::vector<const char*> REQUIRED_EXTENSIONS = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -71,7 +72,7 @@ namespace vk {
 		device = device_result.value();
 
 		command_manager = CommandManager::create(device, queue_info);
-		swapchain = Swapchain::create(device, command_manager);
+		swapchain = SwapchainDeprecated::create(device, command_manager);
 
 		create_allocator();
 
@@ -92,7 +93,7 @@ namespace vk {
 		vmaDestroyAllocator(allocator);
 
 		CommandManager::destroy(device, command_manager);
-		Swapchain::destroy(swapchain);
+		SwapchainDeprecated::destroy(swapchain);
 
 		vkb::destroy_device(device);
 		if (instance.instance != VK_NULL_HANDLE)

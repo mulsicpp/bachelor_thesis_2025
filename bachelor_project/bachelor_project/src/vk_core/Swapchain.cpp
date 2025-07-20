@@ -1,8 +1,8 @@
 #include "Swapchain.h"
 
 namespace vk {
-	Swapchain Swapchain::create(const vkb::Device& device, const CommandManager& command_manager) {
-		Swapchain swapchain;
+	SwapchainDeprecated SwapchainDeprecated::create(const vkb::Device& device, const CommandManager& command_manager) {
+		SwapchainDeprecated swapchain;
 
 		vkb::SwapchainBuilder swapchain_builder{
 			device.physical_device.physical_device,
@@ -22,7 +22,7 @@ namespace vk {
 		return swapchain;
 	}
 
-	void Swapchain::create_images() {
+	void SwapchainDeprecated::create_images() {
 		_images = {};
 
 		auto images_result = swapchain.get_images();
@@ -43,7 +43,7 @@ namespace vk {
 		}
 	}
 
-	void Swapchain::destroy(Swapchain& swapchain) {
+	void SwapchainDeprecated::destroy(SwapchainDeprecated& swapchain) {
 
 		for (auto& image : swapchain._images) {
 			*(image->image) = VK_NULL_HANDLE;

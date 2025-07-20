@@ -9,6 +9,8 @@ if (p_context == nullptr) return;											\
 vkDestroy##name(p_context->get_device(), handle, nullptr);	\
 }
 
+IMPL_DESTROY(SwapchainKHR)
+
 IMPL_DESTROY(Fence)
 IMPL_DESTROY(Semaphore)
 

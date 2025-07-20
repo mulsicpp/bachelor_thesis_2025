@@ -54,7 +54,7 @@
     <ClCompile Include="src\vk_pipeline\RenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\Rasterizer.cpp">
+    <ClCompile Include="src\rendering\Rasterizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_pipeline\Shader.cpp">
@@ -134,7 +134,7 @@
     <ClInclude Include="src\vk_pipeline\RenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\Rasterizer.h">
+    <ClInclude Include="src\rendering\Rasterizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vk_pipeline\Shader.h">
