@@ -17,10 +17,10 @@ namespace vk {
 
 	class Image : public utils::Move, public ptr::ToShared<Image> {
 		friend class SwapchainDeprecated;
-		friend class Swapchain;
+		friend class SwapchainBuilder;
 	private:
 		Handle<VmaAllocation> allocation{};
-		Handle<VkImage> image{};
+		Handle<HImage> image{};
 
 		VkFormat _format{ VK_FORMAT_UNDEFINED };
 		VkExtent2D _extent{ 0, 0 };

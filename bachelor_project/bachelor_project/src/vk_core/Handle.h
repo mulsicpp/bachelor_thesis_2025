@@ -12,7 +12,23 @@
 #define HANDLE_LOG(msg) {}
 #endif
 
+
+
 namespace vk {
+
+	struct HImage {
+		VkImage handle{ VK_NULL_HANDLE };
+		bool owns{ true };
+
+		inline HImage(VkImage handle, bool owns = true) 
+			: handle{handle}
+			, owns{owns}
+		{}
+
+		operator VkImage() const {
+			return handle;
+		}
+	};
 
 	template<class T>
 	class Handle {
@@ -54,6 +70,8 @@ namespace vk {
 		inline const T& operator*() const { return handle; }
 
 		inline T get() const { return handle; }
+
+		inline void invalidate() { handle = VK_NULL_HANDLE; }
 	};
 
 	template<class T>
