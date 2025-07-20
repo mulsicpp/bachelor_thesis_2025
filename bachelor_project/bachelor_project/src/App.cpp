@@ -18,7 +18,18 @@ App::App() {
 
     vk::Context::create(context_info);
 
-    rasterizer = RasterizerBuilder().build();
+    vk::SwapchainBuilder swapchain_builder = vk::SwapchainBuilder().image_usage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+    frame_manager = FrameManagerBuilder()
+        .max_frames_in_flight(2)
+        .swapchain_builder(swapchain_builder)
+        .build();
+
+    rasterizer = RasterizerBuilder()
+        .color_attachment(frame_manager.get_swapchain_attachment())
+        .build();
+
+    frame_manager.bind_rasterizer(&rasterizer);
 }
 
 App::~App() {
@@ -29,7 +40,7 @@ void App::run() {
     dbg_log("run");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        rasterizer.draw_triangle();
+        frame_manager.draw_next(&rasterizer, &Rasterizer::draw_triangle_recorder);
     }
 
     vk::Context::get()->wait_device_idle();

@@ -53,7 +53,7 @@ namespace vk {
 		FramebufferBuilder() = default;
 
 		Ref render_pass(RenderPass&& render_pass) { _render_pass = std::move(render_pass).to_shared(); return *this; }
-		Ref render_pass(ptr::Shared<RenderPass>& render_pass) { _render_pass = render_pass; return *this; }
+		Ref render_pass(const ptr::Shared<RenderPass>& render_pass) { _render_pass = render_pass; return *this; }
 
 		Ref images(const std::vector<ptr::Shared<const Image>>& images) { _images = images; return *this; }
 		Ref add_image(Image&& image) { _images.push_back(std::move(image).to_shared()); return *this; }

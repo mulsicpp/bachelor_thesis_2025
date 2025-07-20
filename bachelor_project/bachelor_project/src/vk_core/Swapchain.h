@@ -55,6 +55,8 @@ namespace vk {
 
 		inline VkSurfaceFormatKHR surface_format() const { return _surface_format; }
 		inline VkPresentModeKHR present_mode() const { return _present_mode; }
+		inline VkImageUsageFlags image_usage() const { return _image_usage; }
+
 		inline VkExtent2D extent() const { return _extent; }
 	};
 
@@ -67,7 +69,7 @@ namespace vk {
 		VkColorSpaceKHR _desired_color_space{ VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 		VkPresentModeKHR _desired_present_mode{ VK_PRESENT_MODE_MAILBOX_KHR };
 		VkImageUsageFlags _image_usage{ VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT };
-		VkExtent2D _extent{ 0, 0 };
+		// VkExtent2D _extent{ 0, 0 };
 	
 	public:
 		SwapchainBuilder() = default;
@@ -76,7 +78,7 @@ namespace vk {
 		inline Ref desired_color_space(VkColorSpaceKHR desired_color_space) { _desired_color_space = desired_color_space; return *this; }
 		inline Ref desired_present_mode(VkPresentModeKHR desired_present_mode) { _desired_present_mode = desired_present_mode; return *this; }
 		inline Ref image_usage(VkImageUsageFlags image_usage) { _image_usage = image_usage; return *this; }
-		inline Ref extent(VkExtent2D extent) { _extent = extent; return *this; }
+		// inline Ref extent(VkExtent2D extent) { _extent = extent; return *this; }
 
 		Swapchain build();
 	};

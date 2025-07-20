@@ -113,10 +113,15 @@ namespace vk {
 			extent = capabilities.currentExtent;
 		}
 		else {
-			_extent.width = std::clamp(_extent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-			_extent.height = std::clamp(_extent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+			int width, height;
+			glfwGetFramebufferSize(Context::get()->get_window(), &width, &height);
 
-			extent = _extent;
+			extent = {
+				static_cast<uint32_t>(width),
+				static_cast<uint32_t>(height)
+			};
+			extent.width = std::clamp(extent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+			extent.height = std::clamp(extent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 		}
 
 		uint32_t image_count = capabilities.minImageCount + 1;

@@ -64,6 +64,7 @@ namespace vk {
 		inline Ref set_load_op(VkAttachmentLoadOp load_op) { this->load_op = load_op; return *this; }
 		inline Ref set_store_op(VkAttachmentStoreOp store_op) { this->store_op = store_op; return *this; }
 		inline Ref set_final_layout(VkImageLayout final_layout) { this->final_layout = final_layout; return *this; }
+		inline Ref set_type(AttachmentType type) { this->type = type; return *this; }
 
 		inline Ref color() { type = AttachmentType::Color; return *this; }
 		inline Ref depth() { type = AttachmentType::Depth; return *this; }
