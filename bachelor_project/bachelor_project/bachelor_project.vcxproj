@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include;..\external\tinygltf\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -109,7 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include;..\external\tinygltf\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include;..\external\tinygltf\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -145,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include;..\external\tinygltf\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;..\external\vulkan\include;..\external\glm\include;..\external\glfw\include;..\external\stb_image\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -160,12 +160,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\external\tinygltf_impl.cpp" />
     <ClCompile Include="src\external\VkBootstrap.cpp" />
     <ClCompile Include="src\external\vk_mem_alloc.cpp" />
     <ClCompile Include="src\rendering\FrameManager.cpp" />
     <ClCompile Include="src\rendering\Rasterizer.cpp" />
     <ClCompile Include="src\scene\Mesh.cpp" />
+    <ClCompile Include="src\scene\Scene.cpp" />
     <ClCompile Include="src\utils\LibManager.cpp" />
     <ClCompile Include="src\utils\LibManager.h" />
     <ClCompile Include="src\utils\load_file.cpp" />
@@ -193,6 +193,8 @@
     <ClInclude Include="src\external\vk_mem_alloc.h" />
     <ClInclude Include="src\rendering\FrameManager.h" />
     <ClInclude Include="src\scene\Mesh.h" />
+    <ClInclude Include="src\scene\Node.h" />
+    <ClInclude Include="src\scene\Scene.h" />
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\default_defines.h" />
     <ClInclude Include="src\utils\defines.h" />

@@ -19,14 +19,12 @@ vk::VertexInput Mesh::get_vertex_input() {
 
 		.add_attribute_info(vk::VertexAttributeInfo()
 			.set_binding(0)
-			//.set_format(vk::format_of_type<decltype(Vertex::position)>())
-			.set_format(VK_FORMAT_R32G32_SFLOAT)
+			.set_format(vk::format_of_type<decltype(Vertex::position)>())
 			.set_offset(offsetof(Vertex, position)))
 
 		.add_attribute_info(vk::VertexAttributeInfo()
 			.set_binding(0)
-			//.set_format(vk::format_of_type<decltype(Vertex::color)>())
-			.set_format(VK_FORMAT_R32G32B32_SFLOAT)
+			.set_format(vk::format_of_type<decltype(Vertex::color)>())
 			.set_offset(offsetof(Vertex, color)));
 }
 
