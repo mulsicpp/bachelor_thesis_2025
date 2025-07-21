@@ -51,6 +51,7 @@ namespace vk {
 			shader_infos.push_back(shader->get_create_info());
 		}
 
+
         VkPipelineVertexInputStateCreateInfo vertex_input_info = _vertex_input.as_create_info();
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly{};

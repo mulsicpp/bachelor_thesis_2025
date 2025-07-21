@@ -26,7 +26,7 @@ namespace vk {
 		using Ref = VertexAttributeInfo&;
 
 		uint32_t location{ UINT32_MAX };
-		uint32_t binding{ UINT32_MAX };
+		uint32_t binding{ 0 };
 		VkFormat format{ VK_FORMAT_UNDEFINED };
 		uint32_t offset{ 0 };
 
@@ -44,13 +44,18 @@ namespace vk {
 		std::vector<VertexBindingInfo> binding_infos{};
 		std::vector<VertexAttributeInfo> attribute_infos{};
 
+		std::vector<VkVertexInputBindingDescription> binding_descriptions{};
+		std::vector<VkVertexInputAttributeDescription> attribute_descriptions{};
+
+		VkPipelineVertexInputStateCreateInfo create_info;
+
 		VertexInput() = default;
 
-		inline Ref set_binding_infos(const std::vector<VertexBindingInfo>& binding_infos) { this->binding_infos = binding_infos; return *this; }
-		inline Ref add_binding_info(const VertexBindingInfo& binding_info) { this->binding_infos.push_back(binding_info); return *this; }
+		Ref set_binding_infos(std::vector<VertexBindingInfo> binding_infos);
+		Ref add_binding_info(VertexBindingInfo binding_info);
 
-		inline Ref set_attribute_infos(const std::vector<VertexAttributeInfo>& attribute_infos) { this->attribute_infos = attribute_infos; return *this; }
-		inline Ref add_attribute_info(const VertexAttributeInfo& attribute_info) { this->attribute_infos.push_back(attribute_info); return *this; }
+		Ref set_attribute_infos(std::vector<VertexAttributeInfo> attribute_infos);
+		Ref add_attribute_info(VertexAttributeInfo attribute_info);
 
 		VkPipelineVertexInputStateCreateInfo as_create_info() const;
 	};

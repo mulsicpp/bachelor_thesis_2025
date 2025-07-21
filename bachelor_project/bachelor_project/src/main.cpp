@@ -11,16 +11,21 @@
 #include "vk_resources/Buffer.h"
 #include "vk_pipeline/Shader.h"
 
+#include <tinygltf/tiny_gltf.h>
+
 
 void test_move_semantics();
 void test_command_buffer();
 void test_buffer_copy();
 void test_buffer_with_staging();
 void test_shaders();
+void test_gltf_loader();
 
 int main(void) {
 	try {
 		utils::LibManager lib_manager{};
+
+		test_gltf_loader();
 
 		App app{};
 		app.run();
@@ -125,5 +130,38 @@ void test_shaders() {
 	}
 	catch (const std::runtime_error& e) {
 		dbg_log("expected error: %s", e.what());
+	}
+}
+void test_gltf_loader() {
+	tinygltf::Model model;
+	std::string error, warning;
+
+	std::string path = "assets/scenes/Avocado/glTF/Avocado.gltf";
+
+	bool success = tinygltf::TinyGLTF().LoadASCIIFromFile(&model, &error, &warning, path);
+
+	if (!warning.empty()) {
+		dbg_log("GLTF Warning: %s", warning.c_str());
+	}
+
+	if (!error.empty()) {
+		dbg_log("GLTF Error: %s", error.c_str());
+	}
+
+	if (!success) {
+		throw std::runtime_error("Failed to parse glTF");
+	}
+
+	dbg_log("Successfully loaded GLTF file '%s'", path.c_str());
+
+	dbg_log("GLTF buffer %s %u", model.buffers[0].name.c_str(), model.buffers[0].data.size());
+
+	for (const auto& view : model.bufferViews) {
+		dbg_log("GLTF buffer view %s %u", view.name.c_str(), view.byteLength);
+	}
+
+
+	for (const auto& primivite : model.meshes[0].primitives) {
+		dbg_log("GLTF accessor %s", accessor.);
 	}
 }

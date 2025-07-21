@@ -93,6 +93,9 @@
     <ClCompile Include="src\vk_core\format.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\utils\NoCopy.h">
@@ -190,12 +193,19 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\compile_shaders.bat">
+    <None Include="assets\shaders\mesh2d\compile_shaders.bat">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="assets\shaders\frag.spv" />
-    <None Include="assets\shaders\fragment_shader.glsl" />
-    <None Include="assets\shaders\vert.spv" />
-    <None Include="assets\shaders\vertex_shader.glsl" />
+    <None Include="assets\shaders\mesh2d\frag.spv" />
+    <None Include="assets\shaders\mesh2d\fragment_shader.glsl" />
+    <None Include="assets\shaders\mesh2d\vert.spv" />
+    <None Include="assets\shaders\mesh2d\vertex_shader.glsl" />
+    <None Include="assets\shaders\triangle\compile_shaders.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="assets\shaders\triangle\frag.spv" />
+    <None Include="assets\shaders\triangle\fragment_shader.glsl" />
+    <None Include="assets\shaders\triangle\vert.spv" />
+    <None Include="assets\shaders\triangle\vertex_shader.glsl" />
   </ItemGroup>
 </Project>

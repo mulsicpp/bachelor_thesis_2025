@@ -12,6 +12,8 @@
 
 #include "vk_core/Swapchain.h"
 
+#include "scene/Mesh.h"
+
 class RasterizerBuilder;
 
 class Rasterizer : public utils::Move {
@@ -27,6 +29,8 @@ private:
 	vk::CommandBuffer render_cmd_buffer{};
 
 	vk::SubmitInfo submit_info{};
+
+	Mesh rect;
 
 public:
 	Rasterizer() = default;

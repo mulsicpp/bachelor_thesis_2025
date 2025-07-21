@@ -42,7 +42,7 @@ namespace vk {
 	private:
 		ptr::Shared<const RenderPass> _render_pass;
 		std::vector<ptr::Shared<const Shader>> _shaders;
-		VertexInput _vertex_input;
+		VertexInput _vertex_input{};
 
 	public:
 		PipelineBuilder();

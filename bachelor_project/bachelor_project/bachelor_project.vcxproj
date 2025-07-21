@@ -165,6 +165,7 @@
     <ClCompile Include="src\external\vk_mem_alloc.cpp" />
     <ClCompile Include="src\rendering\FrameManager.cpp" />
     <ClCompile Include="src\rendering\Rasterizer.cpp" />
+    <ClCompile Include="src\scene\Mesh.cpp" />
     <ClCompile Include="src\utils\LibManager.cpp" />
     <ClCompile Include="src\utils\LibManager.h" />
     <ClCompile Include="src\utils\load_file.cpp" />
@@ -220,11 +221,16 @@
     <ClInclude Include="src\vk_sync\Semaphore.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\compile_shaders.bat" />
-    <None Include="assets\shaders\frag.spv" />
-    <None Include="assets\shaders\fragment_shader.glsl" />
-    <None Include="assets\shaders\vert.spv" />
-    <None Include="assets\shaders\vertex_shader.glsl" />
+    <None Include="assets\shaders\mesh2d\compile_shaders.bat" />
+    <None Include="assets\shaders\mesh2d\frag.spv" />
+    <None Include="assets\shaders\mesh2d\fragment_shader.glsl" />
+    <None Include="assets\shaders\mesh2d\vert.spv" />
+    <None Include="assets\shaders\mesh2d\vertex_shader.glsl" />
+    <None Include="assets\shaders\triangle\compile_shaders.bat" />
+    <None Include="assets\shaders\triangle\frag.spv" />
+    <None Include="assets\shaders\triangle\fragment_shader.glsl" />
+    <None Include="assets\shaders\triangle\vert.spv" />
+    <None Include="assets\shaders\triangle\vertex_shader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,5 @@
 #include "App.h"
 
-#include <tinygltf/tiny_gltf.h>
-
 #define WINDOW_WIDTH  1280
 #define WINDOW_HEIGHT  720
 
@@ -32,33 +30,6 @@ App::App() {
         .build();
 
     frame_manager.bind_rasterizer(&rasterizer);
-
-    tinygltf::Model model;
-    std::string error, warning;
-
-    std::string path = "assets/scenes/Avocado/glTF/Avocado.gltf";
-
-    bool success = tinygltf::TinyGLTF().LoadASCIIFromFile(&model, &error, &warning, path);
-
-    if (!warning.empty()) {
-        dbg_log("GLTF Warning: %s", warning.c_str());
-    }
-
-    if (!error.empty()) {
-        dbg_log("GLTF Error: %s", error.c_str());
-    }
-
-    if (!success) {
-        throw std::runtime_error("Failed to parse glTF");
-    }
-
-    dbg_log("Successfully loaded GLTF file '%s'", path.c_str());
-
-    dbg_log("GLTF buffer %s %lu", model.buffers[0].name.c_str(), model.buffers[0].data.size());
-
-    for (const auto& view : model.bufferViews) {
-        dbg_log("GLTF buffer view %s %lu", view.name.c_str(), view.byteLength);
-    }
 }
 
 App::~App() {
