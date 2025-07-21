@@ -5,6 +5,6 @@
 #endif
 
 // #define DEBUG_LOG false
-#define DEBUG_MOVE true
+#define DEBUG_MOVE false
 
 #include "default_defines.h"
