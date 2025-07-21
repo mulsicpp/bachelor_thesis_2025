@@ -11,6 +11,8 @@
 #include "vk_resources/Buffer.h"
 #include "vk_pipeline/Shader.h"
 
+#include "scene/Scene.h"
+
 
 void test_move_semantics();
 void test_command_buffer();
@@ -21,6 +23,8 @@ void test_shaders();
 int main(void) {
 	try {
 		utils::LibManager lib_manager{};
+
+		auto scene = Scene::load("assets/scenes/Avocado/glTF/Avocado.gltf");
 
 		App app{};
 		app.run();
