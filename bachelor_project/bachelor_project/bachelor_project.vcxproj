@@ -172,12 +172,14 @@
     <ClCompile Include="src\vk_core\CommandManager.cpp" />
     <ClCompile Include="src\vk_core\Context.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vk_core\format.cpp" />
     <ClCompile Include="src\vk_core\Handle.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
     <ClCompile Include="src\vk_pipeline\Framebuffer.cpp" />
     <ClCompile Include="src\vk_pipeline\Pipeline.cpp" />
     <ClCompile Include="src\vk_pipeline\RenderPass.cpp" />
     <ClCompile Include="src\vk_pipeline\Shader.cpp" />
+    <ClCompile Include="src\vk_pipeline\VertexInput.cpp" />
     <ClCompile Include="src\vk_resources\Buffer.cpp" />
     <ClCompile Include="src\vk_resources\Image.cpp" />
     <ClCompile Include="src\vk_resources\ImageView.cpp" />
@@ -189,6 +191,7 @@
     <ClInclude Include="src\external\VkBootstrap.h" />
     <ClInclude Include="src\external\vk_mem_alloc.h" />
     <ClInclude Include="src\rendering\FrameManager.h" />
+    <ClInclude Include="src\scene\Mesh.h" />
     <ClInclude Include="src\utils\dbg_log.h" />
     <ClInclude Include="src\utils\default_defines.h" />
     <ClInclude Include="src\utils\defines.h" />
@@ -199,6 +202,7 @@
     <ClInclude Include="src\vk_core\CommandManager.h" />
     <ClInclude Include="src\vk_core\Context.h" />
     <ClInclude Include="src\utils\NoCopy.h" />
+    <ClInclude Include="src\vk_core\format.h" />
     <ClInclude Include="src\vk_core\Handle.h" />
     <ClInclude Include="src\vk_core\Swapchain.h" />
     <ClInclude Include="src\vk_ext\debug_utils.h" />
@@ -208,6 +212,7 @@
     <ClInclude Include="src\vk_pipeline\Pipeline.h" />
     <ClInclude Include="src\vk_pipeline\RenderPass.h" />
     <ClInclude Include="src\vk_pipeline\Shader.h" />
+    <ClInclude Include="src\vk_pipeline\VertexInput.h" />
     <ClInclude Include="src\vk_resources\Buffer.h" />
     <ClInclude Include="src\vk_resources\Image.h" />
     <ClInclude Include="src\vk_resources\ImageView.h" />

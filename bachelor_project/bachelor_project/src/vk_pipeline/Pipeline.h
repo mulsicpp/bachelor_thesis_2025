@@ -10,6 +10,7 @@
 
 #include "RenderPass.h"
 #include "Shader.h"
+#include "VertexInput.h"
 
 #include <vector>
 
@@ -41,6 +42,7 @@ namespace vk {
 	private:
 		ptr::Shared<const RenderPass> _render_pass;
 		std::vector<ptr::Shared<const Shader>> _shaders;
+		VertexInput _vertex_input;
 
 	public:
 		PipelineBuilder();
@@ -51,6 +53,8 @@ namespace vk {
 		inline Ref shaders(const std::vector<ptr::Shared<const Shader>>& shaders) { _shaders = shaders; return *this; }
 		inline Ref add_shader(Shader&& shader) { _shaders.push_back(std::move(shader).to_shared()); return *this; }
 		inline Ref add_shader(const ptr::Shared<const Shader>& shader) { _shaders.push_back(shader); return *this; }
+
+		inline Ref vertex_input(const VertexInput& vertex_input) { _vertex_input = vertex_input; return *this; }
 
 		Pipeline build();
 	};

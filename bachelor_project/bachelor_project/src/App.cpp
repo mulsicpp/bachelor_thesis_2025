@@ -53,6 +53,12 @@ App::App() {
     }
 
     dbg_log("Successfully loaded GLTF file '%s'", path.c_str());
+
+    dbg_log("GLTF buffer %s %lu", model.buffers[0].name.c_str(), model.buffers[0].data.size());
+
+    for (const auto& view : model.bufferViews) {
+        dbg_log("GLTF buffer view %s %lu", view.name.c_str(), view.byteLength);
+    }
 }
 
 App::~App() {
