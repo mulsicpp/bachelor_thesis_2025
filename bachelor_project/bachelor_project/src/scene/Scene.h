@@ -7,9 +7,10 @@
 
 class Scene {
 private:
-	std::vector<Node> nodes{};
-	uint32_t root_index{ UINT32_MAX };
+	std::vector<ptr::Shared<Node>> nodes{};
 
 public:
+	Scene() = default;
+
 	static Scene load(const std::string& file_path);
 };
