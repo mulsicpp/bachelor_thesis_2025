@@ -112,18 +112,6 @@ namespace vk {
         dynamic_state.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
         dynamic_state.pDynamicStates = dynamicStates.data();
 
-        VkPipelineLayoutCreateInfo pipeline_layout_info{};
-        pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipeline_layout_info.setLayoutCount = 0;
-        pipeline_layout_info.pSetLayouts = nullptr;
-        pipeline_layout_info.pushConstantRangeCount = 0;
-        pipeline_layout_info.pPushConstantRanges = nullptr;
-
-        const auto device = Context::get()->get_device();
-
-        if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &*pipeline.layout) != VK_SUCCESS) {
-            throw std::runtime_error("Pipeline layout creation failed!");
-        }
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -137,10 +125,12 @@ namespace vk {
         pipelineInfo.pDepthStencilState = nullptr;
         pipelineInfo.pColorBlendState = &color_blending;
         pipelineInfo.pDynamicState = &dynamic_state;
-        pipelineInfo.layout = *pipeline.layout;
+        pipelineInfo.layout = _layout->handle();
         pipelineInfo.renderPass = _render_pass->handle();
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+        const auto device = Context::get()->get_device();
 
         if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &*pipeline.pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Pipeline creation failed!");
@@ -148,6 +138,7 @@ namespace vk {
 
         pipeline.render_pass = _render_pass;
         pipeline.shaders = _shaders;
+        pipeline.layout = _layout;
 
 
 		return pipeline;

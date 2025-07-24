@@ -22,6 +22,7 @@ private:
 	vk::Image depth_buffer{};
 	ptr::Shared<vk::RenderPass> render_pass{};
 
+	ptr::Shared<vk::PipelineLayout> pipeline_layout{};
 	vk::Pipeline pipeline{};
 
 	vk::PassBeginInfo pass_begin_info{};

@@ -179,6 +179,7 @@
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
     <ClCompile Include="src\vk_pipeline\Framebuffer.cpp" />
     <ClCompile Include="src\vk_pipeline\Pipeline.cpp" />
+    <ClCompile Include="src\vk_pipeline\PipelineLayout.cpp" />
     <ClCompile Include="src\vk_pipeline\RenderPass.cpp" />
     <ClCompile Include="src\vk_pipeline\Shader.cpp" />
     <ClCompile Include="src\vk_pipeline\VertexInput.cpp" />
@@ -216,6 +217,7 @@
     <ClInclude Include="src\rendering\Rasterizer.h" />
     <ClInclude Include="src\vk_pipeline\Framebuffer.h" />
     <ClInclude Include="src\vk_pipeline\Pipeline.h" />
+    <ClInclude Include="src\vk_pipeline\PipelineLayout.h" />
     <ClInclude Include="src\vk_pipeline\RenderPass.h" />
     <ClInclude Include="src\vk_pipeline\Shader.h" />
     <ClInclude Include="src\vk_pipeline\VertexInput.h" />

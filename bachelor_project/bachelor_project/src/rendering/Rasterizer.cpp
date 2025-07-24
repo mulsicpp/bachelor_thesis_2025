@@ -52,10 +52,25 @@ Rasterizer RasterizerBuilder::build() {
 		.build();
 	dbg_log("loaded fragment shader");
 
+	rasterizer.pipeline_layout = vk::PipelineLayoutBuilder()
+		.add_layout(vk::DescriptorSetLayoutBuilder()
+			.add_binding(vk::DescriptorSetLayoutBinding()
+				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				.set_stage_flags(VK_SHADER_STAGE_VERTEX_BIT))
+			.build())
+		.add_layout(vk::DescriptorSetLayoutBuilder()
+			.add_binding(vk::DescriptorSetLayoutBinding()
+				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				.set_stage_flags(VK_SHADER_STAGE_VERTEX_BIT))
+			.build())
+		.build()
+		.to_shared();
+
 	rasterizer.pipeline = vk::PipelineBuilder()
 		.render_pass(rasterizer.render_pass)
 		.add_shader(std::move(vertex_shader))
 		.add_shader(std::move(fragment_shader))
+		.layout(rasterizer.pipeline_layout)
 		.vertex_input(Mesh::get_vertex_input())
 		.build();
 

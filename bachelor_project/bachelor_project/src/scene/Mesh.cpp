@@ -3,10 +3,10 @@
 #include "vk_core/format.h"
 
 static const std::vector<Vertex> rect_vertices = {
-	{{-0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}},
+	{{-0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
 	{{0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	{{0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}},
-	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+	{{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
+	{{-0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}}
 };
 
 const std::vector<uint16_t> rect_indices = {
