@@ -27,9 +27,10 @@ App::App() {
 
     rasterizer = RasterizerBuilder()
         .color_attachment(frame_manager.get_swapchain_attachment())
-        .build();
+        .build()
+        .to_shared();
 
-    frame_manager.bind_rasterizer(&rasterizer);
+    frame_manager.bind_rasterizer(rasterizer);
 }
 
 App::~App() {
@@ -40,7 +41,7 @@ void App::run() {
     dbg_log("run");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        frame_manager.draw_next(&rasterizer, &Rasterizer::draw_triangle_recorder);
+        frame_manager.draw_frame();
     }
 
     vk::Context::get()->wait_device_idle();

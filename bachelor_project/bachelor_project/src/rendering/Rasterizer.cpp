@@ -5,8 +5,20 @@
 #include "vk_core/Context.h"
 
 
-void Rasterizer::draw() {
 
+void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
+	framebuffer->cmd_begin_pass(cmd_buf, pass_begin_info);
+
+	pipeline.cmd_bind(cmd_buf);
+
+	VkBuffer vertex_buffer = rect.vertex_buffer.handle();
+	VkDeviceSize offset = 0;
+
+	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
+	vkCmdBindIndexBuffer(cmd_buf.handle(), rect.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
+	vkCmdDrawIndexed(cmd_buf.handle(), 6, 1, 0, 0, 0);
+
+	framebuffer->cmd_end_pass(cmd_buf);
 }
 
 vk::CommandRecorder Rasterizer::draw_triangle_recorder(vk::Framebuffer* framebuffer) {
@@ -25,6 +37,29 @@ vk::CommandRecorder Rasterizer::draw_triangle_recorder(vk::Framebuffer* framebuf
 		framebuffer->cmd_end_pass(cmd_buffer);
 		};
 }
+
+
+
+Frame Rasterizer::create_frame() const {
+	Frame frame;
+
+	frame.descriptor_pool = vk::DescriptorPoolBuilder().from_pipeline_layout(pipeline_layout.get()).build();
+
+	return frame;
+}
+
+
+std::vector<Frame> Rasterizer::create_frames(uint32_t count) const {
+	std::vector<Frame> frames{ count };
+
+	for (uint32_t i = 0; i < count; i++) {
+		frames[i] = create_frame();
+	}
+
+	return frames;
+}
+
+
 
 
 RasterizerBuilder::RasterizerBuilder()

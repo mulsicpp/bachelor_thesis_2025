@@ -8,10 +8,18 @@ vk::Attachment FrameManager::get_swapchain_attachment() const {
 	return vk::Attachment().from_swapchain(&swapchain);
 }
 
-void FrameManager::bind_rasterizer(const Rasterizer* rasterizer) {
+
+void FrameManager::bind_rasterizer(Rasterizer&& rasterizer) {
+	bind_rasterizer(std::move(rasterizer).to_shared());
+}
+
+void FrameManager::bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer) {
+	renderer = rasterizer;
+
+	frames = rasterizer->create_frames(max_frames_in_flight);
+
 	submit_infos.resize(max_frames_in_flight);
 	command_buffers.resize(max_frames_in_flight);
-	descriptor_pools.resize(max_frames_in_flight);
 
 	for (uint32_t i = 0; i < max_frames_in_flight; i++) {
 		vk::SubmitInfo info{};
@@ -22,7 +30,6 @@ void FrameManager::bind_rasterizer(const Rasterizer* rasterizer) {
 		submit_infos[i] = std::move(info);
 
 		command_buffers[i] = vk::CommandBufferBuilder(rasterizer->get_queue_type()).single_use(false).build();
-		descriptor_pools[i] = vk::DescriptorPoolBuilder().from_pipeline_layout(rasterizer->get_pipeline_layout().get()).build();
 	}
 
 	const auto& swapchain_images = swapchain.images();
@@ -35,7 +42,7 @@ void FrameManager::bind_rasterizer(const Rasterizer* rasterizer) {
 	}
 }
 
-void FrameManager::draw_next(Rasterizer* rasterizer, DrawRecorder draw_recorder) {
+void FrameManager::draw_frame() {
 	if (command_buffers.size() == 0) {
 		throw std::runtime_error("Failed to draw frame! No rasterizer was selected");
 	}
@@ -49,7 +56,15 @@ void FrameManager::draw_next(Rasterizer* rasterizer, DrawRecorder draw_recorder)
 	uint32_t image_index;
 	vkAcquireNextImageKHR(device, swapchain.handle(), UINT64_MAX, submit_infos[in_flight_index].wait_semaphores[0].handle(), VK_NULL_HANDLE, &image_index);
 
-	command_buffers[in_flight_index].record((rasterizer->*draw_recorder)(&framebuffers[image_index])).submit(submit_infos[in_flight_index]);
+
+	auto draw_recorder = [this, image_index](vk::ReadyCommandBuffer cmd_buf) {
+		renderer->cmd_draw_frame(cmd_buf, &frames[in_flight_index], &framebuffers[image_index]);
+		};
+
+	command_buffers[in_flight_index]
+		.record(draw_recorder)
+		.submit(submit_infos[in_flight_index]);
+
 
 	VkPresentInfoKHR present_info{};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

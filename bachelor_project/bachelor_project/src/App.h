@@ -11,7 +11,7 @@ private:
 
 	FrameManager frame_manager;
 
-	Rasterizer rasterizer;
+	ptr::Shared<Rasterizer> rasterizer;
 
 public:
 	App();

@@ -196,6 +196,7 @@
     <ClInclude Include="src\external\json.h" />
     <ClInclude Include="src\external\VkBootstrap.h" />
     <ClInclude Include="src\external\vk_mem_alloc.h" />
+    <ClInclude Include="src\rendering\Frame.h" />
     <ClInclude Include="src\rendering\FrameManager.h" />
     <ClInclude Include="src\scene\Mesh.h" />
     <ClInclude Include="src\scene\Node.h" />

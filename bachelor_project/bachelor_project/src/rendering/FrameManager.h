@@ -11,6 +11,7 @@
 
 #include <vector>
 
+#include "Frame.h"
 #include "Rasterizer.h"
 
 typedef vk::CommandRecorder(Rasterizer::*DrawRecorder)(vk::Framebuffer* framebuffer);
@@ -27,7 +28,9 @@ private:
 
 	std::vector<vk::SubmitInfo> submit_infos{};
 	std::vector<vk::CommandBuffer> command_buffers{};
-	std::vector<vk::DescriptorPool> descriptor_pools{};
+
+	ptr::Shared<Rasterizer> renderer{};
+	std::vector<Frame> frames{};
 
 	std::vector<vk::Framebuffer> framebuffers{};
 
@@ -36,9 +39,10 @@ public:
 
 	vk::Attachment get_swapchain_attachment() const;
 
-	void bind_rasterizer(const Rasterizer* rasterizer);
+	void bind_rasterizer(Rasterizer&& rasterizer);
+	void bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer);
 
-	void draw_next(Rasterizer* rasterizer, DrawRecorder draw_recorder);
+	void draw_frame();
 };
 
 class FrameManagerBuilder {

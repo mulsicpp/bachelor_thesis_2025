@@ -14,9 +14,11 @@
 
 #include "scene/Mesh.h"
 
+#include "Frame.h"
+
 class RasterizerBuilder;
 
-class Rasterizer : public utils::Move {
+class Rasterizer : public utils::Move, public ptr::ToShared<Rasterizer> {
 	friend class RasterizerBuilder;
 private:
 	vk::Image depth_buffer{};
@@ -27,21 +29,20 @@ private:
 
 	vk::PassBeginInfo pass_begin_info{};
 
-	vk::CommandBuffer render_cmd_buffer{};
-
-	vk::SubmitInfo submit_info{};
-
 	Mesh rect;
 
 public:
 	Rasterizer() = default;
 
-	void draw();
+	void cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer);
 	vk::CommandRecorder draw_triangle_recorder(vk::Framebuffer* framebuffer);
 
 	inline const ptr::Shared<vk::RenderPass>& get_render_pass() const { return render_pass; }
 	inline const vk::QueueType get_queue_type() const { return vk::QueueType::Graphics; }
 	inline const ptr::Shared<vk::PipelineLayout>& get_pipeline_layout() const { return pipeline_layout; }
+
+	Frame create_frame() const;
+	std::vector<Frame> create_frames(uint32_t count) const;
 };
 
 class RasterizerBuilder {
