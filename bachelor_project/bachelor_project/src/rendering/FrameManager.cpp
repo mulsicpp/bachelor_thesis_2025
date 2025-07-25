@@ -11,8 +11,9 @@ vk::Attachment FrameManager::get_swapchain_attachment() const {
 void FrameManager::bind_rasterizer(const Rasterizer* rasterizer) {
 	submit_infos.resize(max_frames_in_flight);
 	command_buffers.resize(max_frames_in_flight);
+	descriptor_pools.resize(max_frames_in_flight);
 
-	for (int i = 0; i < max_frames_in_flight; i++) {
+	for (uint32_t i = 0; i < max_frames_in_flight; i++) {
 		vk::SubmitInfo info{};
 
 		info.add_wait_semaphore(vk::Semaphore::create(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -21,6 +22,7 @@ void FrameManager::bind_rasterizer(const Rasterizer* rasterizer) {
 		submit_infos[i] = std::move(info);
 
 		command_buffers[i] = vk::CommandBufferBuilder(rasterizer->get_queue_type()).single_use(false).build();
+		descriptor_pools[i] = vk::DescriptorPoolBuilder().from_pipeline_layout(rasterizer->get_pipeline_layout().get()).build();
 	}
 
 	const auto& swapchain_images = swapchain.images();

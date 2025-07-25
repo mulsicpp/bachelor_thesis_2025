@@ -34,7 +34,7 @@ Mesh Mesh::create_rect() {
 	mesh.vertex_buffer = vk::BufferBuilder()
 		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-		.size(rect_vertices.size() * sizeof(Vertex))
+		.size(static_cast<uint32_t>(rect_vertices.size() * sizeof(Vertex)))
 		.data((void*)rect_vertices.data())
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 		.build();
@@ -42,7 +42,7 @@ Mesh Mesh::create_rect() {
 	mesh.index_buffer = vk::BufferBuilder()
 		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-		.size(rect_indices.size() * sizeof(uint16_t))
+		.size(static_cast<uint32_t>(rect_indices.size() * sizeof(uint16_t)))
 		.data((void*)rect_indices.data())
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 		.build();

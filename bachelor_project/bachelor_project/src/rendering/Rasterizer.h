@@ -39,8 +39,9 @@ public:
 	void draw();
 	vk::CommandRecorder draw_triangle_recorder(vk::Framebuffer* framebuffer);
 
-	const ptr::Shared<vk::RenderPass>& get_render_pass() const { return render_pass; }
-	const vk::QueueType get_queue_type() const { return vk::QueueType::Graphics; }
+	inline const ptr::Shared<vk::RenderPass>& get_render_pass() const { return render_pass; }
+	inline const vk::QueueType get_queue_type() const { return vk::QueueType::Graphics; }
+	inline const ptr::Shared<vk::PipelineLayout>& get_pipeline_layout() const { return pipeline_layout; }
 };
 
 class RasterizerBuilder {

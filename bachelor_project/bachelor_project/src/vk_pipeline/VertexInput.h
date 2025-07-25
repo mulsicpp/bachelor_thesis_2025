@@ -47,8 +47,6 @@ namespace vk {
 		std::vector<VkVertexInputBindingDescription> binding_descriptions{};
 		std::vector<VkVertexInputAttributeDescription> attribute_descriptions{};
 
-		VkPipelineVertexInputStateCreateInfo create_info;
-
 		VertexInput() = default;
 
 		Ref set_binding_infos(std::vector<VertexBindingInfo> binding_infos);

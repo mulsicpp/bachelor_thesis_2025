@@ -7,6 +7,7 @@
 #include "vk_core/CommandBuffer.h"
 
 #include "vk_pipeline/Framebuffer.h"
+#include "vk_pipeline/DescriptorPool.h"
 
 #include <vector>
 
@@ -26,6 +27,7 @@ private:
 
 	std::vector<vk::SubmitInfo> submit_infos{};
 	std::vector<vk::CommandBuffer> command_buffers{};
+	std::vector<vk::DescriptorPool> descriptor_pools{};
 
 	std::vector<vk::Framebuffer> framebuffers{};
 

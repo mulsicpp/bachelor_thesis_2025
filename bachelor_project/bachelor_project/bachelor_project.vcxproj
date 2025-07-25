@@ -177,6 +177,7 @@
     <ClCompile Include="src\vk_core\format.cpp" />
     <ClCompile Include="src\vk_core\Handle.cpp" />
     <ClCompile Include="src\vk_core\Swapchain.cpp" />
+    <ClCompile Include="src\vk_pipeline\DescriptorPool.cpp" />
     <ClCompile Include="src\vk_pipeline\Framebuffer.cpp" />
     <ClCompile Include="src\vk_pipeline\Pipeline.cpp" />
     <ClCompile Include="src\vk_pipeline\PipelineLayout.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="src\vk_ext\debug_utils.h" />
     <ClInclude Include="src\vk_ext\ext_macros.h" />
     <ClInclude Include="src\rendering\Rasterizer.h" />
+    <ClInclude Include="src\vk_pipeline\DescriptorPool.h" />
     <ClInclude Include="src\vk_pipeline\Framebuffer.h" />
     <ClInclude Include="src\vk_pipeline\Pipeline.h" />
     <ClInclude Include="src\vk_pipeline\PipelineLayout.h" />

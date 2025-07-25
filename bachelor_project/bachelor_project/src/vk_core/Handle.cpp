@@ -17,8 +17,11 @@ IMPL_DESTROY(Semaphore)
 IMPL_DESTROY(RenderPass)
 IMPL_DESTROY(Framebuffer)
 IMPL_DESTROY(ShaderModule)
+
+IMPL_DESTROY(DescriptorPool)
 IMPL_DESTROY(DescriptorSetLayout)
 IMPL_DESTROY(PipelineLayout)
+
 IMPL_DESTROY(Pipeline)
 
 IMPL_DESTROY(Buffer)
