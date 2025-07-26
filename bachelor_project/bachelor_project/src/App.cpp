@@ -5,6 +5,8 @@
 
 #define APP_NAME "Raytracing App"
 
+#include <algorithm>
+
 CameraUBO AppCamera::as_camera_ubo() const {
     glm::mat4 view = glm::mat4{ 1.0f };
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -distance));
@@ -12,7 +14,7 @@ CameraUBO AppCamera::as_camera_ubo() const {
     view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
     view = glm::translate(view, -center);
 
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 20.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near, far);
 
     return CameraUBO{ view, proj };
 }
@@ -23,7 +25,12 @@ App::App() {
 
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
     glfwSetWindowUserPointer(window, this);
+
     glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetKeyCallback(window, key_callback);
     
     auto context_info = vk::ContextInfo()
         .window(window)
@@ -45,6 +52,10 @@ App::App() {
         .to_shared();
 
     frame_manager.bind_rasterizer(rasterizer);
+
+
+    const auto& [width, height] = frame_manager.get_framebuffer_extent();
+    camera.aspect = ((float)width) / ((float)height);
 }
 
 App::~App() {
@@ -57,10 +68,11 @@ void App::run() {
         glfwPollEvents();
         Frame& frame = *frame_manager.get_current_frame();
 
-        camera.theta = 3.0f * glm::pi<float>() / 4.0f;
-        camera.phi = -glm::pi<float>() / 4.0f;
+        //camera.theta = 3.0f * glm::pi<float>() / 4.0f;
+        //camera.phi = -glm::pi<float>() / 4.0f;
 
-        const auto& [width, height] = frame_manager.get_framebuffer_extent();
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
         camera.aspect = ((float)width) / ((float)height);
 
         *frame.p_camera_ubo = camera.as_camera_ubo();
@@ -68,4 +80,72 @@ void App::run() {
     }
 
     vk::Context::get()->wait_device_idle();
+}
+
+
+static struct {
+    double last_x, last_y;
+    float zoom_exp = 0.0f;
+} input_data;
+
+
+
+void App::scroll_callback(GLFWwindow* window, double x_offset, double y_offset) {
+    static float start_distance = AppCamera{}.distance;
+    static float base = 1.2f;
+
+    input_data.zoom_exp -= y_offset;
+
+    auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
+    app->camera.distance = start_distance * glm::pow(base, input_data.zoom_exp);
+}
+
+void App::cursor_pos_callback(GLFWwindow* window, double x_pos, double y_pos) {
+    static double move_factor = 5.0;
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS) return;
+
+    double dx = x_pos - input_data.last_x;
+    double dy = y_pos - input_data.last_y;
+
+    input_data.last_x = x_pos;
+    input_data.last_y = y_pos;
+
+    auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
+    double height = (double)app->frame_manager.get_framebuffer_extent().height;
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        glm::mat4 transform = glm::mat4{ 1.0f };
+        transform = glm::rotate(transform, app->camera.phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
+        transform = glm::rotate(transform, app->camera.theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
+
+        glm::vec3 right = glm::inverse(transform) * glm::vec4{ 1.0f, 0.0f, 0.0f, 0.0f };
+        glm::vec3 up = glm::inverse(transform) * glm::vec4{ 0.0f, 1.0f, 0.0f, 0.0f };
+
+        auto delta = (float)dx * right + (float)dy * up;
+
+        app->camera.center -= delta * (float)(app->camera.distance / height);
+    }
+    else {
+        app->camera.theta += dx * move_factor / height;
+        app->camera.phi -= dy * move_factor / height;
+        app->camera.phi = std::clamp(app->camera.phi, -glm::pi<float>() / 2, glm::pi<float>() / 2);
+    }
+
+}
+
+void App::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        glfwGetCursorPos(window, &input_data.last_x, &input_data.last_y);
+    }
+}
+
+void App::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
+        app->camera = AppCamera{};
+
+        input_data.zoom_exp = 0.0f;
+    }
 }
