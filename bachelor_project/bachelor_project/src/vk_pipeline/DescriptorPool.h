@@ -74,8 +74,7 @@ namespace vk {
 		inline const std::vector<DescriptorSetInfo>& set_infos() const { return _set_infos; }
 		inline uint32_t set_count() const { return static_cast<uint32_t>(_sets.size()); }
 
-		void cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index);
-		void cmd_bind_set_dyn(ReadyCommandBuffer cmd_buffer, uint32_t set_index, uint32_t offset);
+		void cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, std::vector<uint32_t> offsets = {});
 
 		void update_set_binding(uint32_t set_index, uint32_t binding, const BufferDescriptorInfo& info);
 		void update_set_binding(uint32_t set_index, uint32_t binding, const std::vector<BufferDescriptorInfo>& infos);

@@ -14,12 +14,8 @@ namespace vk {
 		return vk_struct;
 	}
 
-	void DescriptorPool::cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index) {
-		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], 0, nullptr);
-	}
-
-	void DescriptorPool::cmd_bind_set_dyn(ReadyCommandBuffer cmd_buffer, uint32_t set_index, uint32_t offset) {
-		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], 1, &offset);
+	void DescriptorPool::cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, std::vector<uint32_t> offsets) {
+		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], static_cast<uint32_t>(offsets.size()), offsets.data());
 	}
 
 	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const BufferDescriptorInfo& info) {

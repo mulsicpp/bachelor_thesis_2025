@@ -53,10 +53,6 @@ App::App() {
         .to_shared();
 
     frame_manager.bind_rasterizer(rasterizer);
-
-
-    const auto& [width, height] = frame_manager.get_framebuffer_extent();
-    camera.aspect = ((float)width) / ((float)height);
 }
 
 App::~App() {

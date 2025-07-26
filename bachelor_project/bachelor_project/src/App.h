@@ -18,7 +18,7 @@ struct AppCamera : Camera {
 
 	float aspect{ 1.0f };
 	float near{ 0.2f };
-	float far{ 100.0f };
+	float far{ 200.0f };
 
 	CameraUBO as_camera_ubo() const override;
 };

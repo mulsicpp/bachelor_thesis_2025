@@ -48,8 +48,12 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
 	vkCmdBindIndexBuffer(cmd_buf.handle(), cube.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
 
+
+	std::vector<uint32_t> offsets{};
+	offsets.resize(1);
 	for (uint32_t i = 0; i < MESH_COUNT; i++) {
-		frame->descriptor_pool.cmd_bind_set_dyn(cmd_buf, 1, sizeof(ModelUBO) * i);
+		offsets[0] = sizeof(ModelUBO) * i;
+		frame->descriptor_pool.cmd_bind_set(cmd_buf, 1, offsets);
 
 		vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
 	}
@@ -62,24 +66,17 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 Frame Rasterizer::create_frame() const {
 	Frame frame;
 
-	CameraUBO camera_ubo = { 
-		glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
-		glm::perspective(glm::radians(45.0f), 1280.f / 720.f, 0.1f, 20.0f)
-	};
-	ModelUBO model_ubo = { glm::mat4(1.0) };
-
 	frame.camera_uniform_buffer = vk::BufferBuilder()
 		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+		.queue_types({ vk::QueueType::Graphics })
 		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
 		.size(sizeof(CameraUBO))
-		.data((void*)&camera_ubo)
 		.build().to_shared();
 	frame.p_camera_ubo = frame.camera_uniform_buffer->mapped_data<CameraUBO>();
 
 	frame.model_uniform_buffer = vk::BufferBuilder()
 		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+		.queue_types({ vk::QueueType::Graphics })
 		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
 		.size(sizeof(ModelUBO))
 		.build().to_shared();
