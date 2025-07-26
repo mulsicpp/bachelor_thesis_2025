@@ -18,6 +18,48 @@ namespace vk {
 		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], 0, nullptr);
 	}
 
+	void DescriptorPool::cmd_bind_set_dyn(ReadyCommandBuffer cmd_buffer, uint32_t set_index, uint32_t offset) {
+		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], 1, &offset);
+	}
+
+	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const BufferDescriptorInfo& info) {
+		update_set_binding(set_index, binding, std::vector<BufferDescriptorInfo>{ info });
+	}
+
+	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const std::vector<BufferDescriptorInfo>& infos) {
+		std::vector<VkDescriptorBufferInfo> buffer_infos{ infos.size() };
+
+		for (uint32_t i = 0; i < infos.size(); i++) {
+			buffer_infos[i] = infos[i].as_vk_struct();
+		}
+
+		VkDescriptorType descriptor_type{};
+
+		for (const auto& layout_binding : _pipeline_layout->descriptor_set_layouts()[_set_infos[set_index].index]->bindings()) {
+			if (layout_binding.binding == binding) {
+				descriptor_type = layout_binding.type;
+				break;
+			}
+		}
+
+		dbg_log("descriptot type: %u", descriptor_type);
+
+		VkWriteDescriptorSet descriptor_write{};
+		descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptor_write.dstSet = _sets[set_index];
+		descriptor_write.dstBinding = binding;
+		descriptor_write.dstArrayElement = 0;
+		descriptor_write.descriptorType = descriptor_type;
+		descriptor_write.descriptorCount = static_cast<uint32_t>(buffer_infos.size());
+		descriptor_write.pBufferInfo = buffer_infos.data();
+
+		vkUpdateDescriptorSets(Context::get()->get_device(), 1, &descriptor_write, 0, nullptr);
+
+		_set_infos[set_index].bindings[binding] = infos;
+	}
+
+
+
 	DescriptorPool DescriptorPoolBuilder::build() const {
 		DescriptorPool pool;
 
@@ -67,32 +109,7 @@ namespace vk {
 
 		for (uint32_t i = 0; i < _set_infos.size(); i++) {
 			for (const auto& [binding, infos] : _set_infos[i].bindings) {
-
-				std::vector<VkDescriptorBufferInfo> buffer_infos{ infos.size() };
-
-				for (uint32_t i = 0; i < infos.size(); i++) {
-					buffer_infos[i] = infos[i].as_vk_struct();
-				}
-
-				VkDescriptorType descriptor_type{};
-
-				for (const auto& layout_binding : all_set_layouts[_set_infos[i].index]->bindings()) {
-					if (layout_binding.binding == binding) {
-						descriptor_type = layout_binding.type;
-						break;
-					}
-				}
-
-				VkWriteDescriptorSet descriptor_write{};
-				descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				descriptor_write.dstSet = pool._sets[i];
-				descriptor_write.dstBinding = binding;
-				descriptor_write.dstArrayElement = 0;
-				descriptor_write.descriptorType = descriptor_type;
-				descriptor_write.descriptorCount = static_cast<uint32_t>(buffer_infos.size());
-				descriptor_write.pBufferInfo = buffer_infos.data();
-
-				vkUpdateDescriptorSets(Context::get()->get_device(), 1, &descriptor_write, 0, nullptr);
+				pool.update_set_binding(i, binding, infos);
 			}
 		}
 

@@ -8,18 +8,43 @@
 
 
 void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
+
+	if (frame->model_count != 2) {
+		frame->model_uniform_buffer = vk::BufferBuilder()
+			.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+			.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+			.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+			.size(sizeof(ModelUBO) * 2)
+			.build().to_shared();
+		frame->p_model_ubo = frame->model_uniform_buffer->mapped_data<ModelUBO>();
+		frame->model_count = 2;
+
+		frame->descriptor_pool.update_set_binding(1, 0, { frame->model_uniform_buffer, 0, sizeof(ModelUBO) });
+
+		dbg_log("descriptor set binding was updated!");
+	}
+
+	frame->p_model_ubo[0].transform = glm::translate(glm::mat4(1.0f), glm::vec3{ 1.0f, 0.0f, 0.0f });
+	frame->p_model_ubo[1].transform = glm::translate(glm::mat4(1.0f), glm::vec3{ -1.0f, 0.0f, 0.0f });
+
+
+
 	framebuffer->cmd_begin_pass(cmd_buf, pass_begin_info);
 
 	pipeline.cmd_bind(cmd_buf);
 
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
-	frame->descriptor_pool.cmd_bind_set(cmd_buf, 1);
+	frame->descriptor_pool.cmd_bind_set_dyn(cmd_buf, 1, 0);
 
 	VkBuffer vertex_buffer = cube.vertex_buffer.handle();
 	VkDeviceSize offset = 0;
 
 	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
 	vkCmdBindIndexBuffer(cmd_buf.handle(), cube.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
+	vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
+
+	frame->descriptor_pool.cmd_bind_set_dyn(cmd_buf, 1, sizeof(ModelUBO));
+
 	vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
 
 	framebuffer->cmd_end_pass(cmd_buf);
@@ -34,7 +59,7 @@ Frame Rasterizer::create_frame() const {
 		glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
 		glm::perspective(glm::radians(45.0f), 1280.f / 720.f, 0.1f, 20.0f)
 	};
-	ModelUBO model_ubo = { glm::scale(glm::mat4(1.0), glm::vec3(1.2f)) };
+	ModelUBO model_ubo = { glm::mat4(1.0) };
 
 	frame.camera_uniform_buffer = vk::BufferBuilder()
 		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
@@ -50,9 +75,9 @@ Frame Rasterizer::create_frame() const {
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
 		.size(sizeof(ModelUBO))
-		.data((void*)&model_ubo)
 		.build().to_shared();
-	frame.p_model_ubo = frame.camera_uniform_buffer->mapped_data<ModelUBO>();
+	frame.p_model_ubo = frame.model_uniform_buffer->mapped_data<ModelUBO>();
+	frame.model_count = 1;
 
 	frame.descriptor_pool = vk::DescriptorPoolBuilder()
 		.pipeline_layout(pipeline_layout)
@@ -61,7 +86,7 @@ Frame Rasterizer::create_frame() const {
 			.set_binding(0, frame.camera_uniform_buffer))
 		.add_set(vk::DescriptorSetInfo()
 			.set_index(1)
-			.set_binding(0, frame.model_uniform_buffer))
+			.set_binding(0, { frame.model_uniform_buffer, 0, sizeof(ModelUBO) }))
 		.build();
 
 	return frame;
@@ -114,7 +139,7 @@ Rasterizer RasterizerBuilder::build() {
 			.build())
 		.add_layout(vk::DescriptorSetLayoutBuilder()
 			.add_binding(vk::DescriptorSetLayoutBinding()
-				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
 				.set_stage_flags(VK_SHADER_STAGE_VERTEX_BIT))
 			.build())
 		.build()

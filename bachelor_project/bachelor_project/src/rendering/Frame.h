@@ -16,5 +16,6 @@ private:
 
 public:
 	CameraUBO* p_camera_ubo;
+	uint32_t model_count;
 	ModelUBO* p_model_ubo;
 };

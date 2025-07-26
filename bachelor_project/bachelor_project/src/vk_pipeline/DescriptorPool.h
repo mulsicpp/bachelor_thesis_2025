@@ -75,6 +75,10 @@ namespace vk {
 		inline uint32_t set_count() const { return static_cast<uint32_t>(_sets.size()); }
 
 		void cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index);
+		void cmd_bind_set_dyn(ReadyCommandBuffer cmd_buffer, uint32_t set_index, uint32_t offset);
+
+		void update_set_binding(uint32_t set_index, uint32_t binding, const BufferDescriptorInfo& info);
+		void update_set_binding(uint32_t set_index, uint32_t binding, const std::vector<BufferDescriptorInfo>& infos);
 	};
 
 	class DescriptorPoolBuilder {
