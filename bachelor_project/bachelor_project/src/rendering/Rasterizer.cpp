@@ -7,40 +7,22 @@
 #include "vk_core/Context.h"
 
 
-
 void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
 	framebuffer->cmd_begin_pass(cmd_buf, pass_begin_info);
 
 	pipeline.cmd_bind(cmd_buf);
 
-	VkBuffer vertex_buffer = rect.vertex_buffer.handle();
-	VkDeviceSize offset = 0;
-
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 1);
 
+	VkBuffer vertex_buffer = cube.vertex_buffer.handle();
+	VkDeviceSize offset = 0;
+
 	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
-	vkCmdBindIndexBuffer(cmd_buf.handle(), rect.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
-	vkCmdDrawIndexed(cmd_buf.handle(), 6, 1, 0, 0, 0);
+	vkCmdBindIndexBuffer(cmd_buf.handle(), cube.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
+	vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
 
 	framebuffer->cmd_end_pass(cmd_buf);
-}
-
-vk::CommandRecorder Rasterizer::draw_triangle_recorder(vk::Framebuffer* framebuffer) {
-	return [this, framebuffer](vk::ReadyCommandBuffer cmd_buffer) -> void {
-		framebuffer->cmd_begin_pass(cmd_buffer, pass_begin_info);
-
-		pipeline.cmd_bind(cmd_buffer);
-
-		VkBuffer vertex_buffer = rect.vertex_buffer.handle();
-		VkDeviceSize offset = 0;
-
-		vkCmdBindVertexBuffers(cmd_buffer.handle(), 0, 1, &vertex_buffer, &offset);
-		vkCmdBindIndexBuffer(cmd_buffer.handle(), rect.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
-		vkCmdDrawIndexed(cmd_buffer.handle(), 6, 1, 0, 0, 0);
-
-		framebuffer->cmd_end_pass(cmd_buffer);
-		};
 }
 
 
@@ -49,7 +31,7 @@ Frame Rasterizer::create_frame() const {
 	Frame frame;
 
 	CameraUBO camera_ubo = { 
-		glm::lookAt(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
 		glm::perspective(glm::radians(45.0f), 1280.f / 720.f, 0.1f, 20.0f)
 	};
 	ModelUBO model_ubo = { glm::scale(glm::mat4(1.0), glm::vec3(1.2f)) };
@@ -61,6 +43,7 @@ Frame Rasterizer::create_frame() const {
 		.size(sizeof(CameraUBO))
 		.data((void*)&camera_ubo)
 		.build().to_shared();
+	frame.p_camera_ubo = frame.camera_uniform_buffer->mapped_data<CameraUBO>();
 
 	frame.model_uniform_buffer = vk::BufferBuilder()
 		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
@@ -69,6 +52,7 @@ Frame Rasterizer::create_frame() const {
 		.size(sizeof(ModelUBO))
 		.data((void*)&model_ubo)
 		.build().to_shared();
+	frame.p_model_ubo = frame.camera_uniform_buffer->mapped_data<ModelUBO>();
 
 	frame.descriptor_pool = vk::DescriptorPoolBuilder()
 		.pipeline_layout(pipeline_layout)
@@ -112,13 +96,13 @@ Rasterizer RasterizerBuilder::build() {
 
 	vk::Shader vertex_shader = vk::ShaderBuilder()
 		.vertex()
-		.load_spirv("assets/shaders/mesh2d/vert.spv")
+		.load_spirv("assets/shaders/mesh3d/vert.spv")
 		.build();
 	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
 		.fragment()
-		.load_spirv("assets/shaders/mesh2d/frag.spv")
+		.load_spirv("assets/shaders/mesh3d/frag.spv")
 		.build();
 	dbg_log("loaded fragment shader");
 
@@ -149,7 +133,7 @@ Rasterizer RasterizerBuilder::build() {
 	rasterizer.pass_begin_info = vk::PassBeginInfo()
 		.add_clear_value(vk::ClearValue::color(std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 1.0f }));
 
-	rasterizer.rect = Mesh::create_rect();
+	rasterizer.cube = Mesh::create_cube();
 
 	return rasterizer;
 }

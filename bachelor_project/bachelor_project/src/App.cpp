@@ -5,6 +5,10 @@
 
 #define APP_NAME "Raytracing App"
 
+CameraUBO AppCamera::as_camera_ubo() const {
+    return CameraUBO{};
+}
+
 App::App() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -41,6 +45,8 @@ void App::run() {
     dbg_log("run");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        Frame& frame = *frame_manager.get_current_frame();
+        frame.p_camera_ubo->view = glm::lookAt(glm::vec3(-3.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         frame_manager.draw_frame();
     }
 

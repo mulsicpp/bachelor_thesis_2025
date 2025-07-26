@@ -221,15 +221,18 @@
     <ClInclude Include="src\rendering\Frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\mesh2d\compile_shaders.bat">
+    <None Include="assets\shaders\mesh3d\compile_shaders.bat">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="assets\shaders\mesh2d\frag.spv" />
-    <None Include="assets\shaders\mesh2d\fragment_shader.glsl" />
-    <None Include="assets\shaders\mesh2d\vert.spv" />
-    <None Include="assets\shaders\mesh2d\vertex_shader.glsl" />
+    <None Include="assets\shaders\mesh3d\frag.spv" />
+    <None Include="assets\shaders\mesh3d\fragment_shader.glsl" />
+    <None Include="assets\shaders\mesh3d\vert.spv" />
+    <None Include="assets\shaders\mesh3d\vertex_shader.glsl" />
     <None Include="assets\shaders\triangle\compile_shaders.bat">
       <Filter>Source Files</Filter>
     </None>

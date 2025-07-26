@@ -17,16 +17,6 @@
 #include "Frame.h"
 
 
-struct CameraUBO {
-	glm::mat4 view;
-	glm::mat4 proj;
-};
-
-struct ModelUBO {
-	glm::mat4 transform;
-};
-
-
 class RasterizerBuilder;
 
 class Rasterizer : public utils::Move, public ptr::ToShared<Rasterizer> {
@@ -40,7 +30,7 @@ private:
 
 	vk::PassBeginInfo pass_begin_info{};
 
-	Mesh rect;
+	Mesh cube;
 
 public:
 	Rasterizer() = default;

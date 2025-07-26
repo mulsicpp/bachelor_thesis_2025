@@ -196,6 +196,7 @@
     <ClInclude Include="src\external\json.h" />
     <ClInclude Include="src\external\VkBootstrap.h" />
     <ClInclude Include="src\external\vk_mem_alloc.h" />
+    <ClInclude Include="src\scene\Camera.h" />
     <ClInclude Include="src\rendering\Frame.h" />
     <ClInclude Include="src\rendering\FrameManager.h" />
     <ClInclude Include="src\scene\Mesh.h" />
@@ -231,11 +232,11 @@
     <ClInclude Include="src\vk_sync\Semaphore.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\mesh2d\compile_shaders.bat" />
-    <None Include="assets\shaders\mesh2d\frag.spv" />
-    <None Include="assets\shaders\mesh2d\fragment_shader.glsl" />
-    <None Include="assets\shaders\mesh2d\vert.spv" />
-    <None Include="assets\shaders\mesh2d\vertex_shader.glsl" />
+    <None Include="assets\shaders\mesh3d\compile_shaders.bat" />
+    <None Include="assets\shaders\mesh3d\frag.spv" />
+    <None Include="assets\shaders\mesh3d\fragment_shader.glsl" />
+    <None Include="assets\shaders\mesh3d\vert.spv" />
+    <None Include="assets\shaders\mesh3d\vertex_shader.glsl" />
     <None Include="assets\shaders\triangle\compile_shaders.bat" />
     <None Include="assets\shaders\triangle\frag.spv" />
     <None Include="assets\shaders\triangle\fragment_shader.glsl" />

@@ -23,6 +23,10 @@ union NodeTransform {
 	RawTransform raw;
 };
 
+struct ModelUBO {
+	glm::mat4 transform;
+};
+
 class Node {
 private:
 	bool raw_transform{ false };
@@ -32,4 +36,6 @@ private:
 	ptr::Shared<Mesh> mesh{};
 
 	void update_global_transfrom(glm::mat4 parent_transform = { 1.0f });
+
+	ModelUBO as_model_ubo() const { return ModelUBO{ global_transform }; }
 };
