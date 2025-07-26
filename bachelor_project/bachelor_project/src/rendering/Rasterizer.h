@@ -52,11 +52,13 @@ public:
 
 private:
 	vk::Attachment _color_attachment;
+	vk::Attachment _depth_attachment;
 
 public:
 	RasterizerBuilder();
 
 	inline Ref color_attachment(const vk::Attachment& color_attachment) { _color_attachment = color_attachment; return *this; }
+	inline Ref depth_attachment(const vk::Attachment& depth_attachment) { _depth_attachment = depth_attachment; return *this; }
 
 	Rasterizer build();
 };

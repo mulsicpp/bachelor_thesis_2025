@@ -48,6 +48,7 @@ App::App() {
 
     rasterizer = RasterizerBuilder()
         .color_attachment(frame_manager.get_swapchain_attachment())
+        .depth_attachment(frame_manager.get_depth_attachment())
         .build()
         .to_shared();
 

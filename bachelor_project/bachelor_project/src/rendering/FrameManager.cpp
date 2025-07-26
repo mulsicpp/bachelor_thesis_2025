@@ -1,11 +1,21 @@
 #include "FrameManager.h"
 
 #include "vk_core/Context.h"
+#include "vk_core/format.h"
 
 #include <utility>
 
 vk::Attachment FrameManager::get_swapchain_attachment() const {
 	return vk::Attachment().from_swapchain(&swapchain);
+}
+
+vk::Attachment FrameManager::get_depth_attachment() const {
+	return vk::Attachment()
+		.depth()
+		.set_format(vk::find_depth_format())
+		.set_final_layout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		.set_load_op(VK_ATTACHMENT_LOAD_OP_CLEAR)
+		.set_store_op(VK_ATTACHMENT_STORE_OP_DONT_CARE);
 }
 
 
@@ -95,6 +105,15 @@ void FrameManager::draw_frame() {
 }
 
 void FrameManager::create_framebuffers() {
+	depth_image = vk::ImageBuilder()
+		.extent(swapchain.extent())
+		.format(get_depth_attachment().format)
+		.usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+		.tiling(VK_IMAGE_TILING_OPTIMAL)
+		.add_queue_type(vk::QueueType::Graphics)
+		.build().to_shared();
+
 	framebuffers.resize(swapchain.image_count());
 	const auto& swapchain_images = swapchain.images();
 
@@ -102,6 +121,7 @@ void FrameManager::create_framebuffers() {
 		framebuffers[i] = vk::FramebufferBuilder()
 			.render_pass(renderer->get_render_pass())
 			.add_image(swapchain_images[i])
+			.add_image(depth_image)
 			.build();
 	}
 }

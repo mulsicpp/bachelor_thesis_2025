@@ -9,24 +9,32 @@
 
 void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
 
-	if (frame->model_count != 2) {
+	const uint32_t MESH_COUNT = 8;
+	if (frame->model_count != MESH_COUNT) {
 		frame->model_uniform_buffer = vk::BufferBuilder()
 			.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
 			.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 			.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
-			.size(sizeof(ModelUBO) * 2)
+			.size(sizeof(ModelUBO) * MESH_COUNT)
 			.build().to_shared();
 		frame->p_model_ubo = frame->model_uniform_buffer->mapped_data<ModelUBO>();
-		frame->model_count = 2;
+		frame->model_count = MESH_COUNT;
 
 		frame->descriptor_pool.update_set_binding(1, 0, { frame->model_uniform_buffer, 0, sizeof(ModelUBO) });
 
 		dbg_log("descriptor set binding was updated!");
 	}
 
-	frame->p_model_ubo[0].transform = glm::translate(glm::mat4(1.0f), glm::vec3{ 1.0f, 0.0f, 0.0f });
-	frame->p_model_ubo[1].transform = glm::translate(glm::mat4(1.0f), glm::vec3{ -1.0f, 0.0f, 0.0f });
+	glm::mat4 scale = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 1.6f });
 
+	frame->p_model_ubo[0].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, +1.0f, +1.0f }) * scale;
+	frame->p_model_ubo[1].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, +1.0f, +1.0f }) * scale;
+	frame->p_model_ubo[2].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, -1.0f, +1.0f }) * scale;
+	frame->p_model_ubo[3].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, -1.0f, +1.0f }) * scale;
+	frame->p_model_ubo[4].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, +1.0f, -1.0f }) * scale;
+	frame->p_model_ubo[5].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, +1.0f, -1.0f }) * scale;
+	frame->p_model_ubo[6].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, -1.0f, -1.0f }) * scale;
+	frame->p_model_ubo[7].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, -1.0f, -1.0f }) * scale;
 
 
 	framebuffer->cmd_begin_pass(cmd_buf, pass_begin_info);
@@ -34,18 +42,17 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 	pipeline.cmd_bind(cmd_buf);
 
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
-	frame->descriptor_pool.cmd_bind_set_dyn(cmd_buf, 1, 0);
 
-	VkBuffer vertex_buffer = cube.vertex_buffer.handle();
 	VkDeviceSize offset = 0;
-
+	VkBuffer vertex_buffer = cube.vertex_buffer.handle();
 	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
 	vkCmdBindIndexBuffer(cmd_buf.handle(), cube.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
-	vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
 
-	frame->descriptor_pool.cmd_bind_set_dyn(cmd_buf, 1, sizeof(ModelUBO));
+	for (uint32_t i = 0; i < MESH_COUNT; i++) {
+		frame->descriptor_pool.cmd_bind_set_dyn(cmd_buf, 1, sizeof(ModelUBO) * i);
 
-	vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
+		vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
+	}
 
 	framebuffer->cmd_end_pass(cmd_buf);
 }
@@ -114,6 +121,7 @@ Rasterizer RasterizerBuilder::build() {
 
 	rasterizer.render_pass = vk::RenderPassBuilder()
 		.add_attachment(_color_attachment)
+		.add_attachment(_depth_attachment)
 		.build()
 		.to_shared();
 
@@ -156,7 +164,8 @@ Rasterizer RasterizerBuilder::build() {
 	dbg_log("created pipeline");
 
 	rasterizer.pass_begin_info = vk::PassBeginInfo()
-		.add_clear_value(vk::ClearValue::color(std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 1.0f }));
+		.add_clear_value(vk::ClearValue::color(std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 1.0f }))
+		.add_clear_value(vk::ClearValue::depth(1.0f));
 
 	rasterizer.cube = Mesh::create_cube();
 

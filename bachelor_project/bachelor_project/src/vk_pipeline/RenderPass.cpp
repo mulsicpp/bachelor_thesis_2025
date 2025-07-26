@@ -92,7 +92,7 @@ namespace vk {
 
 			VkAttachmentReference ref{};
 			ref.attachment = i;
-			ref.layout = attachment.type == AttachmentType::Color ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+			ref.layout = attachment.type == AttachmentType::Color ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 			if (attachment.type == AttachmentType::Color) {
 				color_refs.push_back(ref);

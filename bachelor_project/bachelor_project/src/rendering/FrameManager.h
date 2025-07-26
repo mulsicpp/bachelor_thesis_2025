@@ -32,6 +32,7 @@ private:
 	ptr::Shared<Rasterizer> renderer{};
 	std::vector<Frame> frames{};
 
+	ptr::Shared<vk::Image> depth_image{};
 	std::vector<vk::Framebuffer> framebuffers{};
 
 	bool resize_signaled{ false };
@@ -42,6 +43,7 @@ public:
 	inline VkExtent2D get_framebuffer_extent() const { return swapchain.extent(); }
 
 	vk::Attachment get_swapchain_attachment() const;
+	vk::Attachment get_depth_attachment() const;
 
 	void bind_rasterizer(Rasterizer&& rasterizer);
 	void bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer);
