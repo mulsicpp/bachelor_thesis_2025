@@ -4,6 +4,10 @@
 
 namespace vk {
 
+	void Buffer::flush(VkDeviceSize offset, VkDeviceSize size) {
+		vmaFlushAllocation(Context::get()->get_allocator(), *allocation, offset, size);
+	}
+
 	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
 		if (copy_regions.size() > 0) {
 			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), static_cast<uint32_t>(copy_regions.size()), copy_regions.data());
@@ -11,7 +15,7 @@ namespace vk {
 		}
 
 		VkBufferCopy copy_region{};
-		copy_region.size = dst_buffer->size < size ? dst_buffer->size : size;
+		copy_region.size = dst_buffer->_size < _size ? dst_buffer->_size : _size;
 		copy_region.srcOffset = 0;
 		copy_region.dstOffset = 0;
 
@@ -80,19 +84,19 @@ namespace vk {
 			throw std::runtime_error("Buffer creation failed!");
 		}
 
-		buffer.size = _size;
+		buffer._size = _size;
 		VkMemoryPropertyFlags props;
 		vmaGetMemoryTypeProperties(context.get_allocator(), alloc_info.memoryType, &props);
 
 		buffer.host_coherent = (props & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0;
 
-		buffer.mapped_data = alloc_info.pMappedData;
+		buffer._mapped_data = alloc_info.pMappedData;
 
 		if (_data == nullptr)
 			return buffer;
 
-		if (buffer.mapped_data != nullptr) {
-			memcpy(buffer.mapped_data, _data, _size);
+		if (buffer._mapped_data != nullptr) {
+			memcpy(buffer._mapped_data, _data, _size);
 		}
 		else {
 			if ((_usage & VK_BUFFER_USAGE_TRANSFER_DST_BIT) != 0) {

@@ -7,30 +7,74 @@
 
 #include "vk_core/Handle.h"
 
+#include "vk_resources/Buffer.h"
+#include "vk_resources/ImageView.h"
+
 #include "PipelineLayout.h"
 
 #include <vector>
 #include <map>
+#include <variant>
 
 namespace vk {
+
+	struct BufferDescriptorInfo {
+		using Ref = BufferDescriptorInfo&;
+
+		ptr::Shared<Buffer> buffer{};
+		VkDeviceSize offset{ 0 };
+		VkDeviceSize size{ 0 };
+
+		BufferDescriptorInfo() = default;
+
+		inline BufferDescriptorInfo(Buffer&& buffer, VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE)
+			: BufferDescriptorInfo{ std::move(buffer).to_shared(), offset, size }
+		{}
+
+		inline BufferDescriptorInfo(const ptr::Shared<Buffer>& buffer, VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE)
+			: buffer{ buffer }
+			, offset{ offset }
+			, size{ size }
+		{}
+
+		VkDescriptorBufferInfo as_vk_struct() const;
+	};
+
+	struct DescriptorSetInfo {
+		using Ref = DescriptorSetInfo&;
+
+		uint32_t index{ 0 };
+		std::map<uint32_t, std::vector<BufferDescriptorInfo>> bindings{};
+
+		DescriptorSetInfo() = default;
+
+		inline Ref set_index(uint32_t index) { this->index = index; return *this; }
+
+		inline Ref set_binding(uint32_t binding, const BufferDescriptorInfo& buffer_descriptor_info) { bindings[binding] = std::vector<BufferDescriptorInfo>{ buffer_descriptor_info }; return *this; }
+		inline Ref set_binding(uint32_t binding, const std::vector<BufferDescriptorInfo>& buffer_descriptor_infos) { bindings[binding] = buffer_descriptor_infos; return *this; }
+	};
+
 	class DescriptorPoolBuilder;
 
 	class DescriptorPool : public utils::Move, public ptr::ToShared<DescriptorPool> {
 		friend class DescriptorPoolBuilder;
 	private:
+		ptr::Shared<const PipelineLayout> _pipeline_layout;
+
 		Handle<VkDescriptorPool> descriptor_pool{};
-		std::map<VkDescriptorType, uint32_t> _sizes{};
-		uint32_t _max_sets{ 1 };
+
+		std::vector<VkDescriptorSet> _sets{};
+		std::vector<DescriptorSetInfo> _set_infos{};
 
 	public:
 		DescriptorPool() = default;
 
 		inline VkDescriptorPool handle() const { return *descriptor_pool; }
 
-		inline const std::map<VkDescriptorType, uint32_t>& sizes() const { return _sizes; }
-		inline uint32_t size_of(VkDescriptorType type) const { return _sizes.contains(type) ? _sizes.at(type) : 0; }
+		inline const std::vector<DescriptorSetInfo>& set_infos() const { return _set_infos; }
+		inline uint32_t set_count() const { return static_cast<uint32_t>(_sets.size()); }
 
-		inline uint32_t max_sets() const { return _max_sets; }
+		void cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index);
 	};
 
 	class DescriptorPoolBuilder {
@@ -38,18 +82,17 @@ namespace vk {
 		using Ref = DescriptorPoolBuilder&;
 
 	private:
-		std::map<VkDescriptorType, uint32_t> _sizes{};
-		uint32_t _max_sets{ 1 };
+		ptr::Shared<const PipelineLayout> _pipeline_layout;
+		std::vector<DescriptorSetInfo> _set_infos{};
 
 	public:
 		DescriptorPoolBuilder() = default;
 
-		inline Ref sizes(const std::map<VkDescriptorType, uint32_t>& sizes) { _sizes = sizes; return *this; }
-		inline Ref add_size(VkDescriptorType type, uint32_t count) { _sizes[type] += count; return *this; }
+		inline Ref pipeline_layout(PipelineLayout&& pipeline_layout) { _pipeline_layout = std::move(pipeline_layout).to_shared(); return *this; }
+		inline Ref pipeline_layout(const ptr::Shared<PipelineLayout>& pipeline_layout) { _pipeline_layout = pipeline_layout; return *this; }
 
-		inline Ref max_sets(uint32_t max_sets) { _max_sets = max_sets; return *this; }
-
-		Ref from_pipeline_layout(const PipelineLayout* pipeline_layout);
+		inline Ref sets(const std::vector<DescriptorSetInfo>& set_infos) { _set_infos = set_infos; return *this; }
+		inline Ref add_set(const DescriptorSetInfo& set_info) { _set_infos.push_back(set_info); return *this; }
 
 		DescriptorPool build() const;
 	};

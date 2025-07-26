@@ -1,5 +1,7 @@
 #include "Rasterizer.h"
 
+#include "external/glm.h"
+
 #include "utils/dbg_log.h"
 
 #include "vk_core/Context.h"
@@ -13,6 +15,9 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	VkBuffer vertex_buffer = rect.vertex_buffer.handle();
 	VkDeviceSize offset = 0;
+
+	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
+	frame->descriptor_pool.cmd_bind_set(cmd_buf, 1);
 
 	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
 	vkCmdBindIndexBuffer(cmd_buf.handle(), rect.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
@@ -43,7 +48,37 @@ vk::CommandRecorder Rasterizer::draw_triangle_recorder(vk::Framebuffer* framebuf
 Frame Rasterizer::create_frame() const {
 	Frame frame;
 
-	frame.descriptor_pool = vk::DescriptorPoolBuilder().from_pipeline_layout(pipeline_layout.get()).build();
+	CameraUBO camera_ubo = { 
+		glm::lookAt(glm::vec3(-2.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+		glm::perspective(glm::radians(45.0f), 1280.f / 720.f, 0.1f, 20.0f)
+	};
+	ModelUBO model_ubo = { glm::scale(glm::mat4(1.0), glm::vec3(1.2f)) };
+
+	frame.camera_uniform_buffer = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+		.size(sizeof(CameraUBO))
+		.data((void*)&camera_ubo)
+		.build().to_shared();
+
+	frame.model_uniform_buffer = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+		.size(sizeof(ModelUBO))
+		.data((void*)&model_ubo)
+		.build().to_shared();
+
+	frame.descriptor_pool = vk::DescriptorPoolBuilder()
+		.pipeline_layout(pipeline_layout)
+		.add_set(vk::DescriptorSetInfo()
+			.set_index(0)
+			.set_binding(0, frame.camera_uniform_buffer))
+		.add_set(vk::DescriptorSetInfo()
+			.set_index(1)
+			.set_binding(0, frame.model_uniform_buffer))
+		.build();
 
 	return frame;
 }

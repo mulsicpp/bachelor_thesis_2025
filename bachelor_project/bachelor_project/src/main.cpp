@@ -84,8 +84,8 @@ void test_buffer_copy() {
 		.add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
 		.build();
 
-	char* mapped_data1 = b1.get_mapped_data<char>();
-	char* mapped_data2 = b2.get_mapped_data<char>();
+	char* mapped_data1 = b1.mapped_data<char>();
+	char* mapped_data2 = b2.mapped_data<char>();
 
 	printf("mapped_data1: %s\n", mapped_data1);
 	printf("mapped_data2: %s\n", mapped_data2);

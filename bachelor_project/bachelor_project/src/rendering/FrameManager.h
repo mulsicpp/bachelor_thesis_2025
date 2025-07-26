@@ -42,6 +42,8 @@ public:
 	void bind_rasterizer(Rasterizer&& rasterizer);
 	void bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer);
 
+	inline Frame* get_current_frame() { return &frames[in_flight_index]; }
+
 	void draw_frame();
 };
 

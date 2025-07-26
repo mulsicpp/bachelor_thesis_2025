@@ -22,16 +22,21 @@ namespace vk {
 		Handle<VmaAllocation> allocation{};
 		Handle<VkBuffer> buffer{};
 
-		uint32_t size{ 0 };
-		void* mapped_data{ nullptr };
+		uint32_t _size{ 0 };
+		void* _mapped_data{ nullptr };
 		bool host_coherent{ false };
 
 	public:
 		Buffer() = default;
 
 		inline VkBuffer handle() const { return *buffer; }
+
+		inline uint32_t size() const { return _size; }
 		template<class T = uint8_t>
-		inline T* get_mapped_data() { return (T*)mapped_data; }
+		inline T* mapped_data() { return (T*)_mapped_data; }
+		inline bool is_host_coherent() const { return host_coherent; }
+
+		void flush(VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE);
 
 		void cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions = {});
 		void copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions = {});
