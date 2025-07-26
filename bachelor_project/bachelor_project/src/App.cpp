@@ -12,16 +12,18 @@ CameraUBO AppCamera::as_camera_ubo() const {
     view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
     view = glm::translate(view, -center);
 
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1280.f / 720.f, 0.1f, 20.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 20.0f);
 
     return CameraUBO{ view, proj };
 }
 
 App::App() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, nullptr, nullptr);
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
     
     auto context_info = vk::ContextInfo()
         .window(window)
@@ -55,8 +57,12 @@ void App::run() {
         glfwPollEvents();
         Frame& frame = *frame_manager.get_current_frame();
 
-        camera.theta = glm::pi<float>() / 4.0f;
-        camera.phi = glm::pi<float>() / 4.0f;
+        camera.theta = 3.0f * glm::pi<float>() / 4.0f;
+        camera.phi = -glm::pi<float>() / 4.0f;
+
+        const auto& [width, height] = frame_manager.get_framebuffer_extent();
+        camera.aspect = ((float)width) / ((float)height);
+
         *frame.p_camera_ubo = camera.as_camera_ubo();
         frame_manager.draw_frame();
     }

@@ -32,14 +32,7 @@ void FrameManager::bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer) {
 		command_buffers[i] = vk::CommandBufferBuilder(rasterizer->get_queue_type()).single_use(false).build();
 	}
 
-	const auto& swapchain_images = swapchain.images();
-
-	for (int i = 0; i < framebuffers.size(); i++) {
-		framebuffers[i] = vk::FramebufferBuilder()
-			.render_pass(rasterizer->get_render_pass())
-			.add_image(swapchain_images[i])
-			.build();
-	}
+	create_framebuffers();
 }
 
 void FrameManager::draw_frame() {
@@ -54,7 +47,16 @@ void FrameManager::draw_frame() {
 	command_buffers[in_flight_index].wait();
 
 	uint32_t image_index;
-	vkAcquireNextImageKHR(device, swapchain.handle(), UINT64_MAX, submit_infos[in_flight_index].wait_semaphores[0].handle(), VK_NULL_HANDLE, &image_index);
+	auto result = vkAcquireNextImageKHR(device, swapchain.handle(), UINT64_MAX, submit_infos[in_flight_index].wait_semaphores[0].handle(), VK_NULL_HANDLE, &image_index);
+
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+		recreate();
+		return;
+	}
+	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+		throw std::runtime_error("Swapchain image acquisition failed!");
+	}
 
 
 	auto draw_recorder = [this, image_index](vk::ReadyCommandBuffer cmd_buf) {
@@ -79,9 +81,37 @@ void FrameManager::draw_frame() {
 
 	present_info.pImageIndices = &image_index;
 
-	auto result = vkQueuePresentKHR(vk::Context::get()->get_command_manager()[vk::QueueType::Present].queue, &present_info);
+	result = vkQueuePresentKHR(vk::Context::get()->get_command_manager()[vk::QueueType::Present].queue, &present_info);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || resize_signaled) {
+		resize_signaled = false;
+		recreate();
+	}
+	else if (result != VK_SUCCESS) {
+		throw std::runtime_error("Image presentation failed!");
+	}
 
 	in_flight_index = (in_flight_index + 1) % max_frames_in_flight;
+}
+
+void FrameManager::create_framebuffers() {
+	framebuffers.resize(swapchain.image_count());
+	const auto& swapchain_images = swapchain.images();
+
+	for (int i = 0; i < framebuffers.size(); i++) {
+		framebuffers[i] = vk::FramebufferBuilder()
+			.render_pass(renderer->get_render_pass())
+			.add_image(swapchain_images[i])
+			.build();
+	}
+}
+
+void FrameManager::recreate() {
+	swapchain = vk::SwapchainBuilder().rebuild(std::move(swapchain));
+
+	if (renderer) {
+		create_framebuffers();
+	}
 }
 
 
@@ -91,8 +121,6 @@ FrameManager FrameManagerBuilder::build() {
 	frame_manager.swapchain = _swapchain_builder.build();
 
 	frame_manager.max_frames_in_flight = std::min(frame_manager.swapchain.image_count(), _max_frames_in_flight);
-
-	frame_manager.framebuffers.resize(frame_manager.swapchain.image_count());
 
 	return frame_manager;
 }

@@ -34,8 +34,12 @@ private:
 
 	std::vector<vk::Framebuffer> framebuffers{};
 
+	bool resize_signaled{ false };
+
 public:
 	FrameManager() = default;
+
+	inline VkExtent2D get_framebuffer_extent() const { return swapchain.extent(); }
 
 	vk::Attachment get_swapchain_attachment() const;
 
@@ -45,6 +49,12 @@ public:
 	inline Frame* get_current_frame() { return &frames[in_flight_index]; }
 
 	void draw_frame();
+
+	inline void signal_resize() { resize_signaled = true; }
+
+private:
+	void create_framebuffers();
+	void recreate();
 };
 
 class FrameManagerBuilder {

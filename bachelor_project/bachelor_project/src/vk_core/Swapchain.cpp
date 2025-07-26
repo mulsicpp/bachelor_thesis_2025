@@ -94,6 +94,65 @@ namespace vk {
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
+	VkSwapchainCreateInfoKHR Swapchain::get_swapchain_create_info(const VkSurfaceCapabilitiesKHR& capabilities) const {
+		
+		uint32_t image_count = capabilities.minImageCount + 1;
+		if (capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount) {
+			image_count = capabilities.maxImageCount;
+		}
+		
+		VkSwapchainCreateInfoKHR create_info{};
+		create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		create_info.surface = Context::get()->get_surface();
+
+		create_info.minImageCount = image_count;
+		create_info.imageFormat = _surface_format.format;
+		create_info.imageColorSpace = _surface_format.colorSpace;
+		create_info.imageExtent = _extent;
+		create_info.imageArrayLayers = 1;
+		create_info.imageUsage = _image_usage;
+
+		const auto& cmd_manager = Context::get()->get_command_manager();
+
+		auto families = cmd_manager.get_required_families({ QueueType::Graphics, QueueType::Present });
+
+		create_info.imageSharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
+		create_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
+		create_info.pQueueFamilyIndices = families.data();
+
+		create_info.preTransform = capabilities.currentTransform;
+		create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		create_info.presentMode = _present_mode;
+		create_info.clipped = VK_TRUE;
+		create_info.oldSwapchain = handle();
+
+		return create_info;
+	}
+
+	void Swapchain::create_images() {
+
+		const auto device = Context::get()->get_device();
+
+		uint32_t image_count{};
+		vkGetSwapchainImagesKHR(device, swapchain.get(), &image_count, nullptr);
+		std::vector<VkImage> swapchain_image_handles{ image_count };
+		vkGetSwapchainImagesKHR(device, swapchain.get(), &image_count, swapchain_image_handles.data());
+
+		_images = {};
+
+		for (const auto image_handle : swapchain_image_handles) {
+			Image image;
+
+			*image.allocation = VK_NULL_HANDLE;
+			*image.image = { image_handle, false };
+
+			image._format = _surface_format.format;
+			image._extent = _extent;
+			dbg_log("swapchain image: %p", (void*)image_handle);
+			_images.push_back(std::move(image).to_shared());
+		}
+	}
+
 	Swapchain SwapchainBuilder::build() {
 		Swapchain swapchain;
 
@@ -124,34 +183,12 @@ namespace vk {
 			extent.height = std::clamp(extent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 		}
 
-		uint32_t image_count = capabilities.minImageCount + 1;
-		if (capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount) {
-			image_count = capabilities.maxImageCount;
-		}
+		swapchain._surface_format = surface_format;
+		swapchain._present_mode = present_mode;
+		swapchain._image_usage = _image_usage;
+		swapchain._extent = extent;
 
-		VkSwapchainCreateInfoKHR create_info{};
-		create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		create_info.surface = surface;
-
-		create_info.minImageCount = image_count;
-		create_info.imageFormat = surface_format.format;
-		create_info.imageColorSpace = surface_format.colorSpace;
-		create_info.imageExtent = extent;
-		create_info.imageArrayLayers = 1;
-		create_info.imageUsage = _image_usage;
-
-		const auto& cmd_manager = context.get_command_manager();
-
-		auto families = cmd_manager.get_required_families({ QueueType::Graphics, QueueType::Present });
-
-		create_info.imageSharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
-		create_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
-		create_info.pQueueFamilyIndices = families.data();
-
-		create_info.preTransform = capabilities.currentTransform;
-		create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		create_info.presentMode = present_mode;
-		create_info.clipped = VK_TRUE;
+		auto create_info = swapchain.get_swapchain_create_info(capabilities);
 
 		const auto device = context.get_device();
 
@@ -159,29 +196,48 @@ namespace vk {
 			throw std::runtime_error("Swapchain creation failed!");
 		}
 
-		vkGetSwapchainImagesKHR(device, swapchain.swapchain.get(), &image_count, nullptr);
-		std::vector<VkImage> swapchain_image_handles{ image_count };
-		vkGetSwapchainImagesKHR(device, swapchain.swapchain.get(), &image_count, swapchain_image_handles.data());
+		swapchain.create_images();
 
-		swapchain._surface_format = surface_format;
-		swapchain._present_mode = present_mode;
-		swapchain._image_usage = _image_usage;
+		return swapchain;
+	}
 
+	Swapchain SwapchainBuilder::rebuild(Swapchain&& swapchain) {
+		const auto& context = *Context::get();
+		const auto physical_device = context.get_physical_device();
+		const auto surface = context.get_surface();
+
+		VkSurfaceCapabilitiesKHR capabilities;
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities);
+
+		VkExtent2D extent;
+		if (capabilities.currentExtent.width != UINT32_MAX) {
+			extent = capabilities.currentExtent;
+		}
+		else {
+			int width, height;
+			glfwGetFramebufferSize(Context::get()->get_window(), &width, &height);
+
+			extent = {
+				static_cast<uint32_t>(width),
+				static_cast<uint32_t>(height)
+			};
+			extent.width = std::clamp(extent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+			extent.height = std::clamp(extent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+		}
 		swapchain._extent = extent;
 
-		swapchain._images = {};
+		auto create_info = swapchain.get_swapchain_create_info(capabilities);
 
-		for (const auto image_handle : swapchain_image_handles) {
-			Image image;
+		const auto device = context.get_device();
 
-			*image.allocation = VK_NULL_HANDLE;
-			*image.image = { image_handle, false };
-
-			image._format = surface_format.format;
-			image._extent = extent;
-			dbg_log("swapchain image: %p", (void*)image_handle);
-			swapchain._images.push_back(std::move(image).to_shared());
+		Handle<VkSwapchainKHR> handle{};
+		if (vkCreateSwapchainKHR(device, &create_info, nullptr, &*handle) != VK_SUCCESS) {
+			throw std::runtime_error("Swapchain creation failed!");
 		}
+
+		swapchain.swapchain = std::move(handle);
+
+		swapchain.create_images();
 
 		return swapchain;
 	}

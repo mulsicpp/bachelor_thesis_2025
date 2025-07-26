@@ -58,6 +58,10 @@ namespace vk {
 		inline VkImageUsageFlags image_usage() const { return _image_usage; }
 
 		inline VkExtent2D extent() const { return _extent; }
+
+	private:
+		VkSwapchainCreateInfoKHR get_swapchain_create_info(const VkSurfaceCapabilitiesKHR& capabilities) const;
+		void create_images();
 	};
 
 	class SwapchainBuilder {
@@ -81,5 +85,6 @@ namespace vk {
 		// inline Ref extent(VkExtent2D extent) { _extent = extent; return *this; }
 
 		Swapchain build();
+		Swapchain rebuild(Swapchain&& swapchain);
 	};
 }

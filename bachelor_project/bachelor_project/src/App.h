@@ -16,6 +16,8 @@ struct AppCamera : Camera {
 	float theta{ 0.0f };
 	float phi{ 0.0f };
 
+	float aspect{ 1.0f };
+
 	CameraUBO as_camera_ubo() const override;
 };
 
@@ -34,4 +36,9 @@ public:
 	~App();
 
 	void run();
+
+	static inline void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
+		auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
+		app->frame_manager.signal_resize();
+	}
 };

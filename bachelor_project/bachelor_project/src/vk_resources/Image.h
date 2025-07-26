@@ -17,7 +17,7 @@ namespace vk {
 
 	class Image : public utils::Move, public ptr::ToShared<Image> {
 		friend class SwapchainDeprecated;
-		friend class SwapchainBuilder;
+		friend class Swapchain;
 	private:
 		Handle<VmaAllocation> allocation{};
 		Handle<ImageHandle> image{};
