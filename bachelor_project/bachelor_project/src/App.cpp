@@ -6,7 +6,15 @@
 #define APP_NAME "Raytracing App"
 
 CameraUBO AppCamera::as_camera_ubo() const {
-    return CameraUBO{};
+    glm::mat4 view = glm::mat4{ 1.0f };
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -distance));
+    view = glm::rotate(view, phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
+    view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
+    view = glm::translate(view, -center);
+
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1280.f / 720.f, 0.1f, 20.0f);
+
+    return CameraUBO{ view, proj };
 }
 
 App::App() {
@@ -46,7 +54,10 @@ void App::run() {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         Frame& frame = *frame_manager.get_current_frame();
-        frame.p_camera_ubo->view = glm::lookAt(glm::vec3(-3.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        camera.theta = glm::pi<float>() / 4.0f;
+        camera.phi = glm::pi<float>() / 4.0f;
+        *frame.p_camera_ubo = camera.as_camera_ubo();
         frame_manager.draw_frame();
     }
 

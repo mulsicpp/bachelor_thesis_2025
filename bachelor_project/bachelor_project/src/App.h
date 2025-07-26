@@ -10,22 +10,24 @@
 #include "scene/Camera.h"
 
 struct AppCamera : Camera {
-	glm::vec3 center;
+	glm::vec3 center{ 0.0 };
 
-	float distance;
-	float theta;
-	float phi;
+	float distance{ 4.0f };
+	float theta{ 0.0f };
+	float phi{ 0.0f };
 
 	CameraUBO as_camera_ubo() const override;
 };
 
 class App : public utils::Move {
 private:
-	GLFWwindow* window;
+	GLFWwindow* window{};
 
-	FrameManager frame_manager;
+	AppCamera camera{};
 
-	ptr::Shared<Rasterizer> rasterizer;
+	FrameManager frame_manager{};
+
+	ptr::Shared<Rasterizer> rasterizer{};
 
 public:
 	App();
