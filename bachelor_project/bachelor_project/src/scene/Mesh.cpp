@@ -3,14 +3,14 @@
 #include "vk_core/format.h"
 
 static const std::vector<Vertex> cube_vertices = {
-	{{-0.5f, -0.5f, +0.5f}, {0.0f, 0.0f, 1.0f}},
-	{{+0.5f, -0.5f, +0.5f}, {1.0f, 0.0f, 1.0f}},
-	{{+0.5f, +0.5f, +0.5f}, {1.0f, 1.0f, 1.0f}},
-	{{-0.5f, +0.5f, +0.5f}, {0.0f, 1.0f, 1.0f}},
-	{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
-	{{+0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	{{+0.5f, +0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}},
-	{{-0.5f, +0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+	{{-0.5f, -0.5f, +0.5f}},
+	{{+0.5f, -0.5f, +0.5f}},
+	{{+0.5f, +0.5f, +0.5f}},
+	{{-0.5f, +0.5f, +0.5f}},
+	{{-0.5f, -0.5f, -0.5f}},
+	{{+0.5f, -0.5f, -0.5f}},
+	{{+0.5f, +0.5f, -0.5f}},
+	{{-0.5f, +0.5f, -0.5f}},
 };
 
 const std::vector<uint16_t> cube_indices = {
@@ -29,12 +29,7 @@ vk::VertexInput Mesh::get_vertex_input() {
 		.add_attribute_info(vk::VertexAttributeInfo()
 			.set_binding(0)
 			.set_format(vk::format_of_type<decltype(Vertex::position)>())
-			.set_offset(offsetof(Vertex, position)))
-
-		.add_attribute_info(vk::VertexAttributeInfo()
-			.set_binding(0)
-			.set_format(vk::format_of_type<decltype(Vertex::color)>())
-			.set_offset(offsetof(Vertex, color)));
+			.set_offset(offsetof(Vertex, position)));
 }
 
 Mesh Mesh::create_cube() {

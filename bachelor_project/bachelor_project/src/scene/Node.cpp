@@ -1,11 +1,11 @@
 #include "Node.h"
 
 void Node::update_global_transfrom(glm::mat4 parent_transform) {
-	if (raw_transform) {
-		global_transform = parent_transform * transform.raw.to_mat();
+	if (transform.raw) {
+		global_transform = parent_transform * transform.transform.raw.to_mat();
 	}
 	else {
-		global_transform = parent_transform * transform.matrix;
+		global_transform = parent_transform * transform.transform.matrix;
 	}
 
 	for (auto& child : children) {

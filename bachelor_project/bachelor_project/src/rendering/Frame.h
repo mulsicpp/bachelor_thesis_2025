@@ -4,6 +4,7 @@
 
 #include "scene/Camera.h"
 #include "scene/Node.h"
+#include "scene/Scene.h"
 
 class Rasterizer;
 
@@ -18,4 +19,5 @@ public:
 	CameraUBO* p_camera_ubo;
 	uint32_t model_count;
 	ModelUBO* p_model_ubo;
+	ptr::Shared<Scene> scene;
 };

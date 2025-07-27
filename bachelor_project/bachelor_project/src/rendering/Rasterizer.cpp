@@ -8,33 +8,35 @@
 
 
 void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
+	std::vector<glm::mat4> transforms{};
 
-	const uint32_t MESH_COUNT = 8;
-	if (frame->model_count != MESH_COUNT) {
+	auto iterator = frame->scene->iter();
+
+	while (iterator.has_next()) {
+		const auto& node = iterator.next();
+		transforms.push_back(node->global_transform);
+	}
+
+	if (frame->model_count < transforms.size()) {
 		frame->model_uniform_buffer = vk::BufferBuilder()
 			.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
 			.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 			.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
-			.size(sizeof(ModelUBO) * MESH_COUNT)
+			.size(sizeof(ModelUBO) * transforms.size())
 			.build().to_shared();
 		frame->p_model_ubo = frame->model_uniform_buffer->mapped_data<ModelUBO>();
-		frame->model_count = MESH_COUNT;
+		frame->model_count = transforms.size();
 
 		frame->descriptor_pool.update_set_binding(1, 0, { frame->model_uniform_buffer, 0, sizeof(ModelUBO) });
 
 		dbg_log("descriptor set binding was updated!");
 	}
 
-	glm::mat4 scale = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 1.6f });
+	glm::mat4 scale = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 0.03f });
 
-	frame->p_model_ubo[0].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, +1.0f, +1.0f }) * scale;
-	frame->p_model_ubo[1].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, +1.0f, +1.0f }) * scale;
-	frame->p_model_ubo[2].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, -1.0f, +1.0f }) * scale;
-	frame->p_model_ubo[3].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, -1.0f, +1.0f }) * scale;
-	frame->p_model_ubo[4].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, +1.0f, -1.0f }) * scale;
-	frame->p_model_ubo[5].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, +1.0f, -1.0f }) * scale;
-	frame->p_model_ubo[6].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ +1.0f, -1.0f, -1.0f }) * scale;
-	frame->p_model_ubo[7].transform = glm::translate(glm::mat4{ 1.0f }, glm::vec3{ -1.0f, -1.0f, -1.0f }) * scale;
+	for (uint32_t i = 0; i < transforms.size(); i++) {
+		frame->p_model_ubo[i].transform = transforms[i] * scale;
+	}
 
 
 	framebuffer->cmd_begin_pass(cmd_buf, pass_begin_info);
@@ -51,7 +53,7 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	std::vector<uint32_t> offsets{};
 	offsets.resize(1);
-	for (uint32_t i = 0; i < MESH_COUNT; i++) {
+	for (uint32_t i = 0; i < transforms.size(); i++) {
 		offsets[0] = sizeof(ModelUBO) * i;
 		frame->descriptor_pool.cmd_bind_set(cmd_buf, 1, offsets);
 

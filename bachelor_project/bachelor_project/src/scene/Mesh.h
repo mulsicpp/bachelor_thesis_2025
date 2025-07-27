@@ -10,7 +10,6 @@
 
 struct Vertex {
 	glm::vec3 position;
-	glm::vec3 color;
 };
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {

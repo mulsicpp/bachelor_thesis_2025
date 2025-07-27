@@ -7,12 +7,15 @@
 
 #include <algorithm>
 
+#include "scene/Scene.h"
+
 CameraUBO AppCamera::as_camera_ubo() const {
     glm::mat4 view = glm::mat4{ 1.0f };
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -distance));
     view = glm::rotate(view, phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
     view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
     view = glm::translate(view, -center);
+    view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, 1.0f });
 
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near, far);
 
@@ -53,6 +56,9 @@ App::App() {
         .to_shared();
 
     frame_manager.bind_rasterizer(rasterizer);
+
+    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
+    scene->update();
 }
 
 App::~App() {
@@ -73,6 +79,7 @@ void App::run() {
         camera.aspect = ((float)width) / ((float)height);
 
         *frame.p_camera_ubo = camera.as_camera_ubo();
+        frame.scene = scene;
         frame_manager.draw_frame();
     }
 

@@ -8,6 +8,7 @@
 #include "rendering/Rasterizer.h"
 
 #include "scene/Camera.h"
+#include "scene/Scene.h"
 
 struct AppCamera : Camera {
 	glm::vec3 center{ 0.0 };
@@ -32,6 +33,7 @@ private:
 	FrameManager frame_manager{};
 
 	ptr::Shared<Rasterizer> rasterizer{};
+	ptr::Shared<Scene> scene{};
 
 public:
 	App();
