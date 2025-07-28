@@ -7,6 +7,8 @@
 #include "utils/dbg_log.h"
 #include "utils/load_file.h"
 
+#include "vk_resources/SubBuffer.h"
+
 #include <fstream>
 #include <filesystem>
 #include <stdexcept>
@@ -28,8 +30,11 @@ static struct GLTFData {
 	cgltf_data* data{};
 
 	std::vector<ptr::Shared<vk::Buffer>> buffers{};
+	std::vector<ptr::Shared<vk::SubBuffer>> buffer_views{};
 	std::vector<ptr::Shared<Node>> nodes{};
 
+	void create_buffers();
+	void create_buffer_views();
 	void create_nodes();
 	std::vector<ptr::Shared<Node>> get_scene_nodes();
 };
@@ -51,6 +56,8 @@ Scene Scene::load(const std::string& file_path) {
 		throw std::runtime_error("GLTF buffer loading failed for '" + file_path + "': " + GLTF_ERROR_TEXTS[result]);
 	}
 
+	gltf.create_buffers();
+	gltf.create_buffer_views();
 	gltf.create_nodes();
 
 	Scene scene{};
@@ -62,6 +69,36 @@ Scene Scene::load(const std::string& file_path) {
 }
 
 
+
+void GLTFData::create_buffers() {
+	buffers.resize(data->buffers_count);
+
+	for (uint32_t i = 0; i < buffers.size(); i++) {
+		buffers[i] = vk::BufferBuilder()
+			.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+			.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
+			.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+			.size(data->buffers[i].size)
+			.data(data->buffers[i].data)
+			.build().to_shared();
+	}
+	dbg_log("created scene buffers");
+}
+
+void GLTFData::create_buffer_views() {
+	buffer_views.resize(data->buffer_views_count);
+
+	for (uint32_t i = 0; i < buffer_views.size(); i++) {
+		auto* buffer_view = &data->buffer_views[i];
+		buffer_views[i] = vk::SubBuffer::from(
+			buffers[cgltf_buffer_index(data, buffer_view->buffer)],
+			buffer_view->offset,
+			buffer_view->size,
+			buffer_view->stride)
+			.to_shared();
+	}
+	dbg_log("created scene buffer views");
+}
 
 void GLTFData::create_nodes() {
 	nodes.resize(data->nodes_count);

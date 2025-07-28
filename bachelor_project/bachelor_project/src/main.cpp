@@ -24,8 +24,6 @@ int main(void) {
 	try {
 		utils::LibManager lib_manager{};
 
-		auto scene = Scene::load("assets/scenes/Avocado/glTF/Avocado.gltf");
-
 		App app{};
 		app.run();
 	}
