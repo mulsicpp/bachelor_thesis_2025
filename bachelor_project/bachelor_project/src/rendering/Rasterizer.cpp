@@ -45,10 +45,8 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
 
-	VkDeviceSize offset = 0;
-	VkBuffer vertex_buffer = cube.vertex_buffer.handle();
-	vkCmdBindVertexBuffers(cmd_buf.handle(), 0, 1, &vertex_buffer, &offset);
-	vkCmdBindIndexBuffer(cmd_buf.handle(), cube.index_buffer.handle(), 0, VK_INDEX_TYPE_UINT16);
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, &cube.vertex_buffer);
+	vk::Pipeline::cmd_bind_index_buffer(cmd_buf, &cube.index_buffer, VK_INDEX_TYPE_UINT16);
 
 
 	std::vector<uint32_t> offsets{};
@@ -57,7 +55,7 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 		offsets[0] = sizeof(ModelUBO) * i;
 		frame->descriptor_pool.cmd_bind_set(cmd_buf, 1, offsets);
 
-		vkCmdDrawIndexed(cmd_buf.handle(), 36, 1, 0, 0, 0);
+		vk::Pipeline::cmd_draw_indexed(cmd_buf, 36, 1);
 	}
 
 	framebuffer->cmd_end_pass(cmd_buf);

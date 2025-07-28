@@ -8,6 +8,8 @@
 #include "vk_core/Handle.h"
 #include "vk_core/CommandBuffer.h"
 
+#include "vk_resources/Buffer.h"
+
 #include "RenderPass.h"
 #include "Shader.h"
 #include "PipelineLayout.h"
@@ -34,6 +36,11 @@ namespace vk {
 		inline VkPipeline handle() const { return *pipeline; }
 
 		void cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport = { {0,0}, {UINT32_MAX, UINT32_MAX} }, const VkRect2D& scissor = { {0,0}, {UINT32_MAX, UINT32_MAX} });
+
+		static void cmd_bind_vertex_buffer(ReadyCommandBuffer cmd_buffer, uint32_t binding, const Buffer* buffer, VkDeviceSize offset = 0);
+		static void cmd_bind_index_buffer(ReadyCommandBuffer cmd_buffer, const Buffer* buffer, VkIndexType index_type, VkDeviceSize offset = 0);
+
+		static void cmd_draw_indexed(ReadyCommandBuffer cmd_buffer, uint32_t index_count, uint32_t instance_count, uint32_t first_index = 0, int32_t vertex_offset = 0, uint32_t first_instance = 0);
 	};
 
 	class PipelineBuilder {

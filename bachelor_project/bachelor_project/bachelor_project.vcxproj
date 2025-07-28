@@ -188,6 +188,7 @@
     <ClCompile Include="src\vk_resources\Buffer.cpp" />
     <ClCompile Include="src\vk_resources\Image.cpp" />
     <ClCompile Include="src\vk_resources\ImageView.cpp" />
+    <ClCompile Include="src\vk_resources\SubBuffer.cpp" />
     <ClCompile Include="src\vk_sync\Fence.cpp" />
     <ClCompile Include="src\vk_sync\Semaphore.cpp" />
   </ItemGroup>
@@ -229,6 +230,7 @@
     <ClInclude Include="src\vk_resources\Buffer.h" />
     <ClInclude Include="src\vk_resources\Image.h" />
     <ClInclude Include="src\vk_resources\ImageView.h" />
+    <ClInclude Include="src\vk_resources\SubBuffer.h" />
     <ClInclude Include="src\vk_sync\Fence.h" />
     <ClInclude Include="src\vk_sync\Semaphore.h" />
   </ItemGroup>

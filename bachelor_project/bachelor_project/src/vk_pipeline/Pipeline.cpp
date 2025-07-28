@@ -38,6 +38,21 @@ namespace vk {
         vkCmdSetScissor(cmd_buffer.handle(), 0, 1, &new_scissor);
     }
 
+    void Pipeline::cmd_bind_vertex_buffer(ReadyCommandBuffer cmd_buffer, uint32_t binding, const Buffer* buffer, VkDeviceSize offset) {
+        VkBuffer vertex_buffer = buffer->handle();
+        vkCmdBindVertexBuffers(cmd_buffer.handle(), binding, 1, &vertex_buffer, &offset);
+    }
+
+    void Pipeline::cmd_bind_index_buffer(ReadyCommandBuffer cmd_buffer, const Buffer* buffer, VkIndexType index_type, VkDeviceSize offset) {
+        vkCmdBindIndexBuffer(cmd_buffer.handle(), buffer->handle(), offset, index_type);
+    }
+
+    void Pipeline::cmd_draw_indexed(ReadyCommandBuffer cmd_buffer, uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) {
+        vkCmdDrawIndexed(cmd_buffer.handle(), index_count, instance_count, first_index, vertex_offset, first_instance);
+    }
+
+
+
 	PipelineBuilder::PipelineBuilder()
 		: _render_pass{}
 		, _shaders{}
