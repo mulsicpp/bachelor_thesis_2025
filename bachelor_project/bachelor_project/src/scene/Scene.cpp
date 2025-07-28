@@ -24,19 +24,47 @@ const std::vector<const char*> GLTF_ERROR_TEXTS = {
 	"legacy_gltf",
 };
 
+static struct GLTFData {
+	cgltf_data* data{};
+
+	std::vector<ptr::Shared<vk::Buffer>> buffers{};
+	std::vector<ptr::Shared<Node>> nodes{};
+
+	void create_nodes();
+	std::vector<ptr::Shared<Node>> get_scene_nodes();
+};
+
 Scene Scene::load(const std::string& file_path) {
-	Scene scene;
-
 	cgltf_options options = {};
-	cgltf_data* data = nullptr;
-	cgltf_result result = cgltf_parse_file(&options, file_path.c_str(), &data);
+	GLTFData gltf;
 
+	cgltf_result result = cgltf_parse_file(&options, file_path.c_str(), &gltf.data);
 	if (result != cgltf_result_success)
 	{
 		throw std::runtime_error("GLTF parsing failed for file '" + file_path + "': " + GLTF_ERROR_TEXTS[result]);
 	}
 
-	std::vector<ptr::Shared<Node>> nodes{ data->nodes_count };
+	result = cgltf_load_buffers(&options, gltf.data, file_path.c_str());
+
+	if (result != cgltf_result_success)
+	{
+		throw std::runtime_error("GLTF buffer loading failed for '" + file_path + "': " + GLTF_ERROR_TEXTS[result]);
+	}
+
+	gltf.create_nodes();
+
+	Scene scene{};
+	scene.nodes = gltf.get_scene_nodes();
+
+	cgltf_free(gltf.data);
+
+	return scene;
+}
+
+
+
+void GLTFData::create_nodes() {
+	nodes.resize(data->nodes_count);
 	for (auto& node : nodes) {
 		node = ptr::make_shared<Node>(Node{});
 	}
@@ -72,9 +100,9 @@ Scene Scene::load(const std::string& file_path) {
 		}
 		*nodes[i] = std::move(node);
 	}
+}
 
-
-
+std::vector<ptr::Shared<Node>> GLTFData::get_scene_nodes() {
 	if (data->scene == nullptr) {
 		dbg_log("No scene in gltf");
 		return {};
@@ -86,9 +114,5 @@ Scene Scene::load(const std::string& file_path) {
 		scene_nodes[i] = nodes[node_index];
 	}
 
-	scene.nodes = scene_nodes;
-
-	cgltf_free(data);
-
-	return scene;
+	return scene_nodes;
 }
