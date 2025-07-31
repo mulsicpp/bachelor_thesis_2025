@@ -45,8 +45,8 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
 
-	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, &cube.vertex_buffer);
-	vk::Pipeline::cmd_bind_index_buffer(cmd_buf, &cube.index_buffer, VK_INDEX_TYPE_UINT16);
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, cube.primitives[0].positions.buffer().get());
+	vk::Pipeline::cmd_bind_index_buffer(cmd_buf, cube.primitives[0].indices.buffer().get(), Primitive::get_index_type());
 
 
 	std::vector<uint32_t> offsets{};
@@ -155,7 +155,7 @@ Rasterizer RasterizerBuilder::build() {
 		.add_shader(std::move(vertex_shader))
 		.add_shader(std::move(fragment_shader))
 		.layout(rasterizer.pipeline_layout)
-		.vertex_input(Mesh::get_vertex_input())
+		.vertex_input(Primitive::get_vertex_input())
 		.build();
 
 	dbg_log("created pipeline");

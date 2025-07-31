@@ -22,7 +22,7 @@ namespace vk {
 		Handle<VmaAllocation> allocation{};
 		Handle<VkBuffer> buffer{};
 
-		uint32_t _size{ 0 };
+		VkDeviceSize _size{ 0 };
 		void* _mapped_data{ nullptr };
 		bool host_coherent{ false };
 
@@ -31,7 +31,7 @@ namespace vk {
 
 		inline VkBuffer handle() const { return *buffer; }
 
-		inline uint32_t size() const { return _size; }
+		inline VkDeviceSize size() const { return _size; }
 		template<class T = uint8_t>
 		inline T* mapped_data() { return (T*)_mapped_data; }
 		inline bool is_host_coherent() const { return host_coherent; }
@@ -49,7 +49,7 @@ namespace vk {
 		using Ref = BufferBuilder&;
 
 	private:
-		uint32_t _size;
+		VkDeviceSize _size;
 		void* _data;
 		VkBufferUsageFlags _usage;
 		VmaMemoryUsage _memory_usage;
@@ -59,7 +59,7 @@ namespace vk {
 	public:
 		BufferBuilder();
 
-		inline Ref size(uint32_t size) { _size = size; return *this; }
+		inline Ref size(VkDeviceSize size) { _size = size; return *this; }
 		inline Ref data(void* data) { _data = data; return *this; }
 
 		inline Ref usage(VkBufferUsageFlags usage) { _usage = usage; return *this; }

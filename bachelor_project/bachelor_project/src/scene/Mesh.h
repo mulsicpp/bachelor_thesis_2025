@@ -5,17 +5,49 @@
 #include "utils/move.h"
 #include "utils/ptr.h"
 
-#include "vk_resources/Buffer.h"
+#include "vk_resources/SubBuffer.h"
 #include "vk_pipeline/VertexInput.h"
 
-struct Vertex {
-	glm::vec3 position;
+
+struct Primitive {
+	using PositionType = glm::vec3;
+	using UVType = glm::vec2;
+	using ColorType = glm::vec<3, uint8_t>;
+
+	using IndexType = uint32_t;
+
+	vk::SubBuffer positions;
+	vk::SubBuffer uvs;
+	vk::SubBuffer colors;
+
+	vk::SubBuffer indices;
+
+	enum class Topology {
+		Triangles,
+		TriangleStrip,
+		TriangleFan,
+	} topology{ Topology::Triangles };
+
+	static vk::VertexInput get_vertex_input();
+
+	inline static constexpr VkIndexType get_index_type() {
+		return sizeof(IndexType) == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+	}
+
+	inline VkPrimitiveTopology get_vk_topology() const {
+		switch (topology) {
+		case Topology::Triangles:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		case Topology::TriangleStrip:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+		case Topology::TriangleFan:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+		}
+	}
 };
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
-	vk::Buffer vertex_buffer{};
-	vk::Buffer index_buffer{};
+	std::vector<Primitive> primitives;
 
-	static vk::VertexInput get_vertex_input();
 	static Mesh create_cube();
 };

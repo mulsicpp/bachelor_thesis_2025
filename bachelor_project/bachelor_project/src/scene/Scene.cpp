@@ -29,12 +29,11 @@ const std::vector<const char*> GLTF_ERROR_TEXTS = {
 static struct GLTFData {
 	cgltf_data* data{};
 
-	std::vector<ptr::Shared<vk::Buffer>> buffers{};
-	std::vector<ptr::Shared<vk::SubBuffer>> buffer_views{};
+	std::vector<ptr::Shared<Mesh>> meshes{};
+
 	std::vector<ptr::Shared<Node>> nodes{};
 
-	void create_buffers();
-	void create_buffer_views();
+	void create_meshes();
 	void create_nodes();
 	std::vector<ptr::Shared<Node>> get_scene_nodes();
 };
@@ -56,8 +55,7 @@ Scene Scene::load(const std::string& file_path) {
 		throw std::runtime_error("GLTF buffer loading failed for '" + file_path + "': " + GLTF_ERROR_TEXTS[result]);
 	}
 
-	gltf.create_buffers();
-	gltf.create_buffer_views();
+	gltf.create_meshes();
 	gltf.create_nodes();
 
 	Scene scene{};
@@ -70,34 +68,32 @@ Scene Scene::load(const std::string& file_path) {
 
 
 
-void GLTFData::create_buffers() {
-	buffers.resize(data->buffers_count);
+template<class T>
+struct AttributeData {
+	ptr::Shared<vk::Buffer> buffer{ ptr::make_shared<vk::Buffer>(vk::Buffer{}) };
+	std::vector<T> data{};
+	VkDeviceSize current_offset{};
 
-	for (uint32_t i = 0; i < buffers.size(); i++) {
-		buffers[i] = vk::BufferBuilder()
-			.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
-			.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
-			.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-			.size(data->buffers[i].size)
-			.data(data->buffers[i].data)
-			.build().to_shared();
+	inline uint32_t byte_offset() const { return sizeof(T) * current_offset; }
+};
+
+void GLTFData::create_meshes() {
+	meshes.resize(data->meshes_count);
+
+	AttributeData<glm::vec3> position_attr;
+	AttributeData<glm::vec2> uv_attr;
+	AttributeData<glm::vec<3, uint8_t>> color_attr;
+	AttributeData<uint32_t> index_attr;
+
+	AttributeData<uint8_t> garbage_attr;
+
+	for (uint32_t i = 0; i < meshes.size(); i++) {
+		auto* gltf_mesh = &data->meshes[i];
+
+		for (uint32_t j = 0; j < gltf_mesh->primitives_count; j++) {
+
+		}
 	}
-	dbg_log("created scene buffers");
-}
-
-void GLTFData::create_buffer_views() {
-	buffer_views.resize(data->buffer_views_count);
-
-	for (uint32_t i = 0; i < buffer_views.size(); i++) {
-		auto* buffer_view = &data->buffer_views[i];
-		buffer_views[i] = vk::SubBuffer::from(
-			buffers[cgltf_buffer_index(data, buffer_view->buffer)],
-			buffer_view->offset,
-			buffer_view->size,
-			buffer_view->stride)
-			.to_shared();
-	}
-	dbg_log("created scene buffer views");
 }
 
 void GLTFData::create_nodes() {
