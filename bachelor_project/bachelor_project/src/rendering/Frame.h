@@ -12,12 +12,9 @@ class Frame : public utils::Move, public ptr::ToShared<Frame> {
 	friend class Rasterizer;
 private:
 	ptr::Shared<vk::Buffer> camera_uniform_buffer;
-	ptr::Shared<vk::Buffer> model_uniform_buffer;
 	vk::DescriptorPool descriptor_pool{};
 
 public:
 	CameraUBO* p_camera_ubo;
-	uint32_t model_count;
-	ModelUBO* p_model_ubo;
 	ptr::Shared<Scene> scene;
 };

@@ -11,35 +11,6 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 	std::vector<glm::mat4> transforms{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
 
-	auto iterator = frame->scene->iter();
-
-	while (iterator.has_next()) {
-		const auto& node = iterator.next();
-		transforms.push_back(node->global_transform);
-		meshes.push_back(node->mesh);
-	}
-
-	if (frame->model_count < transforms.size()) {
-		frame->model_uniform_buffer = vk::BufferBuilder()
-			.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-			.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
-			.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
-			.size(sizeof(ModelUBO) * transforms.size())
-			.build().to_shared();
-		frame->p_model_ubo = frame->model_uniform_buffer->mapped_data<ModelUBO>();
-		frame->model_count = transforms.size();
-
-		frame->descriptor_pool.update_set_binding(1, 0, { frame->model_uniform_buffer, 0, sizeof(ModelUBO) });
-
-		dbg_log("descriptor set binding was updated!");
-	}
-
-	glm::mat4 scale = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 0.03f });
-
-	for (uint32_t i = 0; i < transforms.size(); i++) {
-		frame->p_model_ubo[i].transform = transforms[i];
-	}
-
 
 	framebuffer->cmd_begin_pass(cmd_buf, pass_begin_info);
 
@@ -47,24 +18,19 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
 
+	auto iterator = frame->scene->iter();
+	while (iterator.has_next()) {
+		const auto& node = iterator.next();
 
-
-	std::vector<uint32_t> offsets{};
-	offsets.resize(1);
-	for (uint32_t i = 0; i < transforms.size(); i++) {
-		offsets[0] = sizeof(ModelUBO) * i;
-		frame->descriptor_pool.cmd_bind_set(cmd_buf, 1, offsets);
-
-		// vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, cube.primitives[0].positions.buffer().get());
-		// vk::Pipeline::cmd_bind_index_buffer(cmd_buf, cube.primitives[0].indices.buffer().get(), Primitive::get_index_type());
-
-		// vk::Pipeline::cmd_draw_indexed(cmd_buf, 36, 1);
-
-		if (!meshes[i]) {
+		const auto& mesh = node->mesh;
+		if (!mesh) {
 			continue;
 		}
 
-		for (const auto& primitive : meshes[i]->primitives) {
+		const auto model_ubo = node->as_model_ubo();
+		pipeline.cmd_push_constant(cmd_buf, &model_ubo);
+
+		for (const auto& primitive : mesh->primitives) {
 			vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, primitive.positions.buffer().get(), primitive.positions.offset());
 			vk::Pipeline::cmd_bind_index_buffer(cmd_buf, primitive.indices.buffer().get(), Primitive::get_index_type(), primitive.indices.offset());
 
@@ -88,23 +54,11 @@ Frame Rasterizer::create_frame() const {
 		.build().to_shared();
 	frame.p_camera_ubo = frame.camera_uniform_buffer->mapped_data<CameraUBO>();
 
-	frame.model_uniform_buffer = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-		.queue_types({ vk::QueueType::Graphics })
-		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
-		.size(sizeof(ModelUBO))
-		.build().to_shared();
-	frame.p_model_ubo = frame.model_uniform_buffer->mapped_data<ModelUBO>();
-	frame.model_count = 1;
-
 	frame.descriptor_pool = vk::DescriptorPoolBuilder()
 		.pipeline_layout(pipeline_layout)
 		.add_set(vk::DescriptorSetInfo()
 			.set_index(0)
 			.set_binding(0, frame.camera_uniform_buffer))
-		.add_set(vk::DescriptorSetInfo()
-			.set_index(1)
-			.set_binding(0, { frame.model_uniform_buffer, 0, sizeof(ModelUBO) }))
 		.build();
 
 	return frame;
@@ -156,11 +110,9 @@ Rasterizer RasterizerBuilder::build() {
 				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 				.set_stage_flags(VK_SHADER_STAGE_VERTEX_BIT))
 			.build())
-		.add_layout(vk::DescriptorSetLayoutBuilder()
-			.add_binding(vk::DescriptorSetLayoutBinding()
-				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
-				.set_stage_flags(VK_SHADER_STAGE_VERTEX_BIT))
-			.build())
+		.push_constant(vk::PushConstant()
+			.add_stage_flag(VK_SHADER_STAGE_VERTEX_BIT)
+			.set_size(sizeof(ModelUBO)))
 		.build()
 		.to_shared();
 

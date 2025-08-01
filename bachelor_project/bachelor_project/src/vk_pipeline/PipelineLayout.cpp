@@ -40,6 +40,16 @@ namespace vk {
 		return layout;
 	}
 
+	VkPushConstantRange PushConstant::as_vk_struct() const {
+		VkPushConstantRange vk_struct{};
+
+		vk_struct.offset = 0;
+		vk_struct.size = size;
+		vk_struct.stageFlags = stage_flags;
+
+		return vk_struct;
+	}
+
 	PipelineLayout PipelineLayoutBuilder::build() const {
 		PipelineLayout layout;
 
@@ -48,16 +58,22 @@ namespace vk {
 			vk_layouts[i] = _layouts[i]->handle();
 		}
 
+		auto vk_push_constant_range = _push_constant.as_vk_struct();
+
 		VkPipelineLayoutCreateInfo pipeline_layout_info{};
 		pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipeline_layout_info.setLayoutCount = static_cast<uint32_t>(vk_layouts.size());
 		pipeline_layout_info.pSetLayouts = vk_layouts.data();
+		pipeline_layout_info.pushConstantRangeCount = _push_constant.size > 0 ? 1 : 0;
+		pipeline_layout_info.pPushConstantRanges = _push_constant.size > 0 ? &vk_push_constant_range : nullptr;
+
 
 		if (vkCreatePipelineLayout(Context::get()->get_device(), &pipeline_layout_info, nullptr, &*layout.pipeline_layout) != VK_SUCCESS) {
 			throw std::runtime_error("Pipeline layout creation failed!");
 		}
 
 		layout._descriptor_set_layouts = _layouts;
+		layout._push_constant = _push_constant;
 
 		return layout;
 	}

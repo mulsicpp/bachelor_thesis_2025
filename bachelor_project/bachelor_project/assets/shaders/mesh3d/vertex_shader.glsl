@@ -5,7 +5,7 @@ layout(set = 0, binding = 0) uniform Camera {
     mat4 proj;
 } camera;
 
-layout(set = 1, binding = 0) uniform Model {
+layout(push_constant) uniform Model {
     mat4 transform;
 } model;
 

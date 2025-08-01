@@ -38,6 +38,10 @@ namespace vk {
         vkCmdSetScissor(cmd_buffer.handle(), 0, 1, &new_scissor);
     }
 
+    void Pipeline::cmd_push_constant(ReadyCommandBuffer cmd_buffer, const void* value) {
+        vkCmdPushConstants(cmd_buffer.handle(), layout->handle(), layout->push_constant().stage_flags, 0, layout->push_constant().size, value);
+    }
+
     void Pipeline::cmd_bind_vertex_buffer(ReadyCommandBuffer cmd_buffer, uint32_t binding, const Buffer* buffer, VkDeviceSize offset) {
         VkBuffer vertex_buffer = buffer->handle();
         vkCmdBindVertexBuffers(cmd_buffer.handle(), binding, 1, &vertex_buffer, &offset);

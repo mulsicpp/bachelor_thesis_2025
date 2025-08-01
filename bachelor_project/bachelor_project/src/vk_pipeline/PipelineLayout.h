@@ -62,6 +62,21 @@ namespace vk {
 		DescriptorSetLayout build() const;
 	};
 
+	struct PushConstant {
+		using Ref = PushConstant&;
+
+		uint32_t size{ 0 };
+		VkShaderStageFlags stage_flags{ 0 };
+
+		PushConstant() = default;
+
+		inline Ref set_size(uint32_t size) { this->size = size; return *this; }
+		inline Ref set_stage_flags(VkShaderStageFlags stage_flags) { this->stage_flags = stage_flags; return *this; }
+		inline Ref add_stage_flag(VkShaderStageFlagBits stage_flag) { this->stage_flags |= stage_flag; return *this; }
+
+		VkPushConstantRange as_vk_struct() const;
+	};
+
 	class PipelineLayoutBuilder;
 
 	class PipelineLayout : public utils::Move, public ptr::ToShared<PipelineLayout> {
@@ -69,12 +84,14 @@ namespace vk {
 	private:
 		Handle<VkPipelineLayout> pipeline_layout{};
 		std::vector<ptr::Shared<const DescriptorSetLayout>> _descriptor_set_layouts{};
+		PushConstant _push_constant{};
 
 	public:
 		PipelineLayout() = default;
 
 		inline VkPipelineLayout handle() const { return *pipeline_layout; }
 		inline const std::vector<ptr::Shared<const DescriptorSetLayout>>& descriptor_set_layouts() const { return _descriptor_set_layouts; }
+		inline const PushConstant& push_constant() const { return _push_constant; }
 	};
 
 	class PipelineLayoutBuilder {
@@ -83,6 +100,7 @@ namespace vk {
 
 	private:
 		std::vector<ptr::Shared<const DescriptorSetLayout>> _layouts{};
+		PushConstant _push_constant{};
 
 	public:
 		PipelineLayoutBuilder() = default;
@@ -90,6 +108,8 @@ namespace vk {
 		inline Ref layouts(const std::vector<ptr::Shared<const DescriptorSetLayout>>& layouts) { _layouts = layouts; return *this; }
 		inline Ref add_layout(DescriptorSetLayout&& layout) { _layouts.push_back(std::move(layout).to_shared()); return *this; }
 		inline Ref add_layout(const ptr::Shared<const DescriptorSetLayout>& layout) { _layouts.push_back(layout); return *this; }
+
+		inline Ref push_constant(const PushConstant& push_constant) { _push_constant = push_constant; return *this; }
 
 		PipelineLayout build() const;
 	};

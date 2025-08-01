@@ -57,7 +57,7 @@ App::App() {
 
     frame_manager.bind_rasterizer(rasterizer);
 
-    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/Avocado/glTF/Avocado.gltf"));
+    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     scene->update();
 }
 

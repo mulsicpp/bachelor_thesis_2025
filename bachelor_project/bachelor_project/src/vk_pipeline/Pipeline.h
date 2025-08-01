@@ -37,6 +37,8 @@ namespace vk {
 
 		void cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport = { {0,0}, {UINT32_MAX, UINT32_MAX} }, const VkRect2D& scissor = { {0,0}, {UINT32_MAX, UINT32_MAX} });
 
+		void cmd_push_constant(ReadyCommandBuffer cmd_buffer, const void* value);
+
 		static void cmd_bind_vertex_buffer(ReadyCommandBuffer cmd_buffer, uint32_t binding, const Buffer* buffer, VkDeviceSize offset = 0);
 		static void cmd_bind_index_buffer(ReadyCommandBuffer cmd_buffer, const Buffer* buffer, VkIndexType index_type, VkDeviceSize offset = 0);
 
