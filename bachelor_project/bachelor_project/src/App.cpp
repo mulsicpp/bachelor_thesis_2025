@@ -17,7 +17,7 @@ CameraUBO AppCamera::as_camera_ubo() const {
     view = glm::translate(view, -center);
     view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, -1.0f });
 
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near * distance * 0.2f, far);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near * distance, far * distance);
 
     return CameraUBO{ view, proj };
 }
@@ -56,8 +56,9 @@ App::App() {
         .to_shared();
 
     frame_manager.bind_rasterizer(rasterizer);
-
+    
     scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
+    // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
     scene->update();
 }
 

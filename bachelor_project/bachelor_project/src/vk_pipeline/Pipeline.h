@@ -43,6 +43,7 @@ namespace vk {
 		static void cmd_bind_index_buffer(ReadyCommandBuffer cmd_buffer, const Buffer* buffer, VkIndexType index_type, VkDeviceSize offset = 0);
 
 		static void cmd_draw_indexed(ReadyCommandBuffer cmd_buffer, uint32_t index_count, uint32_t instance_count, uint32_t first_index = 0, int32_t vertex_offset = 0, uint32_t first_instance = 0);
+		static void cmd_draw(ReadyCommandBuffer cmd_buffer, uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex = 0, uint32_t first_instance = 0);
 	};
 
 	class PipelineBuilder {

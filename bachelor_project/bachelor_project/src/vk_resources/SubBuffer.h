@@ -6,7 +6,7 @@
 namespace vk {
 	class SubBuffer : public ptr::ToShared<SubBuffer> {
 	private:
-		ptr::Shared<Buffer> _buffer;
+		ptr::Shared<Buffer> _buffer{};
 		VkDeviceSize _offset{ 0 };
 		VkDeviceSize _length{ VK_WHOLE_SIZE };
 		VkDeviceSize _stride{ 0 };

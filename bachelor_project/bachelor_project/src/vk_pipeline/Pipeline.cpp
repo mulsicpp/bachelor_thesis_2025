@@ -55,6 +55,10 @@ namespace vk {
         vkCmdDrawIndexed(cmd_buffer.handle(), index_count, instance_count, first_index, vertex_offset, first_instance);
     }
 
+    void Pipeline::cmd_draw(ReadyCommandBuffer cmd_buffer, uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) {
+        vkCmdDraw(cmd_buffer.handle(), vertex_count, instance_count, first_vertex, first_instance);
+    }
+
 
 
 	PipelineBuilder::PipelineBuilder()

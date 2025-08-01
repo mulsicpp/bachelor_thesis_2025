@@ -5,11 +5,15 @@
 #include "utils/move.h"
 #include "utils/ptr.h"
 
+#include "vk_core/CommandBuffer.h"
 #include "vk_resources/SubBuffer.h"
-#include "vk_pipeline/VertexInput.h"
+
+#include "vk_pipeline/Pipeline.h"
 
 struct Material {
-	glm::vec4 base_color;
+	static const ptr::Shared<Material> default_material;
+
+	glm::vec4 base_color = glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f };
 };
 
 struct Primitive {
@@ -19,17 +23,21 @@ struct Primitive {
 
 	using IndexType = uint32_t;
 
-	vk::SubBuffer positions;
-	vk::SubBuffer uvs;
-	vk::SubBuffer colors;
+	vk::SubBuffer positions{};
+	vk::SubBuffer uvs{};
+	vk::SubBuffer colors{};
 
-	vk::SubBuffer indices;
+	vk::SubBuffer indices{};
 
 	enum class Topology {
 		Triangles,
 		TriangleStrip,
 		TriangleFan,
 	} topology{ Topology::Triangles };
+
+	ptr::Shared<Material> material{};
+
+	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform) const;
 
 	static vk::VertexInput get_vertex_input();
 

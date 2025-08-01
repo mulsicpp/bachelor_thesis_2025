@@ -29,10 +29,12 @@ const std::vector<const char*> GLTF_ERROR_TEXTS = {
 static struct GLTFData {
 	cgltf_data* data{};
 
+	std::vector<ptr::Shared<Material>> materials{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
 
 	std::vector<ptr::Shared<Node>> nodes{};
 
+	void create_materials();
 	void create_meshes();
 	void create_nodes();
 	std::vector<ptr::Shared<Node>> get_scene_nodes();
@@ -55,6 +57,7 @@ Scene Scene::load(const std::string& file_path) {
 		throw std::runtime_error("GLTF buffer loading failed for '" + file_path + "': " + GLTF_ERROR_TEXTS[result]);
 	}
 
+	gltf.create_materials();
 	gltf.create_meshes();
 	gltf.create_nodes();
 
@@ -67,6 +70,22 @@ Scene Scene::load(const std::string& file_path) {
 }
 
 
+
+void GLTFData::create_materials() {
+	materials.resize(data->materials_count);
+	
+	for (uint32_t i = 0; i < materials.size(); i++) {
+		auto* gltf_material = &data->materials[i];
+
+		Material material{};
+
+		if (gltf_material->has_pbr_metallic_roughness) {
+			material.base_color = glm::make_vec4(gltf_material->pbr_metallic_roughness.base_color_factor);
+		}
+
+		materials[i] = ptr::make_shared<Material>(material);
+	}
+}
 
 template<class T>
 struct AttributeData {
@@ -147,14 +166,25 @@ void GLTFData::create_meshes() {
 				garbage_attr.data.resize(element_count * sizeof(Primitive::UVType));
 			}
 
+			if (indices != nullptr) {
+				VkDeviceSize index_count = cgltf_accessor_unpack_indices(indices, nullptr, sizeof(Primitive::IndexType), 0);
+				std::vector<Primitive::IndexType> index_data{};
+				index_data.resize(index_count);
+				cgltf_accessor_unpack_indices(indices, index_data.data(), sizeof(Primitive::IndexType), index_count);
 
-			VkDeviceSize index_count = cgltf_accessor_unpack_indices(indices, nullptr, sizeof(Primitive::IndexType), 0);
-			std::vector<Primitive::IndexType> index_data{};
-			index_data.resize(index_count);
-			cgltf_accessor_unpack_indices(indices, index_data.data(), sizeof(Primitive::IndexType), index_count);
-			
-			primitive.indices = vk::SubBuffer::from(index_attr.buffer, index_attr.byte_offset(), index_count * sizeof(Primitive::IndexType));
-			index_attr.data.insert(index_attr.data.cend(), index_data.begin(), index_data.end());
+				primitive.indices = vk::SubBuffer::from(index_attr.buffer, index_attr.byte_offset(), index_count * sizeof(Primitive::IndexType));
+				index_attr.data.insert(index_attr.data.cend(), index_data.begin(), index_data.end());
+			}
+			else {
+
+			}
+
+			if (gltf_primitive->material != nullptr) {
+				primitive.material = materials[cgltf_material_index(data, gltf_primitive->material)];
+			}
+			else {
+				primitive.material = Material::default_material;
+			}
 			
 			mesh.primitives.emplace_back(std::move(primitive));
 		}
@@ -178,11 +208,13 @@ void GLTFData::create_meshes() {
 		.data(garbage_attr.data.data())
 		.build();
 	
-	*index_attr.buffer = buffer_builder
-		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
-		.size(index_attr.byte_offset())
-		.data(index_attr.data.data())
-		.build();
+	if (index_attr.byte_offset() > 0) {
+		*index_attr.buffer = buffer_builder
+			.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+			.size(index_attr.byte_offset())
+			.data(index_attr.data.data())
+			.build();
+	}
 }
 
 void GLTFData::create_nodes() {
