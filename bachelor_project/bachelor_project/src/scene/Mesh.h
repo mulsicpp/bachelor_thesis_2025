@@ -16,6 +16,13 @@ struct Material {
 	glm::vec4 base_color = glm::vec4{ 1.0f, 1.0f, 1.0f, 1.0f };
 };
 
+struct Node;
+
+struct Skin {
+	std::vector<glm::mat4> inverse_bind_matrices{};
+	std::vector<ptr::Shared<Node>> nodes{};
+};
+
 struct Primitive {
 	using PositionType = glm::vec3;
 	using UVType = glm::vec2;
@@ -36,6 +43,8 @@ struct Primitive {
 	} topology{ Topology::Triangles };
 
 	ptr::Shared<Material> material{};
+
+
 
 	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform) const;
 
@@ -67,7 +76,8 @@ struct MeshPushConst {
 };
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
-	std::vector<Primitive> primitives;
+	std::vector<Primitive> primitives{};
+	ptr::Shared<Skin> skin{};
 
 	static Mesh create_cube();
 };

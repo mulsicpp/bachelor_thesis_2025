@@ -79,6 +79,7 @@ Mesh Mesh::create_cube() {
 	);
 
 	primitive.topology = Primitive::Topology::Triangles;
+	primitive.material = Material::default_material;
 
 	mesh.primitives.push_back(primitive);
 

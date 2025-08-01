@@ -22,13 +22,15 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 	while (iterator.has_next()) {
 		const auto& node = iterator.next();
 
+		cube.primitives[0].draw(cmd_buf, &pipeline, node->global_transform * glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 0.04f }));
+
 		const auto& mesh = node->mesh;
 		if (!mesh) {
 			continue;
 		}
 
 		for (const auto& primitive : mesh->primitives) {
-			primitive.draw(cmd_buf, &pipeline, node->global_transform);
+			// primitive.draw(cmd_buf, &pipeline, node->global_transform);
 		}
 	}
 

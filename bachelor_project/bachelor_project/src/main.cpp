@@ -21,6 +21,7 @@ void test_buffer_with_staging();
 void test_shaders();
 
 int main(void) {
+
 	try {
 		utils::LibManager lib_manager{};
 
