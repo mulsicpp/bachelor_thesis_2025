@@ -38,10 +38,6 @@ struct NodeTransform {
 	}
 };
 
-struct ModelUBO {
-	glm::mat4 transform;
-};
-
 struct Node {
 	NodeTransform transform{};
 	glm::mat4 global_transform{ 1.0 };
@@ -49,8 +45,6 @@ struct Node {
 	ptr::Shared<Mesh> mesh{};
 
 	void update_global_transfrom(glm::mat4 parent_transform = { 1.0f });
-
-	ModelUBO as_model_ubo() const { return ModelUBO{ global_transform }; }
 };
 
 class NodeIterator {

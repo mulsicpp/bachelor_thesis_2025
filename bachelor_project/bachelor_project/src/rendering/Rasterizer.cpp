@@ -27,10 +27,13 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 			continue;
 		}
 
-		const auto model_ubo = node->as_model_ubo();
-		pipeline.cmd_push_constant(cmd_buf, &model_ubo);
+		MeshPushConst mesh_push_const{};
+
+		mesh_push_const.transform = node->global_transform;
+		mesh_push_const.base_color = glm::vec4{ 1.0f, 0.5f, 0.0f, 1.0f };
 
 		for (const auto& primitive : mesh->primitives) {
+			pipeline.cmd_push_constant(cmd_buf, &mesh_push_const);
 			vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, primitive.positions.buffer().get(), primitive.positions.offset());
 			vk::Pipeline::cmd_bind_index_buffer(cmd_buf, primitive.indices.buffer().get(), Primitive::get_index_type(), primitive.indices.offset());
 
@@ -112,7 +115,7 @@ Rasterizer RasterizerBuilder::build() {
 			.build())
 		.push_constant(vk::PushConstant()
 			.add_stage_flag(VK_SHADER_STAGE_VERTEX_BIT)
-			.set_size(sizeof(ModelUBO)))
+			.set_size(sizeof(MeshPushConst)))
 		.build()
 		.to_shared();
 

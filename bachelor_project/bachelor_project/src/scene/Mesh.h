@@ -8,6 +8,9 @@
 #include "vk_resources/SubBuffer.h"
 #include "vk_pipeline/VertexInput.h"
 
+struct Material {
+	glm::vec4 base_color;
+};
 
 struct Primitive {
 	using PositionType = glm::vec3;
@@ -48,6 +51,11 @@ struct Primitive {
 	inline VkDeviceSize get_index_count() const {
 		return indices.length() / sizeof(IndexType);
 	}
+};
+
+struct MeshPushConst {
+	glm::mat4 transform;
+	glm::vec4 base_color;
 };
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
