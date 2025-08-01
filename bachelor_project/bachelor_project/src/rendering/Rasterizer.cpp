@@ -9,12 +9,14 @@
 
 void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
 	std::vector<glm::mat4> transforms{};
+	std::vector<ptr::Shared<Mesh>> meshes{};
 
 	auto iterator = frame->scene->iter();
 
 	while (iterator.has_next()) {
 		const auto& node = iterator.next();
 		transforms.push_back(node->global_transform);
+		meshes.push_back(node->mesh);
 	}
 
 	if (frame->model_count < transforms.size()) {
@@ -35,7 +37,7 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 	glm::mat4 scale = glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 0.03f });
 
 	for (uint32_t i = 0; i < transforms.size(); i++) {
-		frame->p_model_ubo[i].transform = transforms[i] * scale;
+		frame->p_model_ubo[i].transform = transforms[i];
 	}
 
 
@@ -45,8 +47,6 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
 
-	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, cube.primitives[0].positions.buffer().get());
-	vk::Pipeline::cmd_bind_index_buffer(cmd_buf, cube.primitives[0].indices.buffer().get(), Primitive::get_index_type());
 
 
 	std::vector<uint32_t> offsets{};
@@ -55,7 +55,21 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 		offsets[0] = sizeof(ModelUBO) * i;
 		frame->descriptor_pool.cmd_bind_set(cmd_buf, 1, offsets);
 
-		vk::Pipeline::cmd_draw_indexed(cmd_buf, 36, 1);
+		// vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, cube.primitives[0].positions.buffer().get());
+		// vk::Pipeline::cmd_bind_index_buffer(cmd_buf, cube.primitives[0].indices.buffer().get(), Primitive::get_index_type());
+
+		// vk::Pipeline::cmd_draw_indexed(cmd_buf, 36, 1);
+
+		if (!meshes[i]) {
+			continue;
+		}
+
+		for (const auto& primitive : meshes[i]->primitives) {
+			vk::Pipeline::cmd_bind_vertex_buffer(cmd_buf, 0, primitive.positions.buffer().get(), primitive.positions.offset());
+			vk::Pipeline::cmd_bind_index_buffer(cmd_buf, primitive.indices.buffer().get(), Primitive::get_index_type(), primitive.indices.offset());
+
+			vk::Pipeline::cmd_draw_indexed(cmd_buf, primitive.get_index_count(), 1);
+		}
 	}
 
 	framebuffer->cmd_end_pass(cmd_buf);

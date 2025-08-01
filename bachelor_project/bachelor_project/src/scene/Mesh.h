@@ -44,6 +44,10 @@ struct Primitive {
 			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
 		}
 	}
+
+	inline VkDeviceSize get_index_count() const {
+		return indices.length() / sizeof(IndexType);
+	}
 };
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {

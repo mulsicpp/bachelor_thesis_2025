@@ -15,9 +15,9 @@ CameraUBO AppCamera::as_camera_ubo() const {
     view = glm::rotate(view, phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
     view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
     view = glm::translate(view, -center);
-    view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, 1.0f });
+    view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, -1.0f });
 
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near, far);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near * distance * 0.2f, far);
 
     return CameraUBO{ view, proj };
 }
@@ -57,7 +57,7 @@ App::App() {
 
     frame_manager.bind_rasterizer(rasterizer);
 
-    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
+    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/Avocado/glTF/Avocado.gltf"));
     scene->update();
 }
 
