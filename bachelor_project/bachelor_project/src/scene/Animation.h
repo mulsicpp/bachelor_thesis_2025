@@ -5,6 +5,7 @@
 #include "Node.h"
 
 #include <vector>
+#include <cmath>
 
 template<class T>
 struct Sample {
@@ -25,6 +26,8 @@ struct Sampler {
 
 	const T& sample_at(float time) {
 		uint32_t index = 0;
+
+		time = std::fmodf(time, samples.back().time);
 
 		for (index = 0; index < samples.size() && samples[index].time <= time; index++);
 
@@ -56,6 +59,8 @@ protected:
 
 public:
 	virtual void apply_for(float time) = 0;
+
+	inline AnimationChannel(const ptr::Shared<Node>& node) : node{ node } {}
 };
 
 
@@ -66,6 +71,8 @@ private:
 
 public:
 	void apply_for(float time) override;
+
+	inline TranslationChannel(const ptr::Shared<Node>& node, const Sampler<glm::vec3>& sampler) : AnimationChannel{ node }, sampler { sampler } {}
 };
 
 class RotationChannel : public AnimationChannel {
@@ -74,6 +81,8 @@ private:
 
 public:
 	void apply_for(float time) override;
+
+	inline RotationChannel(const ptr::Shared<Node>& node, const Sampler<glm::quat>& sampler) : AnimationChannel{ node }, sampler{ sampler }{}
 };
 
 class ScaleChannel : public AnimationChannel {
@@ -82,6 +91,8 @@ private:
 
 public:
 	void apply_for(float time) override;
+
+	inline ScaleChannel(const ptr::Shared<Node>& node, const Sampler<glm::vec3>& sampler) : AnimationChannel{ node }, sampler{ sampler } {}
 };
 
 

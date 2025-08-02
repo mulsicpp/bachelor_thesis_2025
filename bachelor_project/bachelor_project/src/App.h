@@ -10,6 +10,8 @@
 #include "scene/Camera.h"
 #include "scene/Scene.h"
 
+#include <chrono>
+
 struct AppCamera : Camera {
 	glm::vec3 center{ 0.0 };
 
@@ -34,6 +36,8 @@ private:
 
 	ptr::Shared<Rasterizer> rasterizer{};
 	ptr::Shared<Scene> scene{};
+
+	std::chrono::steady_clock::time_point time{};
 
 public:
 	App();

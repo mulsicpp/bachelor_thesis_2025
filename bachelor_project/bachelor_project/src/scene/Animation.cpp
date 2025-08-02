@@ -1,5 +1,7 @@
 #include "Animation.h"
 
+#include "utils/dbg_log.h"
+
 void TranslationChannel::apply_for(float time) {
 	if (!node->transform.raw) return;
 
@@ -11,7 +13,7 @@ void RotationChannel::apply_for(float time) {
 	if (!node->transform.raw) return;
 
 	const auto& value = sampler.sample_at(time);
-	node->transform.transform.raw.rotation = value;
+	node->transform.transform.raw.rotation = glm::normalize(value);
 }
 
 void ScaleChannel::apply_for(float time) {

@@ -59,7 +59,8 @@ App::App() {
     
     scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
-    scene->update();
+
+    time = std::chrono::high_resolution_clock::now();
 }
 
 App::~App() {
@@ -72,14 +73,20 @@ void App::run() {
         glfwPollEvents();
         Frame& frame = *frame_manager.get_current_frame();
 
-        //camera.theta = 3.0f * glm::pi<float>() / 4.0f;
-        //camera.phi = -glm::pi<float>() / 4.0f;
-
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         camera.aspect = ((float)width) / ((float)height);
 
         *frame.p_camera_ubo = camera.as_camera_ubo();
+
+        auto new_time = std::chrono::high_resolution_clock::now();
+
+        float elapsed = std::chrono::duration<float, std::chrono::seconds::period>(new_time - time).count();
+
+        auto& animation = scene->get_animation(0);
+        animation.apply_for(elapsed);
+        scene->update();
+
         frame.scene = scene;
         frame_manager.draw_frame();
     }

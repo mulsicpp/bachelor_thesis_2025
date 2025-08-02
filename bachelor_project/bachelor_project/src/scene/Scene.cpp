@@ -34,9 +34,14 @@ static struct GLTFData {
 
 	std::vector<ptr::Shared<Node>> nodes{};
 
+	std::vector<Animation> animations{};
+
 	void create_materials();
 	void create_meshes();
 	void create_nodes();
+
+	void create_animations();
+
 	std::vector<ptr::Shared<Node>> get_scene_nodes();
 };
 
@@ -61,8 +66,11 @@ Scene Scene::load(const std::string& file_path) {
 	gltf.create_meshes();
 	gltf.create_nodes();
 
+	gltf.create_animations();
+
 	Scene scene{};
 	scene.nodes = gltf.get_scene_nodes();
+	scene.animations = std::move(gltf.animations);
 
 	cgltf_free(gltf.data);
 
@@ -73,7 +81,7 @@ Scene Scene::load(const std::string& file_path) {
 
 void GLTFData::create_materials() {
 	materials.resize(data->materials_count);
-	
+
 	for (uint32_t i = 0; i < materials.size(); i++) {
 		auto* gltf_material = &data->materials[i];
 
@@ -126,7 +134,7 @@ void GLTFData::create_meshes() {
 			cgltf_accessor* positions = nullptr;
 			cgltf_accessor* uvs = nullptr;
 			cgltf_accessor* colors = nullptr;
-			
+
 			for (uint32_t k = 0; k < gltf_primitive->attributes_count; k++) {
 				auto* attribute = &gltf_primitive->attributes[k];
 				switch (attribute->type) {
@@ -155,13 +163,13 @@ void GLTFData::create_meshes() {
 			VkDeviceSize element_count = positions->count;
 			std::vector<Primitive::PositionType> position_data{ element_count };
 			cgltf_accessor_unpack_floats(positions, (cgltf_float*)position_data.data(), Primitive::PositionType::length() * element_count);
-			
+
 			primitive.positions = vk::SubBuffer::from(position_attr.buffer, position_attr.byte_offset(), element_count * sizeof(Primitive::PositionType));
 			position_attr.data.insert(position_attr.data.cend(), position_data.begin(), position_data.end());
-			
+
 			primitive.uvs = vk::SubBuffer::from(garbage_attr.buffer, 0, element_count * sizeof(Primitive::UVType));
 			primitive.colors = vk::SubBuffer::from(garbage_attr.buffer, 0, element_count * sizeof(Primitive::ColorType));
-			
+
 			if (garbage_attr.data.size() < element_count * sizeof(Primitive::UVType)) {
 				garbage_attr.data.resize(element_count * sizeof(Primitive::UVType));
 			}
@@ -185,7 +193,7 @@ void GLTFData::create_meshes() {
 			else {
 				primitive.material = Material::default_material;
 			}
-			
+
 			mesh.primitives.emplace_back(std::move(primitive));
 		}
 
@@ -196,18 +204,18 @@ void GLTFData::create_meshes() {
 		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer });
-	
+
 	*position_attr.buffer = buffer_builder
 		.size(position_attr.byte_offset())
 		.data(position_attr.data.data())
 		.build();
-	
+
 	memset(garbage_attr.data.data(), 0, garbage_attr.byte_offset());
 	*garbage_attr.buffer = buffer_builder
 		.size(garbage_attr.byte_offset())
 		.data(garbage_attr.data.data())
 		.build();
-	
+
 	if (index_attr.byte_offset() > 0) {
 		*index_attr.buffer = buffer_builder
 			.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
@@ -259,6 +267,93 @@ void GLTFData::create_nodes() {
 		*nodes[i] = std::move(node);
 	}
 }
+
+
+
+void GLTFData::create_animations() {
+	animations.resize(data->animations_count);
+
+	for (uint32_t i = 0; i < animations.size(); i++) {
+		auto* gltf_animation = &data->animations[i];
+
+		Animation animation{};
+
+		for (uint32_t j = 0; j < gltf_animation->channels_count; j++) {
+			auto* gltf_channel = &gltf_animation->channels[j];
+			auto* gltf_sampler = gltf_channel->sampler;
+
+			Interpolation interpolation{};
+			switch (gltf_sampler->interpolation) {
+			case cgltf_interpolation_type_step:
+				interpolation = Interpolation::Step;
+				break;
+			case cgltf_interpolation_type_linear:
+				interpolation = Interpolation::Linear;
+				break;
+			case cgltf_interpolation_type_cubic_spline:
+				interpolation = Interpolation::CubicSpline;
+				break;
+			}
+
+			std::vector<float> input{};
+			std::vector<float> output{};
+
+			input.resize(cgltf_accessor_unpack_floats(gltf_sampler->input, nullptr, 0));
+			output.resize(cgltf_accessor_unpack_floats(gltf_sampler->output, nullptr, 0));
+
+			cgltf_accessor_unpack_floats(gltf_sampler->input, input.data(), input.size());
+			cgltf_accessor_unpack_floats(gltf_sampler->output, output.data(), output.size());
+
+			float* output_data = output.data();
+
+			ptr::Owned<AnimationChannel> channel{};
+
+			const ptr::Shared<Node>& node = nodes[cgltf_node_index(data, gltf_channel->target_node)];
+
+			switch (gltf_channel->target_path) {
+			case cgltf_animation_path_type_translation:
+			case cgltf_animation_path_type_scale:
+			{
+				Sampler<glm::vec3> sampler{};
+				sampler.interpolation = interpolation;
+
+				for (uint32_t i = 0; i < input.size(); i++) {
+					sampler.samples.push_back({ input[i], glm::make_vec3(output_data + 3 * i) });
+				}
+
+				if (gltf_channel->target_path == cgltf_animation_path_type_scale) {
+					channel = std::make_unique<ScaleChannel>(node, sampler);
+				}
+				else {
+					channel = std::make_unique<TranslationChannel>(node, sampler);
+				}
+
+				break;
+			}
+			case cgltf_animation_path_type_rotation:
+			{
+				Sampler<glm::quat> sampler{};
+				sampler.interpolation = interpolation;
+
+				for (uint32_t i = 0; i < input.size(); i++) {
+					sampler.samples.push_back({ input[i], glm::make_quat(output_data + 4 * i) });
+				}
+
+				channel = std::make_unique<RotationChannel>(node, sampler);
+
+				break;
+			}
+			}
+
+			animation.channels.emplace_back(std::move(channel));
+		}
+
+		animations[i] = std::move(animation);
+	}
+
+}
+
+
 
 std::vector<ptr::Shared<Node>> GLTFData::get_scene_nodes() {
 	if (data->scene == nullptr) {
