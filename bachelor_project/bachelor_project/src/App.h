@@ -37,6 +37,8 @@ private:
 	ptr::Shared<Rasterizer> rasterizer{};
 	ptr::Shared<Scene> scene{};
 
+	std::vector<ptr::Shared<vk::Buffer>> dynamic_buffers{};
+
 	std::chrono::steady_clock::time_point time{};
 
 public:

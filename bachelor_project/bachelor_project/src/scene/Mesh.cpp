@@ -23,6 +23,24 @@ void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, 
 	}
 }
 
+void Primitive::draw_dynamic(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, const vk::SubBuffer& dynamic_positions) const {
+	MeshPushConst mesh_push_const{};
+
+	mesh_push_const.transform = global_transform;
+	mesh_push_const.base_color = material->base_color;
+	pipeline->cmd_push_constant(cmd_buffer, &mesh_push_const);
+
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, dynamic_positions.buffer().get(), dynamic_positions.offset());
+
+	if (indices.buffer()) {
+		vk::Pipeline::cmd_bind_index_buffer(cmd_buffer, indices.buffer().get(), Primitive::get_index_type(), indices.offset());
+		vk::Pipeline::cmd_draw_indexed(cmd_buffer, get_index_count(), 1);
+	}
+	else {
+		vk::Pipeline::cmd_draw(cmd_buffer, dynamic_positions.length() / sizeof(PositionType), 1);
+	}
+}
+
 
 
 static const std::vector<Primitive::PositionType> cube_vertices = {

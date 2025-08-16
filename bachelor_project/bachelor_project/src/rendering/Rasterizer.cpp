@@ -29,8 +29,8 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 			continue;
 		}
 
-		for (const auto& primitive : mesh->primitives) {
-			// primitive.draw(cmd_buf, &pipeline, node->global_transform);
+		for (uint32_t i = 0; i < mesh->primitives.size(); i++) {
+			mesh->primitives[i].draw_dynamic(cmd_buf, &pipeline, node->global_transform, node->dynamic_positions[i]);
 		}
 	}
 

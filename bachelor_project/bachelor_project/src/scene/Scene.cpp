@@ -31,13 +31,20 @@ static struct GLTFData {
 
 	std::vector<ptr::Shared<Material>> materials{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
+	std::vector<ptr::Shared<Skin>> skins{};
 
 	std::vector<ptr::Shared<Node>> nodes{};
+
+	VkDeviceSize dynaimc_buffer_size{ 0 };
 
 	std::vector<Animation> animations{};
 
 	void create_materials();
 	void create_meshes();
+
+	void create_empty_nodes();
+	void create_skins();
+
 	void create_nodes();
 
 	void create_animations();
@@ -64,6 +71,9 @@ Scene Scene::load(const std::string& file_path) {
 
 	gltf.create_materials();
 	gltf.create_meshes();
+
+	gltf.create_empty_nodes();
+	gltf.create_skins();
 	gltf.create_nodes();
 
 	gltf.create_animations();
@@ -71,10 +81,63 @@ Scene Scene::load(const std::string& file_path) {
 	Scene scene{};
 	scene.nodes = gltf.get_scene_nodes();
 	scene.animations = std::move(gltf.animations);
+	scene.dynamic_buffer_size = gltf.dynaimc_buffer_size;
 
 	cgltf_free(gltf.data);
 
 	return scene;
+}
+
+void Scene::update() {
+	for (auto& node : nodes) {
+		node->update_global_transfrom();
+	}
+
+	auto node_iter = iter();
+
+	while (node_iter.has_next()) {
+		const auto& node = node_iter.next();
+		if (!node->mesh || !node->skin) {
+			continue;
+		}
+
+		auto& skin = node->skin;
+
+		std::vector<glm::mat4> joint_matrices{};
+		for (uint32_t i = 0; i < skin->nodes.size(); i++) {
+			joint_matrices.push_back(glm::inverse(node->global_transform) * skin->nodes[i]->global_transform * skin->inverse_bind_matrices[i]);
+		}
+
+		for (uint32_t i = 0; i < node->mesh->primitives.size(); i++) {
+			auto& primitive = node->mesh->primitives[i];
+			auto& dynamic_sub_buffer = node->dynamic_positions[i];
+
+			dynamic_sub_buffer.set_buffer(dynamic_buffer);
+
+			auto* dynamic_positions = (glm::vec3*)(dynamic_sub_buffer.buffer()->mapped_data() + dynamic_sub_buffer.offset());
+			uint32_t position_count = dynamic_sub_buffer.length() / sizeof(glm::vec3);
+
+
+			for (uint32_t j = 0; j < position_count; j++) {
+				glm::vec4 position = glm::vec4{ primitive.positions_cpu[j], 1.0f };
+
+				const auto& joint_weights = primitive.joint_weights[j];
+
+				glm::mat4 matrix = glm::mat4{};
+
+				for (const auto& joint_weight : joint_weights) {
+					matrix += joint_weight.weight * joint_matrices[joint_weight.index];
+				}
+
+				position = matrix * position;
+
+				dynamic_positions[j].x = position.x;
+				dynamic_positions[j].y = position.y;
+				dynamic_positions[j].z = position.z;
+			}
+		}
+		// dbg_log("updated dynamic positions");
+	}
 }
 
 
@@ -134,6 +197,8 @@ void GLTFData::create_meshes() {
 			cgltf_accessor* positions = nullptr;
 			cgltf_accessor* uvs = nullptr;
 			cgltf_accessor* colors = nullptr;
+			std::vector<cgltf_accessor*> joints{};
+			std::vector<cgltf_accessor*> weights{};
 
 			for (uint32_t k = 0; k < gltf_primitive->attributes_count; k++) {
 				auto* attribute = &gltf_primitive->attributes[k];
@@ -146,6 +211,18 @@ void GLTFData::create_meshes() {
 					break;
 				case cgltf_attribute_type_color:
 					colors = attribute->data;
+					break;
+				case cgltf_attribute_type_joints:
+					if (attribute->index >= joints.size()) {
+						joints.resize(attribute->index + 1, nullptr);
+					}
+					joints[attribute->index] = attribute->data;
+					break;
+				case cgltf_attribute_type_weights:
+					if (attribute->index >= weights.size()) {
+						weights.resize(attribute->index + 1, nullptr);
+					}
+					weights[attribute->index] = attribute->data;
 					break;
 				}
 			}
@@ -163,6 +240,8 @@ void GLTFData::create_meshes() {
 			VkDeviceSize element_count = positions->count;
 			std::vector<Primitive::PositionType> position_data{ element_count };
 			cgltf_accessor_unpack_floats(positions, (cgltf_float*)position_data.data(), Primitive::PositionType::length() * element_count);
+
+			primitive.positions_cpu = position_data;
 
 			primitive.positions = vk::SubBuffer::from(position_attr.buffer, position_attr.byte_offset(), element_count * sizeof(Primitive::PositionType));
 			position_attr.data.insert(position_attr.data.cend(), position_data.begin(), position_data.end());
@@ -183,8 +262,36 @@ void GLTFData::create_meshes() {
 				primitive.indices = vk::SubBuffer::from(index_attr.buffer, index_attr.byte_offset(), index_count * sizeof(Primitive::IndexType));
 				index_attr.data.insert(index_attr.data.cend(), index_data.begin(), index_data.end());
 			}
-			else {
 
+			if (joints.size() < weights.size()) {
+				joints.resize(weights.size(), nullptr);
+			}
+			else if (weights.size() < joints.size()) {
+				weights.resize(joints.size(), nullptr);
+			}
+
+			if (joints.size() > 0) {
+
+				primitive.joint_weights.resize(element_count, std::vector<JointWeight>{ 4 * joints.size() });
+
+				std::vector<cgltf_uint> joint_data{};
+				joint_data.resize(element_count * 4);
+				std::vector<glm::vec4> weight_data{};
+				weight_data.resize(element_count);
+
+				for (uint32_t i = 0; i < joints.size(); i++) {
+					for (uint32_t j = 0; j < element_count; j++) {
+						cgltf_accessor_read_uint(joints[i], j, joint_data.data() + 4 * j, 4);
+					}
+					cgltf_accessor_unpack_floats(weights[i], (cgltf_float*)weight_data.data(), glm::vec4::length() * element_count);
+
+					for (uint32_t k = 0; k < primitive.joint_weights.size(); k++) {
+						for (uint32_t j = 0; j < 4; j++) {
+							primitive.joint_weights[k][j + 4 * i].index = joint_data[k * 4 + j];
+							primitive.joint_weights[k][j + 4 * i].weight = weight_data[k][j];
+						}
+					}
+				}
 			}
 
 			if (gltf_primitive->material != nullptr) {
@@ -201,7 +308,7 @@ void GLTFData::create_meshes() {
 	}
 
 	auto buffer_builder = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
+		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer });
 
@@ -225,12 +332,97 @@ void GLTFData::create_meshes() {
 	}
 }
 
-void GLTFData::create_nodes() {
+void GLTFData::create_empty_nodes() {
 	nodes.resize(data->nodes_count);
 	for (auto& node : nodes) {
 		node = ptr::make_shared<Node>(Node{});
 	}
+}
 
+void GLTFData::create_skins() {
+	skins.resize(data->skins_count);
+
+	for (uint32_t i = 0; i < skins.size(); i++) {
+		auto* gltf_skin = &data->skins[i];
+
+		Skin skin{};
+
+		skin.nodes.resize(gltf_skin->joints_count);
+
+		if (skin.nodes.size() == 0) {
+			skins[i] = std::make_shared<Skin>(skin);
+			continue;
+		}
+
+		if (gltf_skin->skeleton == nullptr) {
+			std::vector<std::vector<cgltf_node*>> node_paths{ gltf_skin->joints_count };
+
+			for (uint32_t j = 0; j < gltf_skin->joints_count; j++) {
+				skin.nodes[j] = nodes[cgltf_node_index(data, gltf_skin->joints[j])];
+
+				std::vector<cgltf_node*> node_path{};
+
+				node_path.push_back(gltf_skin->joints[j]);
+				while(node_path.back()->parent != nullptr) {
+					node_path.push_back(node_path.back()->parent);
+				}
+
+				node_paths[j] = node_path;
+			}
+
+			cgltf_node* root = nullptr;
+			bool root_found = false;
+			while (!root_found) {
+
+				for (uint32_t i = 1; i < node_paths.size(); i++) {
+					if (node_paths[i].empty() || node_paths[i - 1].empty() || node_paths[i].back() != node_paths[i - 1].back()) {
+						root_found = true;
+						break;
+					}
+				}
+
+				if (root_found) {
+					break;
+				}
+
+				root = node_paths[0].back();
+
+				for (auto& node_path : node_paths) {
+					node_path.pop_back();
+				}
+			}
+
+			skin.skeleton_root = nodes[cgltf_node_index(data, root)];
+		}
+		else {
+
+			for (uint32_t j = 0; j < skin.nodes.size(); j++) {
+				skin.nodes[j] = nodes[cgltf_node_index(data, gltf_skin->joints[j])];
+			}
+
+			skin.skeleton_root = nodes[cgltf_node_index(data, gltf_skin->skeleton)];
+		}
+
+		std::vector<glm::mat4> inverse_bind_matrices{ };
+		inverse_bind_matrices.resize(skin.nodes.size());
+		if (gltf_skin->inverse_bind_matrices != nullptr) {
+			cgltf_accessor_unpack_floats(gltf_skin->inverse_bind_matrices, (cgltf_float*)inverse_bind_matrices.data(), 16 * inverse_bind_matrices.size());
+		}
+		else {
+			for (auto& mat : inverse_bind_matrices) {
+				mat = glm::mat4{ 1.0f };
+			}
+		}
+
+		skin.inverse_bind_matrices = inverse_bind_matrices;
+
+		skins[i] = ptr::make_shared<Skin>(skin);
+
+		dbg_log("skin added");
+	}
+}
+
+void GLTFData::create_nodes() {
 	for (uint32_t i = 0; i < nodes.size(); i++) {
 		Node node{};
 		cgltf_node* gltf_node = &data->nodes[i];
@@ -254,7 +446,16 @@ void GLTFData::create_nodes() {
 
 		if (gltf_node->mesh != nullptr) {
 			node.mesh = meshes[cgltf_mesh_index(data, gltf_node->mesh)];
+			if (gltf_node->skin != nullptr) {
+				node.skin = skins[cgltf_skin_index(data, gltf_node->skin)];
+
+				for (const auto& primitive : node.mesh->primitives) {
+					node.dynamic_positions.push_back(vk::SubBuffer::from(ptr::Shared<vk::Buffer>{}, dynaimc_buffer_size, primitive.positions.length()));
+					dynaimc_buffer_size += primitive.positions.length();
+				}
+			}
 		}
+
 
 
 		node.children = std::vector<ptr::Shared<Node>>{ gltf_node->children_count };

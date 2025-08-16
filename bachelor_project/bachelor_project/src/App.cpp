@@ -60,7 +60,25 @@ App::App() {
     scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
 
+    dynamic_buffers.resize(frame_manager.frames_in_flight());
+
+    auto buffer_builder = vk::BufferBuilder()
+        .usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+        .memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+        .queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+        .size(scene->get_dynamic_buffer_size());
+
+    for (uint32_t i = 0; i < dynamic_buffers.size(); i++) {
+        dynamic_buffers[i] = buffer_builder.build().to_shared();
+    }
+
     time = std::chrono::high_resolution_clock::now();
+
+    scene->select_dynamic_buffer(dynamic_buffers[frame_manager.get_in_flight_index()]);
+
+    auto& animation = scene->get_animation(0);
+    animation.apply_for(0.0f);
+    scene->update();
 }
 
 App::~App() {
@@ -82,9 +100,12 @@ void App::run() {
         auto new_time = std::chrono::high_resolution_clock::now();
 
         float elapsed = std::chrono::duration<float, std::chrono::seconds::period>(new_time - time).count();
+        dbg_log("elapsed time: %f", elapsed);
+
+        scene->select_dynamic_buffer(dynamic_buffers[frame_manager.get_in_flight_index()]);
 
         auto& animation = scene->get_animation(0);
-        animation.apply_for(elapsed);
+        animation.apply_for(elapsed * 1.0f);
         scene->update();
 
         frame.scene = scene;

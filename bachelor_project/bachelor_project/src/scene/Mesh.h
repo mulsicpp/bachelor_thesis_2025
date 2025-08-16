@@ -21,6 +21,12 @@ struct Node;
 struct Skin {
 	std::vector<glm::mat4> inverse_bind_matrices{};
 	std::vector<ptr::Shared<Node>> nodes{};
+	ptr::Shared<Node> skeleton_root{};
+};
+
+struct JointWeight {
+	uint32_t index{};
+	float weight{};
 };
 
 struct Primitive {
@@ -30,11 +36,15 @@ struct Primitive {
 
 	using IndexType = uint32_t;
 
+	std::vector<PositionType> positions_cpu{};
+
 	vk::SubBuffer positions{};
 	vk::SubBuffer uvs{};
 	vk::SubBuffer colors{};
 
 	vk::SubBuffer indices{};
+
+	std::vector<std::vector<JointWeight>> joint_weights{};
 
 	enum class Topology {
 		Triangles,
@@ -47,6 +57,7 @@ struct Primitive {
 
 
 	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform) const;
+	void draw_dynamic(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, const vk::SubBuffer& dynamic_positions) const;
 
 	static vk::VertexInput get_vertex_input();
 
@@ -77,7 +88,6 @@ struct MeshPushConst {
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
 	std::vector<Primitive> primitives{};
-	ptr::Shared<Skin> skin{};
 
 	static Mesh create_cube();
 };

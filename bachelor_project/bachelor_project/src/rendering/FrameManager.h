@@ -41,6 +41,8 @@ public:
 	FrameManager() = default;
 
 	inline VkExtent2D get_framebuffer_extent() const { return swapchain.extent(); }
+	inline uint32_t frames_in_flight() const { return max_frames_in_flight; }
+	inline uint32_t get_in_flight_index() const { return in_flight_index; }
 
 	vk::Attachment get_swapchain_attachment() const;
 	vk::Attachment get_depth_attachment() const;

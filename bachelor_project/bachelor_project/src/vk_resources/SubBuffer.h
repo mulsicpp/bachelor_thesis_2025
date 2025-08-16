@@ -13,6 +13,7 @@ namespace vk {
 
 	public:
 		inline const ptr::Shared<Buffer>& buffer() const { return _buffer; }
+		inline void set_buffer(const ptr::Shared<Buffer>& buffer) { _buffer = buffer; }
 		inline VkDeviceSize offset() const { return _offset; }
 		inline VkDeviceSize length() const { return _length == VK_WHOLE_SIZE ? _buffer->size() : _length; }
 		inline VkDeviceSize stride() const { return _stride; }
