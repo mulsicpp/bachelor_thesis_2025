@@ -34,6 +34,9 @@
     <ClInclude Include="src\external\VkBootstrap.h">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="src\external\VolkBootstrap.h">
+      <Filter>external</Filter>
+    </ClInclude>
     <ClInclude Include="src\external\cgltf.h">
       <Filter>external</Filter>
     </ClInclude>
@@ -41,6 +44,12 @@
       <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="src\external\vk_mem_alloc.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="src\external\volk.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="src\external\volk_mem_alloc.h">
       <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="src\rendering\Frame.h">
@@ -164,6 +173,9 @@
       <Filter>external</Filter>
     </ClCompile>
     <ClCompile Include="src\external\vk_mem_alloc.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="src\external\volk.c">
       <Filter>external</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp" />

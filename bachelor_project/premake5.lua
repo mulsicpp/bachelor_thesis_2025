@@ -13,13 +13,11 @@ workspace("bachelor_project-" .. _TARGET_OS)
     }
 
     libdirs {
-        "external/vulkan/lib",
         "external/glfw/lib/x64"
     }
 
     links {
-        "glfw3",
-        "vulkan-1"
+        "glfw3"
     }
 
     filter {"configurations:Debug"}
@@ -34,7 +32,7 @@ workspace("bachelor_project-" .. _TARGET_OS)
 
     project("bachelor_project-" .. _TARGET_OS)
         kind "ConsoleApp"
-        files {"bachelor_project/src/**.h", "bachelor_project/src/**.cpp"}
+        files {"bachelor_project/src/**.h", "bachelor_project/src/**.cpp", "bachelor_project/src/**.c"}
 
         includedirs "bachelor_project/src"
 

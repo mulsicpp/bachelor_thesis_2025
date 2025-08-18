@@ -1,7 +1,7 @@
 #pragma once
 
-#include "external/vk_mem_alloc.h"
-#include "external/VkBootstrap.h"
+#include "external/VolkBootstrap.h"
+#include "external/volk_mem_alloc.h"
 
 #include "utils/dbg_log.h"
 #include "utils/NoCopy.h"
@@ -11,6 +11,8 @@
 #include "CommandManager.h"
 
 #include <GLFW/glfw3.h>
+
+#include "external/volk.h"
 
 namespace vk {
 

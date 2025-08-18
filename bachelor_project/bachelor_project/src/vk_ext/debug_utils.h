@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ext_macros.h"
-#include <vulkan/vulkan.h>
+#include "external/volk.h"
 
 namespace debug_utils {
 	DECL_EXT_FN(vkDestroyDebugUtilsMessengerEXT);

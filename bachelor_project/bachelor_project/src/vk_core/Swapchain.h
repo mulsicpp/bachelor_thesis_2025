@@ -1,6 +1,7 @@
 #pragma once
 
-#include "external/VkBootstrap.h"
+#include "external/volk.h"
+#include "external/VolkBootstrap.h"
 
 #include "utils/NoCopy.h"
 #include "utils/move.h"

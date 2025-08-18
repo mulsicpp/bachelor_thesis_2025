@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "external/volk.h"
 
 #include "utils/Move.h"
 #include "utils/ptr.h"
