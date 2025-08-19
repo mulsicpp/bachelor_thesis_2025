@@ -39,7 +39,7 @@ private:
 
 	std::vector<ptr::Shared<vk::Buffer>> dynamic_buffers{};
 
-	std::chrono::steady_clock::time_point time{};
+	std::chrono::high_resolution_clock::time_point time{};
 
 public:
 	App();

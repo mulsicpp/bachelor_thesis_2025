@@ -2,6 +2,8 @@
 
 #include "vk_core/Context.h"
 
+#include <cstring>
+
 namespace vk {
 
 	void Buffer::flush(VkDeviceSize offset, VkDeviceSize size) {

@@ -52,6 +52,9 @@ namespace vk {
 	};
 
 	template<class T>
+	void destroy_handle(T handle);
+
+	template<class T>
 	class Handle {
 	private:
 		T handle;
@@ -95,9 +98,6 @@ namespace vk {
 
 		inline void invalidate() { handle = VK_NULL_HANDLE; }
 	};
-
-	template<class T>
-	void destroy_handle(T handle);
 }
 
 #undef HANDLE_LOG

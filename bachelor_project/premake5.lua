@@ -1,4 +1,4 @@
-workspace("bachelor_project-" .. _TARGET_OS)                                                 
+workspace("bachelor_project_" .. _TARGET_OS)                                                 
     language "C++"
     cppdialect "C++20"
     location(".")
@@ -13,11 +13,18 @@ workspace("bachelor_project-" .. _TARGET_OS)
     }
 
     libdirs {
-        "external/glfw/lib/x64"
+        "external/glfw/lib/" .. _TARGET_OS,
+        "external/vulkan/lib"
     }
 
+    local vulkan_lib = "vulkan-1"
+    if _TARGET_OS == "linux" then
+        vulkan_lib = "vulkan"
+    end
+
     links {
-        "glfw3"
+        "glfw3",
+        vulkan_lib
     }
 
     filter {"configurations:Debug"}
@@ -30,7 +37,7 @@ workspace("bachelor_project-" .. _TARGET_OS)
 
     filter {}
 
-    project("bachelor_project-" .. _TARGET_OS)
+    project("bachelor_project_" .. _TARGET_OS)
         kind "ConsoleApp"
         files {"bachelor_project/src/**.h", "bachelor_project/src/**.cpp", "bachelor_project/src/**.c"}
 
@@ -41,7 +48,7 @@ workspace("bachelor_project-" .. _TARGET_OS)
         objdir("bachelor_project/obj/" .. _TARGET_OS .. "-%{cfg.buildcfg}")
         ignoredefaultlibraries { "LIBCMT" }
 
-    project("vk_tutorial-" .. _TARGET_OS)
+    project("vk_tutorial_" .. _TARGET_OS)
         kind "ConsoleApp"
         files {"vk_tutorial/src/**.h", "vk_tutorial/src/**.cpp"}
 

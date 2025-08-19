@@ -24,10 +24,10 @@ struct Sampler {
 	std::vector<Sample<T>> samples;
 	Interpolation interpolation;
 
-	const T& sample_at(float time) {
+	T sample_at(float time) const {
 		uint32_t index = 0;
 
-		time = std::fmodf(time, samples.back().time);
+		time = std::fmod(time, samples.back().time);
 
 		for (index = 0; index < samples.size() && samples[index].time <= time; index++);
 

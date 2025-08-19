@@ -26,7 +26,7 @@ const std::vector<const char*> GLTF_ERROR_TEXTS = {
 	"legacy_gltf",
 };
 
-static struct GLTFData {
+struct GLTFData {
 	cgltf_data* data{};
 
 	std::vector<ptr::Shared<Material>> materials{};
