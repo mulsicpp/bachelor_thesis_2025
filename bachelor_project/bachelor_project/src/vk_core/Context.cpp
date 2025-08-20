@@ -1,7 +1,7 @@
 #include "Context.h"
 #include "utils/dbg_log.h"
 
-const std::vector<const char*> REQUIRED_EXTENSIONS = {
+const std::vector<const char*> REQUIRED_SWAPCHAIN_EXTENSIONS = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
@@ -23,12 +23,14 @@ namespace vk {
 		vkb::InstanceBuilder instance_builder;
 
 		instance_builder.set_app_name(info._app_name.c_str());
+		instance_builder.require_api_version(1, 2);
 
 		if (info._use_debugging) {
 			instance_builder.request_validation_layers();
 			instance_builder.use_default_debug_messenger();
 		}
-		instance_builder.require_api_version(1, 2);
+		
+		instance_builder.set_headless(info._window == nullptr);
 
 		auto instance_result = instance_builder.build();
 		if (!instance_result) {
@@ -39,14 +41,17 @@ namespace vk {
 
 		volkLoadInstance(instance.instance);
 
-		if (glfwCreateWindowSurface(instance.instance, window, nullptr, &surface) != VK_SUCCESS) {
-			throw std::runtime_error("Surface creation failed!");
-		}
 
 		vkb::PhysicalDeviceSelector selector(instance);
 		selector.set_minimum_version(1, 2);
-		selector.set_surface(surface);
-		selector.add_required_extensions(REQUIRED_EXTENSIONS);
+
+		if (info._window != nullptr) {
+			if (glfwCreateWindowSurface(instance.instance, window, nullptr, &surface) != VK_SUCCESS) {
+				throw std::runtime_error("Surface creation failed!");
+			}
+			selector.set_surface(surface);
+			selector.add_required_extensions(REQUIRED_SWAPCHAIN_EXTENSIONS);
+		}
 
 		if (info._use_raytracing) {
 			selector.add_desired_extensions(REQUIRED_RAYTRACING_EXTENSIONS);
@@ -127,7 +132,7 @@ namespace vk {
 		CommandManager::destroy(device, command_manager);
 
 		vkb::destroy_device(device);
-		if (instance.instance != VK_NULL_HANDLE)
+		if (instance.instance != VK_NULL_HANDLE && surface != VK_NULL_HANDLE)
 			vkDestroySurfaceKHR(instance.instance, surface, nullptr);
 		vkb::destroy_instance(instance);
 

@@ -29,3 +29,15 @@
 #endif
 
 #endif
+
+#ifdef _WIN32 
+
+#ifndef DEBUG_MOVE
+#define HEADLESS false
+#endif
+
+#else
+
+#define HEADLESS true
+
+#endif

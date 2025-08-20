@@ -5,21 +5,21 @@
 void TranslationChannel::apply_for(float time) {
 	if (!node->transform.raw) return;
 
-	const auto& value = sampler.sample_at(time);
+	auto value = sampler.sample_at(time);
 	node->transform.transform.raw.translation = value;
 }
 
 void RotationChannel::apply_for(float time) {
 	if (!node->transform.raw) return;
 
-	const auto& value = sampler.sample_at(time);
+	auto value = sampler.sample_at(time);
 	node->transform.transform.raw.rotation = glm::normalize(value);
 }
 
 void ScaleChannel::apply_for(float time) {
 	if (!node->transform.raw) return;
 
-	const auto& value = sampler.sample_at(time);
+	auto value = sampler.sample_at(time);
 	node->transform.transform.raw.scale = value;
 }
 

@@ -22,16 +22,16 @@ namespace vk {
 	private:
 		static Context* context;
 
-		GLFWwindow* window;
-		VkSurfaceKHR surface = VK_NULL_HANDLE;
+		GLFWwindow* window{ nullptr };
+		VkSurfaceKHR surface{ VK_NULL_HANDLE };
 
-		vkb::Instance instance;
-		vkb::PhysicalDevice physical_device;
-		vkb::Device device;
+		vkb::Instance instance{};
+		vkb::PhysicalDevice physical_device{};
+		vkb::Device device{};
 
-		CommandManager command_manager;
+		CommandManager command_manager{};
 
-		VmaAllocator allocator;
+		VmaAllocator allocator{ VK_NULL_HANDLE };
 
 	public:
 		static inline Context* create(const ContextInfo& info) {

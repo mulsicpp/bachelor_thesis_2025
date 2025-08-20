@@ -4,6 +4,8 @@
 
 #include <stdexcept>
 
+#include "utils/defines.h"
+
 #include "vk_core/Context.h"
 
 #include "external/volk.h"
@@ -11,14 +13,18 @@
 
 namespace utils {
     LibManager::LibManager() {
-        if (!glfwInit()) {
-            throw std::runtime_error("GLFW init failed");
+        if (!HEADLESS) {
+            if (!glfwInit()) {
+                throw std::runtime_error("GLFW init failed");
+            }
         }
         volkInitialize();
     }
 
     LibManager::~LibManager() {
         vk::Context::destroy();
-        glfwTerminate();
+        if (!HEADLESS) {
+            glfwTerminate();
+        }
     }
 }

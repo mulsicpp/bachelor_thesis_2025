@@ -1,9 +1,11 @@
 #include <cstdio>
 #include <stdexcept>
 
+#include "utils/defines.h"
 #include "utils/LibManager.h"
 
 #include "App.h"
+#include "HeadlessApp.h"
 
 #include "vk_core/CommandBuffer.h"
 #include "vk_core/Handle.h"
@@ -25,8 +27,14 @@ int main(void) {
 	try {
 		utils::LibManager lib_manager{};
 
-		App app{};
-		app.run();
+		if (HEADLESS) {
+			HeadlessApp headless_app{};
+			headless_app.run();
+		}
+		else {
+			App app{};	
+			app.run();
+		}
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());

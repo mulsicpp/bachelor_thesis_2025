@@ -36,13 +36,15 @@ namespace vk {
 
 		VkBool32 present_support = false;
 
-		for (uint32_t i = 0; i < queue_families.size(); i++) {
+		if (device.surface != VK_NULL_HANDLE) {
+			for (uint32_t i = 0; i < queue_families.size(); i++) {
 
-			vkGetPhysicalDeviceSurfaceSupportKHR(device.physical_device, i, device.surface, &present_support);
-			if (present_support) {
-				queue_info.queue_family_indices[(int)QueueType::Present] = i;
-				queue_info.used_families.insert(i);
-				break;
+				vkGetPhysicalDeviceSurfaceSupportKHR(device.physical_device, i, device.surface, &present_support);
+				if (present_support) {
+					queue_info.queue_family_indices[(int)QueueType::Present] = i;
+					queue_info.used_families.insert(i);
+					break;
+				}
 			}
 		}
 
@@ -70,12 +72,6 @@ namespace vk {
 				queue_info.queue_family_indices[(int)QueueType::Transfer] = i;
 				queue_info.used_families.insert(i);
 				break;
-			}
-		}
-
-		for (int i = 0; i < queue_info.queue_family_indices.size(); i++) {
-			if (queue_info.queue_family_indices[i] < 0) {
-				throw std::runtime_error(std::string("No queue family found for queue type '") + QUEUE_TYPE_NAMES[i] + "'");
 			}
 		}
 
@@ -123,9 +119,11 @@ namespace vk {
 
 		for (int i = 0; i < QUEUE_TYPE_COUNT; i++) {
 			auto family_index = queue_info.queue_family_indices[i];
-			vkGetDeviceQueue(device.device, family_index, 0, &manager.queues[i].queue);
 			manager.queues[i].family_index = family_index;
-			manager.queues[i].command_pool = manager.command_pools[family_index];
+			if (family_index >= 0) {
+				vkGetDeviceQueue(device.device, family_index, 0, &manager.queues[i].queue);
+				manager.queues[i].command_pool = manager.command_pools[family_index];
+			}
 		}
 
 		for (const auto command_pool : manager.command_pools) {
@@ -141,7 +139,7 @@ namespace vk {
 
 	void CommandManager::destroy(const vkb::Device& device, const CommandManager& manager) {
 		for (const auto command_pool : manager.command_pools) {
-			if(command_pool != VK_NULL_HANDLE)
+			if (command_pool != VK_NULL_HANDLE)
 				vkDestroyCommandPool(device.device, command_pool, nullptr);
 		}
 
@@ -151,6 +149,8 @@ namespace vk {
 		std::set<uint32_t> family_indices{};
 
 		for (const auto type : types) {
+			if (queues[(int)type].family_index < 0) continue;
+
 			family_indices.insert(queues[(int)type].family_index);
 		}
 
