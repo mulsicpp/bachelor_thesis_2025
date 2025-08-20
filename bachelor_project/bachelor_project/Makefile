@@ -73,6 +73,7 @@ GENERATED += $(OBJDIR)/Fence.o
 GENERATED += $(OBJDIR)/FrameManager.o
 GENERATED += $(OBJDIR)/Framebuffer.o
 GENERATED += $(OBJDIR)/Handle.o
+GENERATED += $(OBJDIR)/HeadlessApp.o
 GENERATED += $(OBJDIR)/Image.o
 GENERATED += $(OBJDIR)/ImageView.o
 GENERATED += $(OBJDIR)/LibManager.o
@@ -106,6 +107,7 @@ OBJECTS += $(OBJDIR)/Fence.o
 OBJECTS += $(OBJDIR)/FrameManager.o
 OBJECTS += $(OBJDIR)/Framebuffer.o
 OBJECTS += $(OBJDIR)/Handle.o
+OBJECTS += $(OBJDIR)/HeadlessApp.o
 OBJECTS += $(OBJDIR)/Image.o
 OBJECTS += $(OBJDIR)/ImageView.o
 OBJECTS += $(OBJDIR)/LibManager.o
@@ -192,6 +194,9 @@ endif
 # #############################################
 
 $(OBJDIR)/App.o: src/App.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/HeadlessApp.o: src/HeadlessApp.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/VkBootstrap.o: src/external/VkBootstrap.cpp
