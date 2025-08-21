@@ -89,13 +89,13 @@ Rasterizer RasterizerBuilder::build() {
 	dbg_log("created render pass");
 
 	vk::Shader vertex_shader = vk::ShaderBuilder()
-		.vertex()
+		.vertex_stage()
 		.load_spirv("assets/shaders/mesh3d/vert.spv")
 		.build();
 	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
-		.fragment()
+		.fragment_stage()
 		.load_spirv("assets/shaders/mesh3d/frag.spv")
 		.build();
 	dbg_log("loaded fragment shader");

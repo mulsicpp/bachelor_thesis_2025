@@ -117,20 +117,20 @@ void test_buffer_with_staging() {
 
 void test_shaders() {
 	vk::Shader vertex_shader = vk::ShaderBuilder()
-		.vertex()
+		.vertex_stage()
 		.load_spirv("assets/shaders/vert.spv")
 		.build();
 	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
-		.fragment()
+		.fragment_stage()
 		.load_spirv("assets/shaders/frag.spv")
 		.build();
 	dbg_log("loaded fragment shader");
 
 	try {
 		vk::Shader invlaid_sahder = vk::ShaderBuilder()
-			.fragment()
+			.fragment_stage()
 			.load_spirv("assets/shaders/bla.spv")
 			.build();
 	}

@@ -50,8 +50,14 @@ namespace vk {
 
 		inline Ref stage(VkShaderStageFlagBits stage) { _stage = stage; return *this; }
 
-		inline Ref vertex() { _stage = VK_SHADER_STAGE_VERTEX_BIT; return *this; }
-		inline Ref fragment() { _stage = VK_SHADER_STAGE_FRAGMENT_BIT; return *this; }
+		inline Ref vertex_stage() { _stage = VK_SHADER_STAGE_VERTEX_BIT; return *this; }
+		inline Ref fragment_stage() { _stage = VK_SHADER_STAGE_FRAGMENT_BIT; return *this; }
+		
+		inline Ref raygen_stage() { _stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR; return *this; }
+		inline Ref any_hit_stage() { _stage = VK_SHADER_STAGE_ANY_HIT_BIT_KHR; return *this; }
+		inline Ref closest_hit_stage() { _stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR; return *this; }
+		inline Ref miss_stage() { _stage = VK_SHADER_STAGE_MISS_BIT_KHR; return *this; }
+		inline Ref intersection_stage() { _stage = VK_SHADER_STAGE_INTERSECTION_BIT_KHR; return *this; }
 
 		Ref load_spirv(const std::string& file_path);
 	};
