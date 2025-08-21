@@ -21,12 +21,14 @@ void test_command_buffer();
 void test_buffer_copy();
 void test_buffer_with_staging();
 void test_shaders();
+void test_image_copy_and_transitions();
 
 int main(void) {
 
 	try {
 		utils::LibManager lib_manager{};
 
+		
 		if (HEADLESS) {
 			HeadlessApp headless_app{};
 			headless_app.run();
@@ -35,6 +37,10 @@ int main(void) {
 			App app{};	
 			app.run();
 		}
+
+		dbg_log("");
+		test_image_copy_and_transitions();
+		dbg_log("");
 	}
 	catch (const std::exception& e) {
 		fprintf(stderr, "EXCEPTION: %s\n", e.what());
@@ -137,4 +143,55 @@ void test_shaders() {
 	catch (const std::runtime_error& e) {
 		dbg_log("expected error: %s", e.what());
 	}
+}
+
+void test_image_copy_and_transitions() {
+	char src_data[6] = "Hello";
+	char dst_data[6] = "World";
+
+	vk::Buffer src_buffer = vk::BufferBuilder()
+		.add_queue_type(vk::QueueType::Transfer)
+		.usage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+		.size(sizeof(src_data))
+		.data(src_data)
+		.build();
+
+	vk::Buffer dst_buffer = vk::BufferBuilder()
+		.add_queue_type(vk::QueueType::Transfer)
+		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+		.size(sizeof(dst_data))
+		.data(dst_data)
+		.build();
+
+	const char* src_mapped = src_buffer.mapped_data<const char>();
+	const char* dst_mapped = dst_buffer.mapped_data<const char>();
+
+	vk::Image image = vk::ImageBuilder()
+		.add_queue_type(vk::QueueType::Transfer)
+		.usage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+		.format(VK_FORMAT_R8_UINT)
+		.extent({sizeof(src_data), 1})
+		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+		.build();
+
+	auto copy_recorder = [&] (vk::ReadyCommandBuffer cmd_buffer) {
+		image.cmd_transition(cmd_buffer, vk::ImageState::Undefined, vk::ImageState::TransferDst);
+		image.cmd_load(cmd_buffer, &src_buffer);
+
+		image.cmd_transition(cmd_buffer, vk::ImageState::TransferDst, vk::ImageState::TransferSrc);
+		image.cmd_store(cmd_buffer, &dst_buffer);
+	};
+
+	dbg_log("%s %s", src_mapped, dst_mapped);
+
+	vk::CommandBufferBuilder(vk::QueueType::Transfer)
+		.single_use(true)
+		.build()
+		.record(copy_recorder)
+		.submit()
+		.wait();
+
+	dbg_log("%s %s", src_mapped, dst_mapped);
 }

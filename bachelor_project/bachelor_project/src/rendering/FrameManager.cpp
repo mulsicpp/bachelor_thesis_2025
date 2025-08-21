@@ -109,6 +109,7 @@ void FrameManager::create_framebuffers() {
 		.extent(swapchain.extent())
 		.format(get_depth_attachment().format)
 		.usage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		.aspect(VK_IMAGE_ASPECT_DEPTH_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
 		.tiling(VK_IMAGE_TILING_OPTIMAL)
 		.add_queue_type(vk::QueueType::Graphics)
