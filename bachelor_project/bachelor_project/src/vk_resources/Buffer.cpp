@@ -10,7 +10,7 @@ namespace vk {
 		vmaFlushAllocation(Context::get()->get_allocator(), *allocation, offset, size);
 	}
 
-	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
+	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) const {
 		if (copy_regions.size() > 0) {
 			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), static_cast<uint32_t>(copy_regions.size()), copy_regions.data());
 			return;
@@ -24,7 +24,7 @@ namespace vk {
 		vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), 1, &copy_region);
 	}
 
-	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) {
+	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) const {
 		CommandBuffer command_buffer = CommandBufferBuilder(QueueType::Transfer)
 			.single_use(true)
 			.build();

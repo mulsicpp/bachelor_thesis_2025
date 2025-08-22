@@ -23,14 +23,10 @@ class FrameManager : public utils::Move, public ptr::ToShared<FrameManager> {
 private:
 	vk::Swapchain swapchain{};
 
-	uint32_t max_frames_in_flight{ 1 };
-	uint32_t in_flight_index{ 0 };
-
-	std::vector<vk::SubmitInfo> submit_infos{};
-	std::vector<vk::CommandBuffer> command_buffers{};
+	vk::SubmitInfo submit_info{};
+	vk::CommandBuffer command_buffer{};
 
 	ptr::Shared<Rasterizer> renderer{};
-	std::vector<Frame> frames{};
 
 	ptr::Shared<vk::Image> depth_image{};
 	std::vector<vk::Framebuffer> framebuffers{};
@@ -41,8 +37,6 @@ public:
 	FrameManager() = default;
 
 	inline VkExtent2D get_framebuffer_extent() const { return swapchain.extent(); }
-	inline uint32_t frames_in_flight() const { return max_frames_in_flight; }
-	inline uint32_t get_in_flight_index() const { return in_flight_index; }
 
 	vk::Attachment get_swapchain_attachment() const;
 	vk::Attachment get_depth_attachment() const;
@@ -50,9 +44,7 @@ public:
 	void bind_rasterizer(Rasterizer&& rasterizer);
 	void bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer);
 
-	inline Frame* get_current_frame() { return &frames[in_flight_index]; }
-
-	void draw_frame();
+	void draw_frame(const Frame& frame);
 
 	inline void signal_resize() { resize_signaled = true; }
 
@@ -67,18 +59,12 @@ public:
 
 private:
 	vk::SwapchainBuilder _swapchain_builder{};
-	uint32_t _max_frames_in_flight;
 
 public:
 	FrameManagerBuilder() = default;
 
 	inline Ref swapchain_builder(const vk::SwapchainBuilder& swapchain_builder) {
 		_swapchain_builder = swapchain_builder;
-		return *this;
-	}
-
-	inline Ref max_frames_in_flight(uint32_t max_frames_in_flight) {
-		_max_frames_in_flight = max_frames_in_flight;
 		return *this;
 	}
 

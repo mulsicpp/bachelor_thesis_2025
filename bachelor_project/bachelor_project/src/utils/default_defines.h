@@ -32,7 +32,7 @@
 
 #ifdef _WIN32 
 
-#ifndef DEBUG_MOVE
+#ifndef HEADLESS
 #define HEADLESS false
 #endif
 

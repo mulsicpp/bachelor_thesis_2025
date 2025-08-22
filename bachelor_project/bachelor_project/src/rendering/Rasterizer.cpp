@@ -7,7 +7,7 @@
 #include "vk_core/Context.h"
 
 
-void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk::Framebuffer* framebuffer) {
+void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, const Frame& frame, vk::Framebuffer* framebuffer) {
 	std::vector<glm::mat4> transforms{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
 
@@ -16,9 +16,9 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, Frame* frame, vk
 
 	pipeline.cmd_bind(cmd_buf);
 
-	frame->descriptor_pool.cmd_bind_set(cmd_buf, 0);
+	frame.descriptor_pool.cmd_bind_set(cmd_buf, 0);
 
-	auto iterator = frame->scene->iter();
+	auto iterator = frame.scene->iter();
 	while (iterator.has_next()) {
 		const auto& node = iterator.next();
 

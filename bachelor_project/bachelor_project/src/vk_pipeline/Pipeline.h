@@ -35,7 +35,7 @@ namespace vk {
 
 		inline VkPipeline handle() const { return *pipeline; }
 
-		void cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport = { {0,0}, {UINT32_MAX, UINT32_MAX} }, const VkRect2D& scissor = { {0,0}, {UINT32_MAX, UINT32_MAX} });
+		void cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport = { {0,0}, {UINT32_MAX, UINT32_MAX} }, const VkRect2D& scissor = { {0,0}, {UINT32_MAX, UINT32_MAX} }) const;
 
 		void cmd_push_constant(ReadyCommandBuffer cmd_buffer, const void* value);
 
