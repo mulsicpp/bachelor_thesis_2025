@@ -17,8 +17,6 @@ private:
 	ptr::Shared<Rasterizer> rasterizer{};
 	ptr::Shared<Scene> scene{};
 
-	ptr::Shared<vk::Buffer> dynamic_buffer{};
-
 public:
 	HeadlessApp();
 

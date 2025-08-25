@@ -37,7 +37,7 @@ private:
 	ptr::Shared<Rasterizer> rasterizer{};
 	ptr::Shared<Scene> scene{};
 
-	std::vector<ptr::Shared<vk::Buffer>> dynamic_buffers{};
+	Frame frame{};
 
 	std::chrono::high_resolution_clock::time_point time{};
 

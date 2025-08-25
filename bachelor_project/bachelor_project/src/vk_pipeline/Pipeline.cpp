@@ -6,7 +6,7 @@
 
 namespace vk {
 
-    void Pipeline::cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport, const VkRect2D& scissor) {
+    void Pipeline::cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport, const VkRect2D& scissor) const {
         if (!render_pass->active()) {
             throw std::runtime_error("Binding pipeline failed! Render pass is not active");
         }

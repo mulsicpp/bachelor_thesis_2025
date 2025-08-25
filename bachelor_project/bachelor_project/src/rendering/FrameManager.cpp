@@ -26,27 +26,17 @@ void FrameManager::bind_rasterizer(Rasterizer&& rasterizer) {
 void FrameManager::bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer) {
 	renderer = rasterizer;
 
-	frames = rasterizer->create_frames(max_frames_in_flight);
+	submit_info = vk::SubmitInfo{};
+	submit_info.add_wait_semaphore(vk::Semaphore::create(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+	submit_info.add_signal_semaphore(vk::Semaphore::create());
 
-	submit_infos.resize(max_frames_in_flight);
-	command_buffers.resize(max_frames_in_flight);
-
-	for (uint32_t i = 0; i < max_frames_in_flight; i++) {
-		vk::SubmitInfo info{};
-
-		info.add_wait_semaphore(vk::Semaphore::create(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-		info.add_signal_semaphore(vk::Semaphore::create());
-
-		submit_infos[i] = std::move(info);
-
-		command_buffers[i] = vk::CommandBufferBuilder(rasterizer->get_queue_type()).single_use(false).build();
-	}
+	command_buffer = vk::CommandBufferBuilder(rasterizer->get_queue_type()).single_use(false).build();
 
 	create_framebuffers();
 }
 
-void FrameManager::draw_frame() {
-	if (command_buffers.size() == 0) {
+void FrameManager::draw_frame(const Frame& frame) {
+	if (!renderer) {
 		throw std::runtime_error("Failed to draw frame! No rasterizer was selected");
 	}
 
@@ -54,10 +44,10 @@ void FrameManager::draw_frame() {
 
 	const auto device = context.get_device();
 
-	command_buffers[in_flight_index].wait();
+	command_buffer.wait();
 
 	uint32_t image_index;
-	auto result = vkAcquireNextImageKHR(device, swapchain.handle(), UINT64_MAX, submit_infos[in_flight_index].wait_semaphores[0].handle(), VK_NULL_HANDLE, &image_index);
+	auto result = vkAcquireNextImageKHR(device, swapchain.handle(), UINT64_MAX, submit_info.wait_semaphores[0].handle(), VK_NULL_HANDLE, &image_index);
 
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -69,19 +59,19 @@ void FrameManager::draw_frame() {
 	}
 
 
-	auto draw_recorder = [this, image_index](vk::ReadyCommandBuffer cmd_buf) {
-		renderer->cmd_draw_frame(cmd_buf, &frames[in_flight_index], &framebuffers[image_index]);
+	auto draw_recorder = [this, image_index, &frame](vk::ReadyCommandBuffer cmd_buf) {
+		renderer->cmd_draw_frame(cmd_buf, frame, &framebuffers[image_index]);
 		};
 
-	command_buffers[in_flight_index]
+	command_buffer
 		.record(draw_recorder)
-		.submit(submit_infos[in_flight_index]);
+		.submit(submit_info);
 
 
 	VkPresentInfoKHR present_info{};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-	VkSemaphore present_wait_semaphore = submit_infos[in_flight_index].signal_semaphores[0].handle();
+	VkSemaphore present_wait_semaphore = submit_info.signal_semaphores[0].handle();
 	present_info.waitSemaphoreCount = 1;
 	present_info.pWaitSemaphores = &present_wait_semaphore;
 
@@ -100,8 +90,6 @@ void FrameManager::draw_frame() {
 	else if (result != VK_SUCCESS) {
 		throw std::runtime_error("Image presentation failed!");
 	}
-
-	in_flight_index = (in_flight_index + 1) % max_frames_in_flight;
 }
 
 void FrameManager::create_framebuffers() {
@@ -140,8 +128,6 @@ FrameManager FrameManagerBuilder::build() {
 	FrameManager frame_manager;
 
 	frame_manager.swapchain = _swapchain_builder.build();
-
-	frame_manager.max_frames_in_flight = std::min(frame_manager.swapchain.image_count(), _max_frames_in_flight);
 
 	return frame_manager;
 }

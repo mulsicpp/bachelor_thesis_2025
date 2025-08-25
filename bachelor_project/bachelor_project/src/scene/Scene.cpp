@@ -35,8 +35,6 @@ struct GLTFData {
 
 	std::vector<ptr::Shared<Node>> nodes{};
 
-	VkDeviceSize dynaimc_buffer_size{ 0 };
-
 	std::vector<Animation> animations{};
 
 	void create_materials();
@@ -81,7 +79,6 @@ Scene Scene::load(const std::string& file_path) {
 	Scene scene{};
 	scene.nodes = gltf.get_scene_nodes();
 	scene.animations = std::move(gltf.animations);
-	scene.dynamic_buffer_size = gltf.dynaimc_buffer_size;
 
 	cgltf_free(gltf.data);
 
@@ -111,8 +108,6 @@ void Scene::update() {
 		for (uint32_t i = 0; i < node->mesh->primitives.size(); i++) {
 			auto& primitive = node->mesh->primitives[i];
 			auto& dynamic_sub_buffer = node->dynamic_positions[i];
-
-			dynamic_sub_buffer.set_buffer(dynamic_buffer);
 
 			auto* dynamic_positions = (glm::vec3*)(dynamic_sub_buffer.buffer()->mapped_data() + dynamic_sub_buffer.offset());
 			uint32_t position_count = dynamic_sub_buffer.length() / sizeof(glm::vec3);
@@ -423,6 +418,9 @@ void GLTFData::create_skins() {
 }
 
 void GLTFData::create_nodes() {
+	VkDeviceSize dynamic_buffer_size = 0;
+	ptr::Shared<vk::Buffer> dynamic_buffer = ptr::make_shared<vk::Buffer>();
+
 	for (uint32_t i = 0; i < nodes.size(); i++) {
 		Node node{};
 		cgltf_node* gltf_node = &data->nodes[i];
@@ -444,19 +442,19 @@ void GLTFData::create_nodes() {
 			node.transform = NodeTransform{ raw };
 		}
 
+
+
 		if (gltf_node->mesh != nullptr) {
 			node.mesh = meshes[cgltf_mesh_index(data, gltf_node->mesh)];
 			if (gltf_node->skin != nullptr) {
 				node.skin = skins[cgltf_skin_index(data, gltf_node->skin)];
 
 				for (const auto& primitive : node.mesh->primitives) {
-					node.dynamic_positions.push_back(vk::SubBuffer::from(ptr::Shared<vk::Buffer>{}, dynaimc_buffer_size, primitive.positions.length()));
-					dynaimc_buffer_size += primitive.positions.length();
+					node.dynamic_positions.push_back(vk::SubBuffer::from(dynamic_buffer, dynamic_buffer_size, primitive.positions.length()));
+					dynamic_buffer_size += primitive.positions.length();
 				}
 			}
 		}
-
-
 
 		node.children = std::vector<ptr::Shared<Node>>{ gltf_node->children_count };
 		for (uint32_t j = 0; j < gltf_node->children_count; j++) {
@@ -467,6 +465,13 @@ void GLTFData::create_nodes() {
 		}
 		*nodes[i] = std::move(node);
 	}
+
+	*dynamic_buffer = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
+		.size(dynamic_buffer_size)
+		.build();
 }
 
 
