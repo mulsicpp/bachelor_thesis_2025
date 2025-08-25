@@ -54,6 +54,8 @@ namespace vk {
 		void cmd_load(ReadyCommandBuffer cmd_buffer, Buffer* buffer, const std::vector<VkBufferImageCopy>& copy_regions = {});
 		void cmd_store(ReadyCommandBuffer cmd_buffer, Buffer* buffer, const std::vector<VkBufferImageCopy>& copy_regions = {});
 
+		void store_in_file(const std::string& file);
+
 	};
 
 
@@ -66,6 +68,7 @@ namespace vk {
 		VkFormat _format{ VK_FORMAT_UNDEFINED };
 		VkImageLayout _initial_layout{ VK_IMAGE_LAYOUT_UNDEFINED };
 		VkImageTiling _tiling{ VK_IMAGE_TILING_OPTIMAL };
+		std::string _file{};
 
 		VkImageAspectFlags _aspect{ VK_IMAGE_ASPECT_COLOR_BIT };
 		VkImageUsageFlags _usage{ 0 };
@@ -80,6 +83,8 @@ namespace vk {
 		inline Ref format(VkFormat format) { _format = format; return *this; }
 		inline Ref initial_layout(VkImageLayout initial_layout) { _initial_layout = initial_layout; return *this; }
 		inline Ref tiling(VkImageTiling tiling) { _tiling = tiling; return *this; }
+
+		inline Ref file(std::string file) { _file = file; return *this; }
 
 		inline Ref aspect(VkImageAspectFlags aspect) { _aspect = aspect; return *this; }
 

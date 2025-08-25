@@ -1,30 +1,52 @@
 #include "Image.h"
 #include "vk_core/Context.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 namespace vk
 {
+#define FORMAT_CASES(comp)         \
+    case VK_FORMAT_##comp##_UINT:  \
+    case VK_FORMAT_##comp##_UNORM: \
+    case VK_FORMAT_##comp##_SNORM: \
+    case VK_FORMAT_##comp##_USCALED
 
-    struct ImageStateInfo {
-		VkImageLayout layout;
-		VkAccessFlags access_mask;
-		VkPipelineStageFlags stage_mask;
-	};
+    static int get_channel_count(VkFormat format)
+    {
+        switch (format)
+        {
+            FORMAT_CASES(R8) : return 1;
+            FORMAT_CASES(R8G8B8) : return 3;
+            FORMAT_CASES(R8G8B8A8) : return 4;
+        }
+
+        return -1;
+    }
+
+    struct ImageStateInfo
+    {
+        VkImageLayout layout;
+        VkAccessFlags access_mask;
+        VkPipelineStageFlags stage_mask;
+    };
 
     static const std::vector<ImageStateInfo> IMAGE_STATE_INFOS = {
         {VK_IMAGE_LAYOUT_UNDEFINED, 0, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT},
         {VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT},
         {VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT},
-        {VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}
-    };
+        {VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}};
 
-
-    void Image::cmd_transition(ReadyCommandBuffer cmd_buffer, ImageState src_state, ImageState dst_state) {
-        const auto& src_info = IMAGE_STATE_INFOS[(uint32_t)src_state];
-        const auto& dst_info = IMAGE_STATE_INFOS[(uint32_t)dst_state];
+    void Image::cmd_transition(ReadyCommandBuffer cmd_buffer, ImageState src_state, ImageState dst_state)
+    {
+        const auto &src_info = IMAGE_STATE_INFOS[(uint32_t)src_state];
+        const auto &dst_info = IMAGE_STATE_INFOS[(uint32_t)dst_state];
 
         VkImageMemoryBarrier memory_barrier{};
         memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        
+
         memory_barrier.image = (*image).handle;
 
         memory_barrier.oldLayout = src_info.layout;
@@ -44,7 +66,6 @@ namespace vk
 
         vkCmdPipelineBarrier(cmd_buffer.handle(), src_info.stage_mask, dst_info.stage_mask, 0, 0, nullptr, 0, nullptr, 1, &memory_barrier);
     }
-
 
     void Image::cmd_load(ReadyCommandBuffer cmd_buffer, Buffer *buffer, const std::vector<VkBufferImageCopy> &copy_regions)
     {
@@ -90,23 +111,73 @@ namespace vk
         vkCmdCopyImageToBuffer(cmd_buffer.handle(), (*image).handle, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer->handle(), 1, &region);
     }
 
+    void Image::store_in_file(const std::string &file)
+    {
+        int channel_count = get_channel_count(_format);
+        if (channel_count == -1)
+        {
+            throw std::runtime_error("Could not store image in file '" + file + "'! Format not compatible");
+        }
+
+        dbg_log("channel count: %i", channel_count);
+
+        Buffer buffer = BufferBuilder()
+                            .usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+                            .add_queue_type(QueueType::Transfer)
+                            .memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+                            .size(_extent.width * _extent.height * channel_count)
+                            .build();
+
+        CommandBufferBuilder(QueueType::Transfer)
+            .single_use(true)
+            .build()
+            .record([&](ReadyCommandBuffer cmd_buffer)
+                    { cmd_store(cmd_buffer, &buffer); })
+            .submit()
+            .wait();
+
+        auto *data = buffer.mapped_data<uint8_t>();
+        dbg_log("buffer copy success size: %u", buffer.size());
+
+        for (uint32_t i = 0; i < buffer.size(); i++)
+        {
+            dbg_log("%02x", data[i]);
+        }
+
+        stbi_write_png(file.c_str(), _extent.width, _extent.height, channel_count, buffer.mapped_data<void>(), 0);
+    }
+
     Image ImageBuilder::build() const
     {
         Image image;
 
         const auto &context = *Context::get();
 
+        int width{_extent.width}, height{_extent.height}, comp{};
+        const uint8_t *pixels{nullptr};
+
+        int required_channel_count = get_channel_count(_format);
+        if (required_channel_count == -1)
+        {
+            throw std::runtime_error("Image creation failed! Format not compatible");
+        }
+
+        if (!_file.empty())
+        {
+            pixels = stbi_load(_file.c_str(), &width, &height, &comp, required_channel_count);
+        }
+
         VkImageCreateInfo image_info{};
         image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         image_info.imageType = VK_IMAGE_TYPE_2D;
-        image_info.extent.width = _extent.width;
-        image_info.extent.height = _extent.height;
+        image_info.extent.width = width;
+        image_info.extent.height = height;
         image_info.extent.depth = 1;
         image_info.mipLevels = 1;
         image_info.arrayLayers = 1;
         image_info.format = _format;
         image_info.tiling = _tiling;
-        image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        image_info.initialLayout = pixels != nullptr ? VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL : VK_IMAGE_LAYOUT_UNDEFINED;
         image_info.usage = _usage;
         image_info.samples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -121,6 +192,25 @@ namespace vk
         if (vmaCreateImage(context.get_allocator(), &image_info, &allocation_info, &(*image.image).handle, &*image.allocation, nullptr) != VK_SUCCESS)
         {
             throw std::runtime_error("Image creation failed!");
+        }
+
+        if (pixels != nullptr)
+        {
+            Buffer staging_buffer = BufferBuilder()
+                                        .usage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+                                        .add_queue_type(QueueType::Transfer)
+                                        .memory_usage(VMA_MEMORY_USAGE_CPU_COPY)
+                                        .size(width * height * required_channel_count)
+                                        .data((void *)pixels)
+                                        .build();
+
+            CommandBufferBuilder(QueueType::Transfer)
+                .single_use(true)
+                .build()
+                .record([&](ReadyCommandBuffer cmd_buffer)
+                        { image.cmd_load(cmd_buffer, &staging_buffer); })
+                .submit()
+                .wait();
         }
 
         image._extent = _extent;
