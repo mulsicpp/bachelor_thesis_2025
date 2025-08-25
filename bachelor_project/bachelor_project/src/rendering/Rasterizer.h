@@ -36,7 +36,7 @@ public:
 	Rasterizer() = default;
 
 	void cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, const Frame& frame, vk::Framebuffer* framebuffer);
-	vk::CommandRecorder draw_triangle_recorder(vk::Framebuffer* framebuffer);
+	void draw_frame(const Frame& frame, vk::Framebuffer* framebuffer);
 
 	inline const ptr::Shared<vk::RenderPass>& get_render_pass() const { return render_pass; }
 	inline const vk::QueueType get_queue_type() const { return vk::QueueType::Graphics; }

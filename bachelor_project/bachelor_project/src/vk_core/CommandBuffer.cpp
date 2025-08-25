@@ -120,6 +120,12 @@ namespace vk {
 	}
 
 
+	void CommandBuffer::single_time_submit(QueueType type, CommandRecorder recorder) {
+		auto cmd_buffer = CommandBufferBuilder(type).single_use(true).build();
+
+		cmd_buffer.record(recorder).submit().wait();
+	}
+
 
 	void CommandBuffer::destroy() {
 		const auto p_context = Context::get_noexcept();

@@ -67,6 +67,12 @@ namespace vk
         vkCmdPipelineBarrier(cmd_buffer.handle(), src_info.stage_mask, dst_info.stage_mask, 0, 0, nullptr, 0, nullptr, 1, &memory_barrier);
     }
 
+    void Image::transition(ImageState src_state, ImageState dst_state)
+    {
+        CommandBuffer::single_time_submit(QueueType::Transfer, [&](ReadyCommandBuffer cmd_buffer)
+                                          { cmd_transition(cmd_buffer, src_state, dst_state); });
+    }
+
     void Image::cmd_load(ReadyCommandBuffer cmd_buffer, Buffer *buffer, const std::vector<VkBufferImageCopy> &copy_regions)
     {
         if (copy_regions.size() > 0)
@@ -119,8 +125,6 @@ namespace vk
             throw std::runtime_error("Could not store image in file '" + file + "'! Format not compatible");
         }
 
-        dbg_log("channel count: %i", channel_count);
-
         Buffer buffer = BufferBuilder()
                             .usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
                             .add_queue_type(QueueType::Transfer)
@@ -128,21 +132,10 @@ namespace vk
                             .size(_extent.width * _extent.height * channel_count)
                             .build();
 
-        CommandBufferBuilder(QueueType::Transfer)
-            .single_use(true)
-            .build()
-            .record([&](ReadyCommandBuffer cmd_buffer)
-                    { cmd_store(cmd_buffer, &buffer); })
-            .submit()
-            .wait();
+        CommandBuffer::single_time_submit(QueueType::Transfer, [&](ReadyCommandBuffer cmd_buffer)
+                                          { cmd_store(cmd_buffer, &buffer); });
 
         auto *data = buffer.mapped_data<uint8_t>();
-        dbg_log("buffer copy success size: %u", buffer.size());
-
-        for (uint32_t i = 0; i < buffer.size(); i++)
-        {
-            dbg_log("%02x", data[i]);
-        }
 
         stbi_write_png(file.c_str(), _extent.width, _extent.height, channel_count, buffer.mapped_data<void>(), 0);
     }
@@ -157,13 +150,13 @@ namespace vk
         const uint8_t *pixels{nullptr};
 
         int required_channel_count = get_channel_count(_format);
-        if (required_channel_count == -1)
-        {
-            throw std::runtime_error("Image creation failed! Format not compatible");
-        }
 
         if (!_file.empty())
         {
+            if (required_channel_count == -1)
+            {
+                throw std::runtime_error("Image creation failed! Format not compatible");
+            }
             pixels = stbi_load(_file.c_str(), &width, &height, &comp, required_channel_count);
         }
 
@@ -204,13 +197,8 @@ namespace vk
                                         .data((void *)pixels)
                                         .build();
 
-            CommandBufferBuilder(QueueType::Transfer)
-                .single_use(true)
-                .build()
-                .record([&](ReadyCommandBuffer cmd_buffer)
-                        { image.cmd_load(cmd_buffer, &staging_buffer); })
-                .submit()
-                .wait();
+            CommandBuffer::single_time_submit(QueueType::Transfer, [&](ReadyCommandBuffer cmd_buffer)
+                                              { image.cmd_load(cmd_buffer, &staging_buffer); });
         }
 
         image._extent = _extent;

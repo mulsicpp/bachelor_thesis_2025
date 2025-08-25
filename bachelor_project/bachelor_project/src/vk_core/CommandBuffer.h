@@ -61,6 +61,8 @@ namespace vk {
 		Ref submit(const SubmitInfo& info = {});
 
 		Ref wait();
+
+		static void single_time_submit(QueueType type, CommandRecorder recorder);
 	private:
 		void destroy();
 	};

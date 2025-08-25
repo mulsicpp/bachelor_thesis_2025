@@ -50,6 +50,7 @@ namespace vk {
 		inline VkImageAspectFlags aspect() const { return _aspect; }
 
 		void cmd_transition(ReadyCommandBuffer cmd_buffer, ImageState src_state, ImageState dst_state);
+		void transition(ImageState src_state, ImageState dst_state);
 
 		void cmd_load(ReadyCommandBuffer cmd_buffer, Buffer* buffer, const std::vector<VkBufferImageCopy>& copy_regions = {});
 		void cmd_store(ReadyCommandBuffer cmd_buffer, Buffer* buffer, const std::vector<VkBufferImageCopy>& copy_regions = {});

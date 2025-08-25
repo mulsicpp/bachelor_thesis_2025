@@ -41,9 +41,9 @@ int main(void)
 			app.run();
 		}
 
-		dbg_log("");
-		test_image_file_store();
-		dbg_log("");
+		//dbg_log("");
+		//test_image_file_store();
+		//dbg_log("");
 	}
 	catch (const std::exception &e)
 	{
@@ -200,10 +200,11 @@ void test_image_copy_and_transitions()
 
 	dbg_log("%s %s", src_mapped, dst_mapped);
 
-	vk::CommandBufferBuilder(vk::QueueType::Transfer)
+	auto cmd_buffer = vk::CommandBufferBuilder(vk::QueueType::Transfer)
 		.single_use(true)
-		.build()
-		.record(copy_recorder)
+		.build();
+	
+	cmd_buffer.record(copy_recorder)
 		.submit()
 		.wait();
 
@@ -247,12 +248,7 @@ void test_image_file_store()
 		image.cmd_transition(cmd_buffer, vk::ImageState::TransferDst, vk::ImageState::TransferSrc);
 	};
 
-	vk::CommandBufferBuilder(vk::QueueType::Transfer)
-		.single_use(true)
-		.build()
-		.record(store_recorder)
-		.submit()
-		.wait();
+	vk::CommandBuffer::single_time_submit(vk::QueueType::Transfer, store_recorder);
 
 	image.store_in_file("test_image.png");
 }

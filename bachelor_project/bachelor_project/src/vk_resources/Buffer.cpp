@@ -25,14 +25,7 @@ namespace vk {
 	}
 
 	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) const {
-		CommandBuffer command_buffer = CommandBufferBuilder(QueueType::Transfer)
-			.single_use(true)
-			.build();
-
-		command_buffer
-			.record([&](ReadyCommandBuffer cmd_buf) { this->cmd_copy_into(cmd_buf, dst_buffer, copy_regions); })
-			.submit()
-			.wait();
+		CommandBuffer::single_time_submit(vk::QueueType::Transfer, [&](ReadyCommandBuffer cmd_buf) { this->cmd_copy_into(cmd_buf, dst_buffer, copy_regions); });
 	}
 
 
