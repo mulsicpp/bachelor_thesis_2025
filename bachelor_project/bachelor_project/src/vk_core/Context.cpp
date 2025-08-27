@@ -1,6 +1,10 @@
 #include "Context.h"
 #include "utils/dbg_log.h"
 
+const std::vector<const char*> REQUIRED_EXTENSIONS = {
+	VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME
+};
+
 const std::vector<const char*> REQUIRED_SWAPCHAIN_EXTENSIONS = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -46,6 +50,8 @@ namespace vk {
 		vkb::PhysicalDeviceSelector selector(instance);
 		selector.set_minimum_version(1, 2);
 
+		selector.add_required_extensions(REQUIRED_EXTENSIONS);
+
 		if (info._window != nullptr) {
 			if (glfwCreateWindowSurface(instance.instance, window, nullptr, &surface) != VK_SUCCESS) {
 				throw std::runtime_error("Surface creation failed!");
@@ -72,6 +78,11 @@ namespace vk {
 
 		device_builder.custom_queue_setup(queue_info.get_custom_queue_descriptions());
 
+		VkPhysicalDeviceBufferDeviceAddressFeatures features{};
+		features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+		features.bufferDeviceAddress = true;
+		device_builder.add_pNext(&features);
+
 		auto device_result = device_builder.build();
 		if (!device_result) {
 			throw std::runtime_error("Device creation failed! " + device_result.error().message());
@@ -94,6 +105,8 @@ namespace vk {
 		allocator_info.instance = instance.instance;
 		allocator_info.physicalDevice = physical_device.physical_device;
 		allocator_info.device = device.device;
+
+		allocator_info.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
 		VmaVulkanFunctions vulkan_functions{};
 		vulkan_functions.vkAllocateMemory = vkAllocateMemory;

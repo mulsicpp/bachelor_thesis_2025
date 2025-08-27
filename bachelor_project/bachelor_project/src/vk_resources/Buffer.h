@@ -37,6 +37,8 @@ namespace vk {
 
 		void flush(VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE);
 
+		VkDeviceAddress device_address() const;
+
 		void cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions = {}) const;
 		void copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions = {}) const;
 	};
