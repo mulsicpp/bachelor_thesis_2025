@@ -64,6 +64,7 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/Animation.o
 GENERATED += $(OBJDIR)/App.o
+GENERATED += $(OBJDIR)/Blas.o
 GENERATED += $(OBJDIR)/Buffer.o
 GENERATED += $(OBJDIR)/CommandBuffer.o
 GENERATED += $(OBJDIR)/CommandManager.o
@@ -98,6 +99,7 @@ GENERATED += $(OBJDIR)/vk_mem_alloc.o
 GENERATED += $(OBJDIR)/volk.o
 OBJECTS += $(OBJDIR)/Animation.o
 OBJECTS += $(OBJDIR)/App.o
+OBJECTS += $(OBJDIR)/Blas.o
 OBJECTS += $(OBJDIR)/Buffer.o
 OBJECTS += $(OBJDIR)/CommandBuffer.o
 OBJECTS += $(OBJDIR)/CommandManager.o
@@ -287,6 +289,9 @@ $(OBJDIR)/ImageView.o: src/vk_resources/ImageView.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/SubBuffer.o: src/vk_resources/SubBuffer.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Blas.o: src/vk_rtx/Blas.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Fence.o: src/vk_sync/Fence.cpp
