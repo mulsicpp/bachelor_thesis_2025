@@ -15,7 +15,7 @@ HeadlessApp::HeadlessApp()
 {
     auto context_info = vk::ContextInfo()
                             .app_name(APP_NAME)
-                            .use_raytracing(false);
+                            .use_raytracing(true);
 
     vk::Context::create(context_info);
 
@@ -77,6 +77,9 @@ HeadlessApp::HeadlessApp()
     frame = rasterizer->create_frame();
 
     camera.aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
+    camera.theta = glm::pi<float>();
+    camera.center = glm::vec3{0.0f, -1.0f, 0.0f};
+    camera.distance /= 2;
     *frame.p_camera_ubo = camera.as_camera_ubo();
     frame.scene = scene;
 

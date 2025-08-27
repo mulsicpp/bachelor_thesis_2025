@@ -8,9 +8,10 @@ const std::vector<const char*> REQUIRED_SWAPCHAIN_EXTENSIONS = {
 const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 	VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
 	VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+	VK_KHR_RAY_QUERY_EXTENSION_NAME,
 	VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+	VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME,
 	VK_KHR_SPIRV_1_4_EXTENSION_NAME,
-	VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
 };
 
 namespace vk {
@@ -54,7 +55,7 @@ namespace vk {
 		}
 
 		if (info._use_raytracing) {
-			selector.add_desired_extensions(REQUIRED_RAYTRACING_EXTENSIONS);
+			selector.add_required_extensions(REQUIRED_RAYTRACING_EXTENSIONS);
 		}
 
 		auto physical_device_result = selector.select();
