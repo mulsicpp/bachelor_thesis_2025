@@ -162,6 +162,18 @@ struct AttributeData {
 	inline VkDeviceSize element_size() const { return sizeof(T); }
 };
 
+static const VkBufferUsageFlags VERTEX_BUFFER_USAGES = 
+VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+
+static const VkBufferUsageFlags INDEX_BUFFER_USAGES = 
+VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+
 void GLTFData::create_meshes() {
 	meshes.resize(data->meshes_count);
 
@@ -303,7 +315,7 @@ void GLTFData::create_meshes() {
 	}
 
 	auto buffer_builder = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+		.usage(VERTEX_BUFFER_USAGES | VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer });
 
@@ -320,7 +332,7 @@ void GLTFData::create_meshes() {
 
 	if (index_attr.byte_offset() > 0) {
 		*index_attr.buffer = buffer_builder
-			.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+			.usage(INDEX_BUFFER_USAGES)
 			.size(index_attr.byte_offset())
 			.data(index_attr.data.data())
 			.build();
@@ -358,7 +370,7 @@ void GLTFData::create_skins() {
 				std::vector<cgltf_node*> node_path{};
 
 				node_path.push_back(gltf_skin->joints[j]);
-				while(node_path.back()->parent != nullptr) {
+				while (node_path.back()->parent != nullptr) {
 					node_path.push_back(node_path.back()->parent);
 				}
 
