@@ -39,7 +39,7 @@ namespace vk
 
     class BlasBuilder;
 
-    class Blas : utils::Move, ptr::ToShared<Blas>
+    class Blas : public utils::Move, public ptr::ToShared<Blas>
     {
         friend class BlasBuilder;
     private:
@@ -47,7 +47,7 @@ namespace vk
         Buffer buffer{};
         Handle<VkAccelerationStructureKHR> blas{};
 
-        std::vector<BlasGeometry> geometries{};
+        std::vector<BlasGeometry> _geometries{};
 
     public:
         Blas() = default;

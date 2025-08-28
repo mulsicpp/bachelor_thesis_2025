@@ -5,8 +5,7 @@
 namespace vk
 {
 
-    BlasGeometry::Ref BlasGeometry::set_position_input(const SubBuffer& vertex_buffer, uint32_t vertex_count, const VertexInput& vertex_input, uint32_t location)
-    {
+    BlasGeometry::Ref BlasGeometry::set_position_input(const SubBuffer& vertex_buffer, uint32_t vertex_count, const VertexInput& vertex_input, uint32_t location) {
         this->vertex_buffer = vertex_buffer;
         this->vertex_count = vertex_count;
 
@@ -30,8 +29,7 @@ namespace vk
         throw std::runtime_error("No attribute with location " + std::to_string(location) + " found");
     }
 
-    BlasGeometry::Ref BlasGeometry::set_index_input(const SubBuffer& index_buffer, VkIndexType index_type)
-    {
+    BlasGeometry::Ref BlasGeometry::set_index_input(const SubBuffer& index_buffer, VkIndexType index_type) {
         this->index_buffer = index_buffer;
         this->index_type = index_type;
 
@@ -65,21 +63,20 @@ namespace vk
 
     VkDeviceAddress Blas::device_address() const {
         VkAccelerationStructureDeviceAddressInfoKHR addr_info{};
-		addr_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
-		addr_info.accelerationStructure = *blas;
+        addr_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
+            addr_info.accelerationStructure = *blas;
 
-		return vkGetAccelerationStructureDeviceAddressKHR(Context::get()->get_device(), &addr_info);
+        return vkGetAccelerationStructureDeviceAddressKHR(Context::get()->get_device(), &addr_info);
     }
 
-    Blas BlasBuilder::build() const
-    {
+    Blas BlasBuilder::build() const {
         Blas blas;
 
         std::vector<VkAccelerationStructureGeometryKHR> vk_geometries{};
 
         vk_geometries.resize(_geometries.size());
 
-        for(uint32_t i = 0; i < vk_geometries.size(); i++) {
+        for (uint32_t i = 0; i < vk_geometries.size(); i++) {
             vk_geometries[i] = _geometries[i].as_vk_struct();
         }
 
@@ -100,7 +97,7 @@ namespace vk
 
         triangle_counts.resize(_geometries.size());
 
-        for(uint32_t i = 0; i < _geometries.size(); i++) {
+        for (uint32_t i = 0; i < _geometries.size(); i++) {
             triangle_counts[i] = _geometries[i].triangle_count;
         }
 
@@ -153,7 +150,7 @@ namespace vk
         range_info.firstVertex = 0;
         range_info.transformOffset = 0;
 
-        for(uint32_t i = 0; i < _geometries.size(); i++) {
+        for (uint32_t i = 0; i < _geometries.size(); i++) {
             range_info.primitiveCount = _geometries[i].triangle_count;
             range_infos[i] = range_info;
         }
@@ -181,6 +178,8 @@ namespace vk
             };
 
         CommandBuffer::single_time_submit(QueueType::Compute, recorder);
+
+        blas._geometries = _geometries;
 
         dbg_log("blas buffer size: %u", blas.buffer.size());
         dbg_log("blas scratch size: %u", build_scratch_buffer.size());

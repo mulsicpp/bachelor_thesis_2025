@@ -89,6 +89,7 @@ GENERATED += $(OBJDIR)/Semaphore.o
 GENERATED += $(OBJDIR)/Shader.o
 GENERATED += $(OBJDIR)/SubBuffer.o
 GENERATED += $(OBJDIR)/Swapchain.o
+GENERATED += $(OBJDIR)/Tlas.o
 GENERATED += $(OBJDIR)/VertexInput.o
 GENERATED += $(OBJDIR)/VkBootstrap.o
 GENERATED += $(OBJDIR)/cgltf.o
@@ -124,6 +125,7 @@ OBJECTS += $(OBJDIR)/Semaphore.o
 OBJECTS += $(OBJDIR)/Shader.o
 OBJECTS += $(OBJDIR)/SubBuffer.o
 OBJECTS += $(OBJDIR)/Swapchain.o
+OBJECTS += $(OBJDIR)/Tlas.o
 OBJECTS += $(OBJDIR)/VertexInput.o
 OBJECTS += $(OBJDIR)/VkBootstrap.o
 OBJECTS += $(OBJDIR)/cgltf.o
@@ -292,6 +294,9 @@ $(OBJDIR)/SubBuffer.o: src/vk_resources/SubBuffer.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Blas.o: src/vk_rtx/Blas.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Tlas.o: src/vk_rtx/Tlas.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Fence.o: src/vk_sync/Fence.cpp

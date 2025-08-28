@@ -6,11 +6,15 @@
 #include <vector>
 #include <string>
 
+#include "vk_rtx/Tlas.h"
+
 class Scene {
 private:
 	std::vector<ptr::Shared<Skin>> skins{};
 	std::vector<ptr::Shared<Node>> nodes{};
 	std::vector<Animation> animations{};
+
+	vk::Tlas tlas{};
 
 public:
 	Scene() = default;
