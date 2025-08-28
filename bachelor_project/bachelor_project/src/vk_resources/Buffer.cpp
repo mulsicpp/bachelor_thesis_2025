@@ -69,15 +69,10 @@ namespace vk
 		buffer_info.size = _size;
 		buffer_info.usage = _usage;
 
-		if (_queue_types.size() == 0)
-		{
-			throw std::runtime_error("Buffer creation failed! No queue types specified");
-		}
-
 		const auto families = context.get_command_manager().get_required_families(_queue_types);
 		buffer_info.sharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
 		buffer_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
-		buffer_info.pQueueFamilyIndices = families.data();
+		buffer_info.pQueueFamilyIndices = families.size() > 0 ? families.data() : nullptr;
 
 		VmaAllocationCreateFlags allocation_flags = 0;
 		allocation_flags |= _use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
