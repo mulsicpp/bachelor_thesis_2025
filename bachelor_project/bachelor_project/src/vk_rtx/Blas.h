@@ -25,7 +25,7 @@ namespace vk
         uint32_t vertex_offset{};
 
         SubBuffer index_buffer{};
-        VkIndexType index_type{};
+        VkIndexType index_type{ VK_INDEX_TYPE_NONE_KHR };
 
         uint32_t triangle_count{};
 

@@ -135,6 +135,18 @@ void Scene::update() {
 	}
 }
 
+void Scene::build_acceleration_structures() {
+	NodeIterator it = iter();
+
+	while(it.has_next()) {
+		const auto node = it.next();
+
+		if(node->mesh) {
+			node->mesh->build_blas();
+		}
+	}
+}
+
 
 
 void GLTFData::create_materials() {

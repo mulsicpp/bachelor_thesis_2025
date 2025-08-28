@@ -10,6 +10,8 @@
 
 #include "vk_pipeline/Pipeline.h"
 
+#include "vk_rtx/Blas.h"
+
 struct Material {
 	static const ptr::Shared<Material> default_material;
 
@@ -80,6 +82,8 @@ struct Primitive {
 	inline VkDeviceSize get_index_count() const {
 		return indices.length() / sizeof(IndexType);
 	}
+
+	vk::BlasGeometry get_blas_geometry() const;
 };
 
 struct MeshPushConst {
@@ -90,5 +94,9 @@ struct MeshPushConst {
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
 	std::vector<Primitive> primitives{};
 
+	vk::Blas blas{};
+
 	static Mesh create_cube();
+
+	void build_blas();
 };

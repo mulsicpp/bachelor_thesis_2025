@@ -55,6 +55,22 @@ vk::VertexInput Primitive::get_vertex_input() {
 			.set_format(vk::format_of_type<PositionType>()));
 }
 
+vk::BlasGeometry Primitive::get_blas_geometry() const {
+	vk::BlasGeometry geometry{};
+
+	geometry.set_position_input(positions, positions.length() / sizeof(PositionType), get_vertex_input(), 0);
+
+	if (indices.buffer()) {
+		geometry.set_index_input(indices, get_index_type());
+		geometry.set_triangle_count(get_index_count() / 3);
+	}
+	else {
+		geometry.set_triangle_count(positions.length() / (sizeof(PositionType) * 3));
+	}
+
+	return geometry;
+}
+
 Mesh Mesh::create_cube() {
 	Mesh mesh;
 
@@ -86,4 +102,15 @@ Mesh Mesh::create_cube() {
 	mesh.primitives.push_back(primitive);
 
 	return mesh;
+}
+
+void Mesh::build_blas() {
+	std::vector<vk::BlasGeometry> blas_geometries{};
+
+	auto vertex_input = Primitive::get_vertex_input();
+	for (const auto& primitive : primitives) {
+		blas_geometries.push_back(primitive.get_blas_geometry());
+	}
+
+	blas = vk::BlasBuilder().geometries(blas_geometries).build();
 }

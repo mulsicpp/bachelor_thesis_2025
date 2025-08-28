@@ -87,6 +87,7 @@ namespace vk
 		VmaAllocationInfo alloc_info{};
 		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &*buffer.buffer, &*buffer.allocation, &alloc_info) != VK_SUCCESS)
 		{
+			dbg_log("buffer size: %u", _size);
 			throw std::runtime_error("Buffer creation failed!");
 		}
 

@@ -54,7 +54,8 @@ namespace vk
         triangle_data.maxVertex = vertex_count - 1;
 
         triangle_data.indexType = index_type;
-        triangle_data.indexData.deviceAddress = index_buffer.buffer()->device_address() + index_buffer.offset();
+        triangle_data.indexData.deviceAddress = index_type == VK_INDEX_TYPE_NONE_KHR ? 0 : index_buffer.buffer()->device_address() + index_buffer.offset();
+
         triangle_data.transformData.deviceAddress = 0;
 
         vk_struct.geometry.triangles = triangle_data;
@@ -116,11 +117,11 @@ namespace vk
             .size(size_info.buildScratchSize)
             .build();
 
-        blas.update_scratch_buffer = BufferBuilder()
-            .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-            .size(size_info.updateScratchSize)
-            .build();
+        // blas.update_scratch_buffer = BufferBuilder()
+        //     .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+        //     .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+        //     .size(size_info.updateScratchSize)
+        //     .build();
 
         blas.buffer = BufferBuilder()
             .usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
@@ -180,6 +181,9 @@ namespace vk
             };
 
         CommandBuffer::single_time_submit(QueueType::Compute, recorder);
+
+        dbg_log("blas buffer size: %u", blas.buffer.size());
+        dbg_log("blas scratch size: %u", build_scratch_buffer.size());
 
         return blas;
     }

@@ -21,6 +21,8 @@ public:
 
 	void update();
 
+	void build_acceleration_structures();
+
 	inline NodeIterator iter() {
 		return NodeIterator::from(nodes);
 	}

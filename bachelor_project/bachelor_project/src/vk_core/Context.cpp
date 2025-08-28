@@ -34,7 +34,7 @@ namespace vk {
 			instance_builder.request_validation_layers();
 			instance_builder.use_default_debug_messenger();
 		}
-		
+
 		instance_builder.set_headless(info._window == nullptr);
 
 		auto instance_result = instance_builder.build();
@@ -78,10 +78,22 @@ namespace vk {
 
 		device_builder.custom_queue_setup(queue_info.get_custom_queue_descriptions());
 
-		VkPhysicalDeviceBufferDeviceAddressFeatures features{};
-		features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-		features.bufferDeviceAddress = true;
-		device_builder.add_pNext(&features);
+		VkPhysicalDeviceBufferDeviceAddressFeatures bda_features{};
+		bda_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+		bda_features.bufferDeviceAddress = true;
+		device_builder.add_pNext(&bda_features);
+
+		if (info._use_raytracing) {
+			VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features{};
+			as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+			as_features.accelerationStructure = true;
+			device_builder.add_pNext(&as_features);
+
+			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtp_features{};
+			rtp_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+			rtp_features.rayTracingPipeline = true;
+			device_builder.add_pNext(&rtp_features);
+		}
 
 		auto device_result = device_builder.build();
 		if (!device_result) {
