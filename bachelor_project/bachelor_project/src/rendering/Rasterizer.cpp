@@ -70,7 +70,7 @@ Frame Rasterizer::create_frame() const
 		.pipeline_layout(pipeline_layout)
 		.add_set(vk::DescriptorSetInfo()
 			.set_index(0)
-			.set_binding(0, frame.camera_uniform_buffer))
+			.set_binding(0, { frame.camera_uniform_buffer }))
 		.build();
 
 	return frame;

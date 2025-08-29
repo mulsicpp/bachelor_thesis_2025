@@ -14,31 +14,28 @@ namespace vk {
 		return vk_struct;
 	}
 
+	VkDescriptorImageInfo ImageDescriptorInfo::as_vk_struct() const {
+		VkDescriptorImageInfo vk_struct{};
+
+		vk_struct.imageView = image_view->handle();
+		vk_struct.imageLayout = layout;
+
+		return vk_struct;
+	}
+
 	void DescriptorPool::cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, std::vector<uint32_t> offsets) const {
 		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], static_cast<uint32_t>(offsets.size()), offsets.data());
 	}
 
-	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const BufferDescriptorInfo& info) {
-		update_set_binding(set_index, binding, std::vector<BufferDescriptorInfo>{ info });
-	}
-
-	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const std::vector<BufferDescriptorInfo>& infos) {
-		std::vector<VkDescriptorBufferInfo> buffer_infos{ infos.size() };
-
-		for (uint32_t i = 0; i < infos.size(); i++) {
-			buffer_infos[i] = infos[i].as_vk_struct();
-		}
-
+	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const DescriptorInfo& info) {
 		VkDescriptorType descriptor_type{};
-
 		for (const auto& layout_binding : _pipeline_layout->descriptor_set_layouts()[_set_infos[set_index].index]->bindings()) {
 			if (layout_binding.binding == binding) {
 				descriptor_type = layout_binding.type;
 				break;
 			}
 		}
-
-		dbg_log("descriptot type: %u", descriptor_type);
+		dbg_log("descriptor type: %u", descriptor_type);
 
 		VkWriteDescriptorSet descriptor_write{};
 		descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -46,12 +43,61 @@ namespace vk {
 		descriptor_write.dstBinding = binding;
 		descriptor_write.dstArrayElement = 0;
 		descriptor_write.descriptorType = descriptor_type;
-		descriptor_write.descriptorCount = static_cast<uint32_t>(buffer_infos.size());
-		descriptor_write.pBufferInfo = buffer_infos.data();
 
-		vkUpdateDescriptorSets(Context::get()->get_device(), 1, &descriptor_write, 0, nullptr);
+		switch (info.info.index()) {
+		case 0: {
+			const auto& buffer_infos = std::get<0>(info.info);
+			std::vector<VkDescriptorBufferInfo> vk_buffer_infos{ buffer_infos.size() };
 
-		_set_infos[set_index].bindings[binding] = infos;
+			for (uint32_t i = 0; i < buffer_infos.size(); i++) {
+				vk_buffer_infos[i] = buffer_infos[i].as_vk_struct();
+			}
+
+			descriptor_write.descriptorCount = static_cast<uint32_t>(vk_buffer_infos.size());
+			descriptor_write.pBufferInfo = vk_buffer_infos.data();
+
+			vkUpdateDescriptorSets(Context::get()->get_device(), 1, &descriptor_write, 0, nullptr);
+
+			break;
+		}
+
+		case 1: {
+			const auto& image_infos = std::get<1>(info.info);
+			std::vector<VkDescriptorImageInfo> vk_image_infos{ image_infos.size() };
+
+			for (uint32_t i = 0; i < image_infos.size(); i++) {
+				vk_image_infos[i] = image_infos[i].as_vk_struct();
+			}
+
+			descriptor_write.descriptorCount = static_cast<uint32_t>(vk_image_infos.size());
+			descriptor_write.pImageInfo = vk_image_infos.data();
+
+			vkUpdateDescriptorSets(Context::get()->get_device(), 1, &descriptor_write, 0, nullptr);
+
+			break;
+		}
+
+		case 2: {
+			const auto& tlas_info = std::get<2>(info.info);
+
+			const auto tlas_handle = tlas_info.tlas->handle();
+
+			VkWriteDescriptorSetAccelerationStructureKHR vk_tlas_info{};
+			vk_tlas_info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+			vk_tlas_info.accelerationStructureCount = 1;
+			vk_tlas_info.pAccelerationStructures = &tlas_handle;
+
+			descriptor_write.descriptorCount = 1;
+			descriptor_write.pNext = &vk_tlas_info;
+
+			vkUpdateDescriptorSets(Context::get()->get_device(), 1, &descriptor_write, 0, nullptr);
+
+			break;
+		}
+
+		}
+
+		_set_infos[set_index].bindings[binding] = info;
 	}
 
 

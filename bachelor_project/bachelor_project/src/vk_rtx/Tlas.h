@@ -26,7 +26,7 @@ namespace vk {
 
     class TlasBuilder;
 
-    class Tlas : public utils::Move, public ptr::Shared<Tlas> {
+    class Tlas : public utils::Move, public ptr::ToShared<Tlas> {
         friend class TlasBuilder;
     private:
         Buffer update_scratch_buffer{};
