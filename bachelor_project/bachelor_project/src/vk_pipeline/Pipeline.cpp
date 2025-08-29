@@ -59,13 +59,6 @@ namespace vk {
         vkCmdDraw(cmd_buffer.handle(), vertex_count, instance_count, first_vertex, first_instance);
     }
 
-
-
-	PipelineBuilder::PipelineBuilder()
-		: _render_pass{}
-		, _shaders{}
-	{}
-
 	Pipeline PipelineBuilder::build() {
 		Pipeline pipeline;
 

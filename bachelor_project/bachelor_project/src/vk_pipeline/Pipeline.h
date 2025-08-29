@@ -51,13 +51,13 @@ namespace vk {
 		using Ref = PipelineBuilder&;
 
 	private:
-		ptr::Shared<const RenderPass> _render_pass;
-		std::vector<ptr::Shared<const Shader>> _shaders;
-		ptr::Shared<const PipelineLayout> _layout;
+		ptr::Shared<const RenderPass> _render_pass{};
+		std::vector<ptr::Shared<const Shader>> _shaders{};
+		ptr::Shared<const PipelineLayout> _layout{};
 		VertexInput _vertex_input{};
 
 	public:
-		PipelineBuilder();
+		PipelineBuilder() = default;
 
 		inline Ref render_pass(RenderPass&& render_pass) { _render_pass = std::move(render_pass).to_shared(); return *this; }
 		inline Ref render_pass(const ptr::Shared<const RenderPass>& render_pass) { _render_pass = render_pass; return *this; }
