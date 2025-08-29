@@ -20,7 +20,7 @@ endif
 
 RESCOMP = windres
 DEFINES +=
-INCLUDES += -I../external/vulkan/include -I../external/glm/include -I../external/glfw/include -I../external/stb_image/include -Isrc
+INCLUDES += -I../../../vulkan_sdk/1.4.321.1/x86_64/include -I../external/glm/include -I../external/glfw/include -I../external/stb_image/include -Isrc
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -40,7 +40,7 @@ TARGET = $(TARGETDIR)/bachelor_project_linux
 OBJDIR = obj/linux-Debug
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g -std=c++20
-ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../external/vulkan/lib -L/usr/lib64 -m64
+ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../../../vulkan_sdk/1.4.321.1/x86_64/lib -L/usr/lib64 -m64
 
 else ifeq ($(config),release)
 TARGETDIR = bin/linux-Release
@@ -48,7 +48,7 @@ TARGET = $(TARGETDIR)/bachelor_project_linux
 OBJDIR = obj/linux-Release
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++20
-ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../external/vulkan/lib -L/usr/lib64 -m64 -s
+ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../../../vulkan_sdk/1.4.321.1/x86_64/lib -L/usr/lib64 -m64 -s
 
 endif
 
@@ -64,6 +64,7 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/Animation.o
 GENERATED += $(OBJDIR)/App.o
+GENERATED += $(OBJDIR)/Blas.o
 GENERATED += $(OBJDIR)/Buffer.o
 GENERATED += $(OBJDIR)/CommandBuffer.o
 GENERATED += $(OBJDIR)/CommandManager.o
@@ -88,6 +89,7 @@ GENERATED += $(OBJDIR)/Semaphore.o
 GENERATED += $(OBJDIR)/Shader.o
 GENERATED += $(OBJDIR)/SubBuffer.o
 GENERATED += $(OBJDIR)/Swapchain.o
+GENERATED += $(OBJDIR)/Tlas.o
 GENERATED += $(OBJDIR)/VertexInput.o
 GENERATED += $(OBJDIR)/VkBootstrap.o
 GENERATED += $(OBJDIR)/cgltf.o
@@ -98,6 +100,7 @@ GENERATED += $(OBJDIR)/vk_mem_alloc.o
 GENERATED += $(OBJDIR)/volk.o
 OBJECTS += $(OBJDIR)/Animation.o
 OBJECTS += $(OBJDIR)/App.o
+OBJECTS += $(OBJDIR)/Blas.o
 OBJECTS += $(OBJDIR)/Buffer.o
 OBJECTS += $(OBJDIR)/CommandBuffer.o
 OBJECTS += $(OBJDIR)/CommandManager.o
@@ -122,6 +125,7 @@ OBJECTS += $(OBJDIR)/Semaphore.o
 OBJECTS += $(OBJDIR)/Shader.o
 OBJECTS += $(OBJDIR)/SubBuffer.o
 OBJECTS += $(OBJDIR)/Swapchain.o
+OBJECTS += $(OBJDIR)/Tlas.o
 OBJECTS += $(OBJDIR)/VertexInput.o
 OBJECTS += $(OBJDIR)/VkBootstrap.o
 OBJECTS += $(OBJDIR)/cgltf.o
@@ -287,6 +291,12 @@ $(OBJDIR)/ImageView.o: src/vk_resources/ImageView.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/SubBuffer.o: src/vk_resources/SubBuffer.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Blas.o: src/vk_rtx/Blas.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Tlas.o: src/vk_rtx/Tlas.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Fence.o: src/vk_sync/Fence.cpp

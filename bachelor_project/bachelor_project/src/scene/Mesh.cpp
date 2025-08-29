@@ -5,39 +5,23 @@
 
 const ptr::Shared<Material> Material::default_material = ptr::make_shared<Material>(Material{});
 
-void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform) const {
+void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, vk::SubBuffer dynamic_positions) const {
 	MeshPushConst mesh_push_const{};
 
 	mesh_push_const.transform = global_transform;
 	mesh_push_const.base_color = material->base_color;
 	pipeline->cmd_push_constant(cmd_buffer, &mesh_push_const);
 
-	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, positions.buffer().get(), positions.offset());
+	const vk::SubBuffer& draw_positions = dynamic_positions.buffer() ? dynamic_positions : positions;
+
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, draw_positions.buffer().get(), draw_positions.offset());
 
 	if (indices.buffer()) {
 		vk::Pipeline::cmd_bind_index_buffer(cmd_buffer, indices.buffer().get(), Primitive::get_index_type(), indices.offset());
 		vk::Pipeline::cmd_draw_indexed(cmd_buffer, get_index_count(), 1);
 	}
 	else {
-		vk::Pipeline::cmd_draw(cmd_buffer, positions.length() / sizeof(PositionType), 1);
-	}
-}
-
-void Primitive::draw_dynamic(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, const vk::SubBuffer& dynamic_positions) const {
-	MeshPushConst mesh_push_const{};
-
-	mesh_push_const.transform = global_transform;
-	mesh_push_const.base_color = material->base_color;
-	pipeline->cmd_push_constant(cmd_buffer, &mesh_push_const);
-
-	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, dynamic_positions.buffer().get(), dynamic_positions.offset());
-
-	if (indices.buffer()) {
-		vk::Pipeline::cmd_bind_index_buffer(cmd_buffer, indices.buffer().get(), Primitive::get_index_type(), indices.offset());
-		vk::Pipeline::cmd_draw_indexed(cmd_buffer, get_index_count(), 1);
-	}
-	else {
-		vk::Pipeline::cmd_draw(cmd_buffer, dynamic_positions.length() / sizeof(PositionType), 1);
+		vk::Pipeline::cmd_draw(cmd_buffer, draw_positions.length() / sizeof(PositionType), 1);
 	}
 }
 
@@ -71,6 +55,22 @@ vk::VertexInput Primitive::get_vertex_input() {
 			.set_format(vk::format_of_type<PositionType>()));
 }
 
+vk::BlasGeometry Primitive::get_blas_geometry() const {
+	vk::BlasGeometry geometry{};
+
+	geometry.set_position_input(positions, positions.length() / sizeof(PositionType), get_vertex_input(), 0);
+
+	if (indices.buffer()) {
+		geometry.set_index_input(indices, get_index_type());
+		geometry.set_triangle_count(get_index_count() / 3);
+	}
+	else {
+		geometry.set_triangle_count(positions.length() / (sizeof(PositionType) * 3));
+	}
+
+	return geometry;
+}
+
 Mesh Mesh::create_cube() {
 	Mesh mesh;
 
@@ -102,4 +102,15 @@ Mesh Mesh::create_cube() {
 	mesh.primitives.push_back(primitive);
 
 	return mesh;
+}
+
+void Mesh::build_blas() {
+	auto blas_builder = vk::BlasBuilder();
+
+	auto vertex_input = Primitive::get_vertex_input();
+	for (const auto& primitive : primitives) {
+		blas_builder.add_geometry(primitive.get_blas_geometry());
+	}
+
+	blas = blas_builder.build().to_shared();
 }

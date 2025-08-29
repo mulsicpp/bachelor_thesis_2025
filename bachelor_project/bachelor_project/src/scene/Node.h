@@ -46,6 +46,8 @@ struct Node {
 	ptr::Shared<Skin> skin{};
 	std::vector<vk::SubBuffer> dynamic_positions{};
 
+	int32_t instance_index{ -1 };
+
 	void update_global_transfrom(glm::mat4 parent_transform = { 1.0f });
 };
 

@@ -4,14 +4,27 @@
 
 #include <cstring>
 
-namespace vk {
+namespace vk
+{
 
-	void Buffer::flush(VkDeviceSize offset, VkDeviceSize size) {
+	void Buffer::flush(VkDeviceSize offset, VkDeviceSize size)
+	{
 		vmaFlushAllocation(Context::get()->get_allocator(), *allocation, offset, size);
 	}
 
-	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) const {
-		if (copy_regions.size() > 0) {
+	VkDeviceAddress Buffer::device_address() const
+	{
+		VkBufferDeviceAddressInfo addr_info{};
+		addr_info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,
+		addr_info.buffer = *buffer;
+
+		return vkGetBufferDeviceAddress(Context::get()->get_device(), &addr_info);
+	}
+
+	void Buffer::cmd_copy_into(ReadyCommandBuffer cmd_buf, Buffer *dst_buffer, const std::vector<VkBufferCopy> &copy_regions) const
+	{
+		if (copy_regions.size() > 0)
+		{
 			vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), static_cast<uint32_t>(copy_regions.size()), copy_regions.data());
 			return;
 		}
@@ -24,58 +37,57 @@ namespace vk {
 		vkCmdCopyBuffer(cmd_buf.handle(), this->buffer.get(), dst_buffer->buffer.get(), 1, &copy_region);
 	}
 
-	void Buffer::copy_into(Buffer* dst_buffer, const std::vector<VkBufferCopy>& copy_regions) const {
-		CommandBuffer::single_time_submit(vk::QueueType::Transfer, [&](ReadyCommandBuffer cmd_buf) { this->cmd_copy_into(cmd_buf, dst_buffer, copy_regions); });
+	void Buffer::copy_into(Buffer *dst_buffer, const std::vector<VkBufferCopy> &copy_regions) const
+	{
+		CommandBuffer::single_time_submit(vk::QueueType::Transfer, [&](ReadyCommandBuffer cmd_buf)
+										  { this->cmd_copy_into(cmd_buf, dst_buffer, copy_regions); });
 	}
 
-
-
 	BufferBuilder::BufferBuilder()
-		: _size{ 0 }
-		, _data{ nullptr }
-		, _usage{ 0 }
-		, _memory_usage{ VMA_MEMORY_USAGE_UNKNOWN }
-		, _queue_types{}
-		, _use_mapping{ true }
-	{}
+		: _size{0}, _data{nullptr}, _usage{0}, _memory_usage{VMA_MEMORY_USAGE_UNKNOWN}, _queue_types{}, _use_mapping{true}
+	{
+	}
 
-
-	BufferBuilder::Ref BufferBuilder::staging_buffer() {
+	BufferBuilder::Ref BufferBuilder::staging_buffer()
+	{
 		_usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		_memory_usage = VMA_MEMORY_USAGE_CPU_ONLY;
-		_queue_types = { QueueType::Transfer };
+		_queue_types = {QueueType::Transfer};
 		_use_mapping = true;
 
 		return *this;
 	}
 
-
-	Buffer BufferBuilder::build() {
+	Buffer BufferBuilder::build()
+	{
 		Buffer buffer{};
 
-		const auto& context = *Context::get();
+		const auto &context = *Context::get();
 
 		VkBufferCreateInfo buffer_info{};
 		buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		buffer_info.size = _size;
 		buffer_info.usage = _usage;
 
-		if (_queue_types.size() == 0) {
-			throw std::runtime_error("Buffer creation failed! No queue types specified");
-		}
-
 		const auto families = context.get_command_manager().get_required_families(_queue_types);
 		buffer_info.sharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
 		buffer_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
-		buffer_info.pQueueFamilyIndices = families.data();
+		buffer_info.pQueueFamilyIndices = families.size() > 0 ? families.data() : nullptr;
 
+		VmaAllocationCreateFlags allocation_flags = 0;
+		allocation_flags |= _use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+		allocation_flags |= (_usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT : 0;
+
+		dbg_log("allocation flags: %u", allocation_flags);
 
 		VmaAllocationCreateInfo allocation_info{};
 		allocation_info.usage = _memory_usage;
-		allocation_info.flags = _use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+		allocation_info.flags = allocation_flags;
 
 		VmaAllocationInfo alloc_info{};
-		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &*buffer.buffer, &*buffer.allocation, &alloc_info) != VK_SUCCESS) {
+		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &*buffer.buffer, &*buffer.allocation, &alloc_info) != VK_SUCCESS)
+		{
+			dbg_log("buffer size: %u", _size);
 			throw std::runtime_error("Buffer creation failed!");
 		}
 
@@ -90,16 +102,19 @@ namespace vk {
 		if (_data == nullptr)
 			return buffer;
 
-		if (buffer._mapped_data != nullptr) {
+		if (buffer._mapped_data != nullptr)
+		{
 			memcpy(buffer._mapped_data, _data, _size);
 		}
-		else {
-			if ((_usage & VK_BUFFER_USAGE_TRANSFER_DST_BIT) != 0) {
+		else
+		{
+			if ((_usage & VK_BUFFER_USAGE_TRANSFER_DST_BIT) != 0)
+			{
 				Buffer staging_buffer = BufferBuilder()
-					.staging_buffer()
-					.size(_size)
-					.data(_data)
-					.build();
+											.staging_buffer()
+											.size(_size)
+											.data(_data)
+											.build();
 
 				staging_buffer.copy_into(&buffer);
 			}

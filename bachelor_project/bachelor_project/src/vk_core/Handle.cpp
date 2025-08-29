@@ -29,6 +29,8 @@ IMPL_DESTROY(BufferView)
 IMPL_DESTROY(Image)
 IMPL_DESTROY(ImageView)
 
+IMPL_DESTROY(AccelerationStructureKHR)
+
 template<>
 void vk::destroy_handle<vk::ImageHandle>(vk::ImageHandle handle) {
 	if (!handle.owns) {

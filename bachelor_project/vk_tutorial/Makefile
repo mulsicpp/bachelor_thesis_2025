@@ -20,7 +20,7 @@ endif
 
 RESCOMP = windres
 DEFINES +=
-INCLUDES += -I../external/vulkan/include -I../external/glm/include -I../external/glfw/include -I../external/stb_image/include -Isrc
+INCLUDES += -I../../../vulkan_sdk/1.4.321.1/x86_64/include -I../external/glm/include -I../external/glfw/include -I../external/stb_image/include -Isrc
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -40,7 +40,7 @@ TARGET = $(TARGETDIR)/vk_tutorial_linux
 OBJDIR = obj/linux-Debug
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g -std=c++20
-ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../external/vulkan/lib -L/usr/lib64 -m64
+ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../../../vulkan_sdk/1.4.321.1/x86_64/lib -L/usr/lib64 -m64
 
 else ifeq ($(config),release)
 TARGETDIR = bin/linux-Release
@@ -48,7 +48,7 @@ TARGET = $(TARGETDIR)/vk_tutorial_linux
 OBJDIR = obj/linux-Release
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++20
-ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../external/vulkan/lib -L/usr/lib64 -m64 -s
+ALL_LDFLAGS += $(LDFLAGS) -L../external/glfw/lib/linux -L../../../vulkan_sdk/1.4.321.1/x86_64/lib -L/usr/lib64 -m64 -s
 
 endif
 

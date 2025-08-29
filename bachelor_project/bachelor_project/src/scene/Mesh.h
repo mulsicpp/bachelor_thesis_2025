@@ -10,6 +10,8 @@
 
 #include "vk_pipeline/Pipeline.h"
 
+#include "vk_rtx/Blas.h"
+
 struct Material {
 	static const ptr::Shared<Material> default_material;
 
@@ -56,8 +58,7 @@ struct Primitive {
 
 
 
-	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform) const;
-	void draw_dynamic(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, const vk::SubBuffer& dynamic_positions) const;
+	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, vk::SubBuffer dynamic_positions = {}) const;
 
 	static vk::VertexInput get_vertex_input();
 
@@ -79,6 +80,8 @@ struct Primitive {
 	inline VkDeviceSize get_index_count() const {
 		return indices.length() / sizeof(IndexType);
 	}
+
+	vk::BlasGeometry get_blas_geometry() const;
 };
 
 struct MeshPushConst {
@@ -89,5 +92,9 @@ struct MeshPushConst {
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
 	std::vector<Primitive> primitives{};
 
+	ptr::Shared<vk::Blas> blas{};
+
 	static Mesh create_cube();
+
+	void build_blas();
 };

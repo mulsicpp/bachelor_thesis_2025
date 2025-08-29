@@ -22,6 +22,17 @@ void test_buffer_with_staging();
 void test_shaders();
 void test_image_copy_and_transitions();
 void test_image_file_store();
+void test_buffer_device_address();
+
+void run_app() {
+#if HEADLESS
+	HeadlessApp headless_app{};
+	headless_app.run();
+#else
+	App app{};
+	app.run();
+#endif
+}
 
 int main(void)
 {
@@ -30,20 +41,11 @@ int main(void)
 	{
 		utils::LibManager lib_manager{};
 
-		if (HEADLESS)
-		{
-			HeadlessApp headless_app{};
-			headless_app.run();
-		}
-		else
-		{
-			App app{};
-			app.run();
-		}
+		run_app();
 
-		//dbg_log("");
-		//test_image_file_store();
-		//dbg_log("");
+		dbg_log("");
+		test_buffer_device_address();
+		dbg_log("");
 	}
 	catch (const std::exception &e)
 	{
@@ -251,4 +253,19 @@ void test_image_file_store()
 	vk::CommandBuffer::single_time_submit(vk::QueueType::Transfer, store_recorder);
 
 	image.store_in_file("test_image.png");
+}
+
+void test_buffer_device_address() {
+	auto builder = vk::BufferBuilder()
+					   .size(24)
+					   .memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+					   .usage(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+					   .add_queue_type(vk::QueueType::Transfer)
+					   .use_mapping(false);
+
+	auto b1 = builder.build();
+	auto b2 = builder.build();
+
+	dbg_log("#1 device address: %p", b1.device_address());
+	dbg_log("#2 device address: %p", b2.device_address());
 }

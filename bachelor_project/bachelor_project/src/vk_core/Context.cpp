@@ -1,6 +1,10 @@
 #include "Context.h"
 #include "utils/dbg_log.h"
 
+const std::vector<const char*> REQUIRED_EXTENSIONS = {
+	VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME
+};
+
 const std::vector<const char*> REQUIRED_SWAPCHAIN_EXTENSIONS = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -8,9 +12,10 @@ const std::vector<const char*> REQUIRED_SWAPCHAIN_EXTENSIONS = {
 const std::vector<const char*> REQUIRED_RAYTRACING_EXTENSIONS = {
 	VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
 	VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+	VK_KHR_RAY_QUERY_EXTENSION_NAME,
 	VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+	VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME,
 	VK_KHR_SPIRV_1_4_EXTENSION_NAME,
-	VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
 };
 
 namespace vk {
@@ -29,7 +34,7 @@ namespace vk {
 			instance_builder.request_validation_layers();
 			instance_builder.use_default_debug_messenger();
 		}
-		
+
 		instance_builder.set_headless(info._window == nullptr);
 
 		auto instance_result = instance_builder.build();
@@ -45,6 +50,8 @@ namespace vk {
 		vkb::PhysicalDeviceSelector selector(instance);
 		selector.set_minimum_version(1, 2);
 
+		selector.add_required_extensions(REQUIRED_EXTENSIONS);
+
 		if (info._window != nullptr) {
 			if (glfwCreateWindowSurface(instance.instance, window, nullptr, &surface) != VK_SUCCESS) {
 				throw std::runtime_error("Surface creation failed!");
@@ -54,7 +61,7 @@ namespace vk {
 		}
 
 		if (info._use_raytracing) {
-			selector.add_desired_extensions(REQUIRED_RAYTRACING_EXTENSIONS);
+			selector.add_required_extensions(REQUIRED_RAYTRACING_EXTENSIONS);
 		}
 
 		auto physical_device_result = selector.select();
@@ -70,6 +77,23 @@ namespace vk {
 		vkb::DeviceBuilder device_builder(physical_device);
 
 		device_builder.custom_queue_setup(queue_info.get_custom_queue_descriptions());
+
+		VkPhysicalDeviceBufferDeviceAddressFeatures bda_features{};
+		bda_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+		bda_features.bufferDeviceAddress = true;
+		device_builder.add_pNext(&bda_features);
+
+		if (info._use_raytracing) {
+			VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features{};
+			as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+			as_features.accelerationStructure = true;
+			device_builder.add_pNext(&as_features);
+
+			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtp_features{};
+			rtp_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+			rtp_features.rayTracingPipeline = true;
+			device_builder.add_pNext(&rtp_features);
+		}
 
 		auto device_result = device_builder.build();
 		if (!device_result) {
@@ -93,6 +117,8 @@ namespace vk {
 		allocator_info.instance = instance.instance;
 		allocator_info.physicalDevice = physical_device.physical_device;
 		allocator_info.device = device.device;
+
+		allocator_info.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
 		VmaVulkanFunctions vulkan_functions{};
 		vulkan_functions.vkAllocateMemory = vkAllocateMemory;

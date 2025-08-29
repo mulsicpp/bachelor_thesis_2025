@@ -177,7 +177,7 @@ namespace vk
         const auto families = context.get_command_manager().get_required_families(_queue_types);
         image_info.sharingMode = families.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE;
         image_info.queueFamilyIndexCount = static_cast<uint32_t>(families.size());
-        image_info.pQueueFamilyIndices = families.data();
+        image_info.pQueueFamilyIndices = families.size() > 0 ? families.data() : nullptr;
 
         VmaAllocationCreateInfo allocation_info{};
         allocation_info.usage = _memory_usage;

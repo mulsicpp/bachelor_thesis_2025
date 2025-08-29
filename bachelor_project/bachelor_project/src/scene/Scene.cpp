@@ -135,6 +135,34 @@ void Scene::update() {
 	}
 }
 
+void Scene::build_acceleration_structures() {
+	NodeIterator it = iter();
+
+	auto tlas_builder = vk::TlasBuilder();
+
+	int32_t next_instance_idx = 0;
+
+	while(it.has_next()) {
+		const auto node = it.next();
+
+		if(node->mesh) {
+			node->mesh->build_blas();
+
+			vk::TlasInstance tlas_instance{};
+			tlas_instance.blas = node->mesh->blas;
+			tlas_instance.transform = node->global_transform;
+
+			tlas_builder.add_instance(tlas_instance);
+
+			node->instance_index = next_instance_idx++;
+		} else {
+			node->instance_index = -1;
+		}
+	}
+
+	tlas = tlas_builder.build();
+}
+
 
 
 void GLTFData::create_materials() {
@@ -161,6 +189,18 @@ struct AttributeData {
 	inline VkDeviceSize byte_offset() const { return data.size() * sizeof(T); }
 	inline VkDeviceSize element_size() const { return sizeof(T); }
 };
+
+static const VkBufferUsageFlags VERTEX_BUFFER_USAGES = 
+VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+
+static const VkBufferUsageFlags INDEX_BUFFER_USAGES = 
+VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 
 void GLTFData::create_meshes() {
 	meshes.resize(data->meshes_count);
@@ -303,7 +343,7 @@ void GLTFData::create_meshes() {
 	}
 
 	auto buffer_builder = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+		.usage(VERTEX_BUFFER_USAGES | VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer });
 
@@ -320,7 +360,7 @@ void GLTFData::create_meshes() {
 
 	if (index_attr.byte_offset() > 0) {
 		*index_attr.buffer = buffer_builder
-			.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+			.usage(INDEX_BUFFER_USAGES)
 			.size(index_attr.byte_offset())
 			.data(index_attr.data.data())
 			.build();
@@ -358,7 +398,7 @@ void GLTFData::create_skins() {
 				std::vector<cgltf_node*> node_path{};
 
 				node_path.push_back(gltf_skin->joints[j]);
-				while(node_path.back()->parent != nullptr) {
+				while (node_path.back()->parent != nullptr) {
 					node_path.push_back(node_path.back()->parent);
 				}
 
@@ -449,7 +489,7 @@ void GLTFData::create_nodes() {
 			if (gltf_node->skin != nullptr) {
 				node.skin = skins[cgltf_skin_index(data, gltf_node->skin)];
 
-				for (const auto& primitive : node.mesh->primitives) {
+				for (auto& primitive : node.mesh->primitives) {
 					node.dynamic_positions.push_back(vk::SubBuffer::from(dynamic_buffer, dynamic_buffer_size, primitive.positions.length()));
 					dynamic_buffer_size += primitive.positions.length();
 				}
@@ -467,7 +507,7 @@ void GLTFData::create_nodes() {
 	}
 
 	*dynamic_buffer = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.usage(VERTEX_BUFFER_USAGES)
 		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 		.size(dynamic_buffer_size)
