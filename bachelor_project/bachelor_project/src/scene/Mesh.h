@@ -44,8 +44,6 @@ struct Primitive {
 	vk::SubBuffer uvs{};
 	vk::SubBuffer colors{};
 
-	vk::SubBuffer dynamic_positions{};
-
 	vk::SubBuffer indices{};
 
 	std::vector<std::vector<JointWeight>> joint_weights{};
@@ -60,7 +58,7 @@ struct Primitive {
 
 
 
-	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, bool dynamic = false) const;
+	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, vk::SubBuffer dynamic_positions = {}) const;
 
 	static vk::VertexInput get_vertex_input();
 

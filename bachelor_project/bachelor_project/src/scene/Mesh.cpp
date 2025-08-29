@@ -5,14 +5,14 @@
 
 const ptr::Shared<Material> Material::default_material = ptr::make_shared<Material>(Material{});
 
-void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, bool dynamic) const {
+void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, vk::SubBuffer dynamic_positions) const {
 	MeshPushConst mesh_push_const{};
 
 	mesh_push_const.transform = global_transform;
 	mesh_push_const.base_color = material->base_color;
 	pipeline->cmd_push_constant(cmd_buffer, &mesh_push_const);
 
-	const vk::SubBuffer& draw_positions = dynamic ? dynamic_positions : positions;
+	const vk::SubBuffer& draw_positions = dynamic_positions.buffer() ? dynamic_positions : positions;
 
 	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, draw_positions.buffer().get(), draw_positions.offset());
 

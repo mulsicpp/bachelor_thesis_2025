@@ -44,6 +44,7 @@ struct Node {
 	std::vector<ptr::Shared<Node>> children{};
 	ptr::Shared<Mesh> mesh{};
 	ptr::Shared<Skin> skin{};
+	std::vector<vk::SubBuffer> dynamic_positions{};
 
 	int32_t instance_index{ -1 };
 

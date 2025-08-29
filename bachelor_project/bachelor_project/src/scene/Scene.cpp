@@ -107,7 +107,7 @@ void Scene::update() {
 
 		for (uint32_t i = 0; i < node->mesh->primitives.size(); i++) {
 			auto& primitive = node->mesh->primitives[i];
-			auto& dynamic_sub_buffer = primitive.dynamic_positions;
+			auto& dynamic_sub_buffer = node->dynamic_positions[i];
 
 			auto* dynamic_positions = (glm::vec3*)(dynamic_sub_buffer.buffer()->mapped_data() + dynamic_sub_buffer.offset());
 			uint32_t position_count = dynamic_sub_buffer.length() / sizeof(glm::vec3);
@@ -490,7 +490,7 @@ void GLTFData::create_nodes() {
 				node.skin = skins[cgltf_skin_index(data, gltf_node->skin)];
 
 				for (auto& primitive : node.mesh->primitives) {
-					primitive.dynamic_positions = vk::SubBuffer::from(dynamic_buffer, dynamic_buffer_size, primitive.positions.length());
+					node.dynamic_positions.push_back(vk::SubBuffer::from(dynamic_buffer, dynamic_buffer_size, primitive.positions.length()));
 					dynamic_buffer_size += primitive.positions.length();
 				}
 			}
