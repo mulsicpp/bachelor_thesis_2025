@@ -31,7 +31,7 @@ namespace vk
 
         Ref set_position_input(const SubBuffer& vertex_buffer, uint32_t vertex_count, const VertexInput& vertex_input, uint32_t location);
         Ref set_index_input(const SubBuffer& index_buffer, VkIndexType index_type);
-        Ref set_triangle_count(uint32_t triangle_count) { triangle_count = triangle_count; return *this; }
+        Ref set_triangle_count(uint32_t triangle_count) { this->triangle_count = triangle_count; return *this; }
 
         VkAccelerationStructureGeometryKHR as_vk_struct() const;
     };
