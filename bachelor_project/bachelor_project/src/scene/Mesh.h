@@ -94,7 +94,7 @@ struct MeshPushConst {
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
 	std::vector<Primitive> primitives{};
 
-	vk::Blas blas{};
+	ptr::Shared<vk::Blas> blas{};
 
 	static Mesh create_cube();
 

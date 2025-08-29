@@ -138,13 +138,29 @@ void Scene::update() {
 void Scene::build_acceleration_structures() {
 	NodeIterator it = iter();
 
+	auto tlas_builder = vk::TlasBuilder();
+
+	int32_t next_instance_idx = 0;
+
 	while(it.has_next()) {
 		const auto node = it.next();
 
 		if(node->mesh) {
 			node->mesh->build_blas();
+
+			vk::TlasInstance tlas_instance{};
+			tlas_instance.blas = node->mesh->blas;
+			tlas_instance.transform = node->global_transform;
+
+			tlas_builder.add_instance(tlas_instance);
+
+			node->instance_index = next_instance_idx++;
+		} else {
+			node->instance_index = -1;
 		}
 	}
+
+	tlas = tlas_builder.build();
 }
 
 

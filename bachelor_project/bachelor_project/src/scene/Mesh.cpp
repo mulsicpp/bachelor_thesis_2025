@@ -105,12 +105,12 @@ Mesh Mesh::create_cube() {
 }
 
 void Mesh::build_blas() {
-	std::vector<vk::BlasGeometry> blas_geometries{};
+	auto blas_builder = vk::BlasBuilder();
 
 	auto vertex_input = Primitive::get_vertex_input();
 	for (const auto& primitive : primitives) {
-		blas_geometries.push_back(primitive.get_blas_geometry());
+		blas_builder.add_geometry(primitive.get_blas_geometry());
 	}
 
-	blas = vk::BlasBuilder().geometries(blas_geometries).build();
+	blas = blas_builder.build().to_shared();
 }

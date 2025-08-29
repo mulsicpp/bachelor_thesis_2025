@@ -45,6 +45,8 @@ struct Node {
 	ptr::Shared<Mesh> mesh{};
 	ptr::Shared<Skin> skin{};
 
+	int32_t instance_index{ -1 };
+
 	void update_global_transfrom(glm::mat4 parent_transform = { 1.0f });
 };
 
