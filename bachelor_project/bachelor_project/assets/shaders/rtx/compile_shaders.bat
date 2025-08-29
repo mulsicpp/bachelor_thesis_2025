@@ -1,4 +1,4 @@
-cd "$(dirname "$0")"
+cd /D "%~dp0"
 
 glslangValidator -V ray_gen.rgen -o ray_gen.spv --target-env spirv1.5
 glslangValidator -V miss.rmiss -o miss.spv --target-env spirv1.5
