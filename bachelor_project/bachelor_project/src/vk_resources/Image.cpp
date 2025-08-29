@@ -146,7 +146,7 @@ namespace vk
 
         const auto &context = *Context::get();
 
-        int width{_extent.width}, height{_extent.height}, comp{};
+        int width{(int)_extent.width}, height{(int)_extent.height}, comp{};
         const uint8_t *pixels{nullptr};
 
         int required_channel_count = get_channel_count(_format);
