@@ -507,7 +507,7 @@ void GLTFData::create_nodes() {
 	}
 
 	*dynamic_buffer = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.usage(VERTEX_BUFFER_USAGES)
 		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer })
 		.size(dynamic_buffer_size)
