@@ -2,6 +2,8 @@
 
 #include "vk_core/Context.h"
 
+#include <string>
+
 namespace vk
 {
 

@@ -25,6 +25,9 @@
     <Filter Include="vk_resources">
       <UniqueIdentifier>{200DBADB-0C70-4980-B5F5-8136A1371503}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vk_rtx">
+      <UniqueIdentifier>{4309E622-2FAB-10F9-1866-244D04A79749}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vk_sync">
       <UniqueIdentifier>{62D2A77F-CEB1-261B-D7C9-B1F143288D7C}</UniqueIdentifier>
     </Filter>
@@ -158,6 +161,12 @@
     <ClInclude Include="src\vk_resources\SubBuffer.h">
       <Filter>vk_resources</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_rtx\Blas.h">
+      <Filter>vk_rtx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_rtx\Tlas.h">
+      <Filter>vk_rtx</Filter>
+    </ClInclude>
     <ClInclude Include="src\vk_sync\Fence.h">
       <Filter>vk_sync</Filter>
     </ClInclude>
@@ -255,6 +264,12 @@
     </ClCompile>
     <ClCompile Include="src\vk_resources\SubBuffer.cpp">
       <Filter>vk_resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_rtx\Blas.cpp">
+      <Filter>vk_rtx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_rtx\Tlas.cpp">
+      <Filter>vk_rtx</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_sync\Fence.cpp">
       <Filter>vk_sync</Filter>
