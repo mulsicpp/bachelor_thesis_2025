@@ -5,8 +5,10 @@ workspace("bachelor_project_" .. _TARGET_OS)
     configurations {"Debug", "Release"}
     architecture "x86_64"
 
+    local vulkan_sdk = os.getenv("VULKAN_SDK")
+
     includedirs {
-        "external/vulkan/include",
+        vulkan_sdk .. "/include",
         "external/glm/include",
         "external/glfw/include",
         "external/stb_image/include"
@@ -14,7 +16,7 @@ workspace("bachelor_project_" .. _TARGET_OS)
 
     libdirs {
         "external/glfw/lib/" .. _TARGET_OS,
-        "external/vulkan/lib"
+        vulkan_sdk .. "/lib"
     }
 
     local vulkan_lib = "vulkan-1"
