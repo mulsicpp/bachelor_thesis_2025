@@ -10,6 +10,7 @@ class RaytracerBuilder;
 class Raytracer : public utils::Move, public ptr::ToShared<Raytracer> {
     friend class RaytracerBuilder;
 private:
+    ptr::Shared<vk::PipelineLayout> pipeline_layout{};
     vk::RtxPipeline pipeline{};
 
 public:
