@@ -5,10 +5,11 @@
 
 #include "vk_core/Handle.h"
 
-#include "vk_pipeline/Shader.h"
 #include "vk_pipeline/PipelineLayout.h"
 
 #include "external/volk.h"
+
+#include "ShaderGroup.h"
 
 namespace vk {
 
@@ -17,6 +18,9 @@ namespace vk {
     class RtxPipeline : public utils::Move, public ptr::ToShared<RtxPipeline> {
         friend class RtxPipelineBuilder;
     private:
+		std::vector<ShaderGroup> _shader_groups{};
+		ptr::Shared<const PipelineLayout> _layout{};
+		uint32_t _max_ray_recursion_depth{};
         Handle<VkPipeline> pipeline;
 
     public:
@@ -30,18 +34,22 @@ namespace vk {
 		using Ref = RtxPipelineBuilder&;
 
 	private:
-		std::vector<ptr::Shared<const Shader>> _shaders{};
+		std::vector<ShaderGroup> _shader_groups{};
 		ptr::Shared<const PipelineLayout> _layout{};
+		uint32_t _max_ray_recursion_depth{ 1 };
 
 	public:
 		RtxPipelineBuilder() = default;
 
-		inline Ref shaders(const std::vector<ptr::Shared<const Shader>>& shaders) { _shaders = shaders; return *this; }
-		inline Ref add_shader(Shader&& shader) { _shaders.push_back(std::move(shader).to_shared()); return *this; }
-		inline Ref add_shader(const ptr::Shared<const Shader>& shader) { _shaders.push_back(shader); return *this; }
+		inline Ref shader_groups(const std::vector<ShaderGroup>& shader_groups) { _shader_groups = shader_groups; return *this; }
+		inline Ref add_shader_group(const ShaderGroup& shader_group) { _shader_groups.push_back(shader_group); return *this; }
+		inline Ref add_shader_group_general(const ShaderGroupGeneral& shader_group) { _shader_groups.push_back(shader_group); return *this; }
+		inline Ref add_shader_group_hit(const ShaderGroupHit& shader_group) { _shader_groups.push_back(shader_group); return *this; }
 
 		inline Ref layout(PipelineLayout&& layout) { _layout = std::move(layout).to_shared(); return *this; }
 		inline Ref layout(const ptr::Shared<const PipelineLayout>& layout) { _layout = layout; return *this; }
+
+		inline Ref max_ray_recursion_depth(uint32_t max_ray_recursion_depth) { _max_ray_recursion_depth = max_ray_recursion_depth; return *this; }
 
 		RtxPipeline build() const;
 	};

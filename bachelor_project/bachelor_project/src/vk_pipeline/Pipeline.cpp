@@ -129,26 +129,26 @@ namespace vk {
         dynamic_state.pDynamicStates = dynamicStates.data();
 
 
-        VkGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineInfo.stageCount = static_cast<uint32_t>(shader_infos.size());
-        pipelineInfo.pStages = shader_infos.data();
-        pipelineInfo.pVertexInputState = &vertex_input_info;
-        pipelineInfo.pInputAssemblyState = &input_assembly;
-        pipelineInfo.pViewportState = &viewport_state;
-        pipelineInfo.pRasterizationState = &rasterizer;
-        pipelineInfo.pMultisampleState = &multisampling;
-        pipelineInfo.pDepthStencilState = &depth_stencil;
-        pipelineInfo.pColorBlendState = &color_blending;
-        pipelineInfo.pDynamicState = &dynamic_state;
-        pipelineInfo.layout = _layout->handle();
-        pipelineInfo.renderPass = _render_pass->handle();
-        pipelineInfo.subpass = 0;
-        pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+        VkGraphicsPipelineCreateInfo pipeline_info{};
+        pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pipeline_info.stageCount = static_cast<uint32_t>(shader_infos.size());
+        pipeline_info.pStages = shader_infos.data();
+        pipeline_info.pVertexInputState = &vertex_input_info;
+        pipeline_info.pInputAssemblyState = &input_assembly;
+        pipeline_info.pViewportState = &viewport_state;
+        pipeline_info.pRasterizationState = &rasterizer;
+        pipeline_info.pMultisampleState = &multisampling;
+        pipeline_info.pDepthStencilState = &depth_stencil;
+        pipeline_info.pColorBlendState = &color_blending;
+        pipeline_info.pDynamicState = &dynamic_state;
+        pipeline_info.layout = _layout->handle();
+        pipeline_info.renderPass = _render_pass->handle();
+        pipeline_info.subpass = 0;
+        pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
 
         const auto device = Context::get()->get_device();
 
-        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &*pipeline.pipeline) != VK_SUCCESS) {
+        if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &*pipeline.pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Pipeline creation failed!");
         }
 
