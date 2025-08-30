@@ -83,7 +83,9 @@ GENERATED += $(OBJDIR)/Node.o
 GENERATED += $(OBJDIR)/Pipeline.o
 GENERATED += $(OBJDIR)/PipelineLayout.o
 GENERATED += $(OBJDIR)/Rasterizer.o
+GENERATED += $(OBJDIR)/Raytracer.o
 GENERATED += $(OBJDIR)/RenderPass.o
+GENERATED += $(OBJDIR)/RtxPipeline.o
 GENERATED += $(OBJDIR)/Scene.o
 GENERATED += $(OBJDIR)/Semaphore.o
 GENERATED += $(OBJDIR)/Shader.o
@@ -119,7 +121,9 @@ OBJECTS += $(OBJDIR)/Node.o
 OBJECTS += $(OBJDIR)/Pipeline.o
 OBJECTS += $(OBJDIR)/PipelineLayout.o
 OBJECTS += $(OBJDIR)/Rasterizer.o
+OBJECTS += $(OBJDIR)/Raytracer.o
 OBJECTS += $(OBJDIR)/RenderPass.o
+OBJECTS += $(OBJDIR)/RtxPipeline.o
 OBJECTS += $(OBJDIR)/Scene.o
 OBJECTS += $(OBJDIR)/Semaphore.o
 OBJECTS += $(OBJDIR)/Shader.o
@@ -224,6 +228,9 @@ $(OBJDIR)/FrameManager.o: src/rendering/FrameManager.cpp
 $(OBJDIR)/Rasterizer.o: src/rendering/Rasterizer.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Raytracer.o: src/rendering/Raytracer.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Animation.o: src/scene/Animation.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -294,6 +301,9 @@ $(OBJDIR)/SubBuffer.o: src/vk_resources/SubBuffer.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Blas.o: src/vk_rtx/Blas.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/RtxPipeline.o: src/vk_rtx/RtxPipeline.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Tlas.o: src/vk_rtx/Tlas.cpp

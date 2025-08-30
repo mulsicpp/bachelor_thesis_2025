@@ -1,0 +1,30 @@
+#pragma once
+
+#include "utils/move.h"
+#include "utils/ptr.h"
+
+#include "vk_rtx/RtxPipeline.h"
+
+class RaytracerBuilder;
+
+class Raytracer : public utils::Move, public ptr::ToShared<Raytracer> {
+    friend class RaytracerBuilder;
+private:
+    vk::RtxPipeline pipeline{};
+
+public:
+    // TODO functionality
+};
+
+class RaytracerBuilder {
+public:
+    using Ref = RaytracerBuilder&;
+
+private:
+    // TODO raytracer builder parameters
+
+public:
+    RaytracerBuilder() = default;
+
+    Raytracer build() const;
+};
