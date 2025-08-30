@@ -12,7 +12,7 @@
 
 namespace vk {
 
-	class ShaderBuidler;
+	class ShaderBuilder;
 
 	class Shader : public utils::Move, public ptr::ToShared<Shader> {
 		friend class ShaderBuilder;

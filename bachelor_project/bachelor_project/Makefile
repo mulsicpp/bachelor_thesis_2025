@@ -85,6 +85,7 @@ GENERATED += $(OBJDIR)/PipelineLayout.o
 GENERATED += $(OBJDIR)/Rasterizer.o
 GENERATED += $(OBJDIR)/Raytracer.o
 GENERATED += $(OBJDIR)/RenderPass.o
+GENERATED += $(OBJDIR)/RtxApp.o
 GENERATED += $(OBJDIR)/RtxPipeline.o
 GENERATED += $(OBJDIR)/Scene.o
 GENERATED += $(OBJDIR)/Semaphore.o
@@ -123,6 +124,7 @@ OBJECTS += $(OBJDIR)/PipelineLayout.o
 OBJECTS += $(OBJDIR)/Rasterizer.o
 OBJECTS += $(OBJDIR)/Raytracer.o
 OBJECTS += $(OBJDIR)/RenderPass.o
+OBJECTS += $(OBJDIR)/RtxApp.o
 OBJECTS += $(OBJDIR)/RtxPipeline.o
 OBJECTS += $(OBJDIR)/Scene.o
 OBJECTS += $(OBJDIR)/Semaphore.o
@@ -205,6 +207,9 @@ $(OBJDIR)/App.o: src/App.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/HeadlessApp.o: src/HeadlessApp.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/RtxApp.o: src/RtxApp.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/VkBootstrap.o: src/external/VkBootstrap.cpp
