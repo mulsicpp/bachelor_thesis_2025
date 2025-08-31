@@ -14,9 +14,9 @@ Raytracer RaytracerBuilder::build() const {
     auto miss_shader = vk::ShaderBuilder().miss_stage().load_spirv("assets/shaders/rtx/miss.spv").build().to_shared();
     dbg_log("loaded all rtx shaders");
 
-    vk::ShaderGroupGeneral ray_gen_group = vk::ShaderGroupGeneral().set_general(ray_gen_shader);
-    vk::ShaderGroupGeneral miss_group = vk::ShaderGroupGeneral().set_general(miss_shader);
-    vk::ShaderGroupHit hit_group = vk::ShaderGroupHit().set_closest_hit(closest_hit_shader);
+    vk::ShaderGroup ray_gen_group = vk::ShaderGroup::create_general(ray_gen_shader);
+    vk::ShaderGroup miss_group = vk::ShaderGroup::create_general(miss_shader);
+    vk::ShaderGroup hit_group = vk::ShaderGroup::create_hit_closest(closest_hit_shader);
     dbg_log("created shader groups");
 
     raytracer.pipeline_layout = vk::PipelineLayoutBuilder()
@@ -38,13 +38,15 @@ Raytracer RaytracerBuilder::build() const {
 
     // TODO build raytracer
     raytracer.pipeline = vk::RtxPipelineBuilder()
-        .add_shader_group_general(ray_gen_group)
-        .add_shader_group_general(miss_group)
-        .add_shader_group_hit(hit_group)
+        .add_shader_group(ray_gen_group)
+        .add_shader_group(miss_group)
+        .add_shader_group(hit_group)
         .layout(raytracer.pipeline_layout)
         .max_ray_recursion_depth(1)
         .build();
     dbg_log("created rtx pipeline");
+
+
 
     return raytracer;
 }

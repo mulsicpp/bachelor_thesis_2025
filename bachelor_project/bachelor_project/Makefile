@@ -87,9 +87,11 @@ GENERATED += $(OBJDIR)/Raytracer.o
 GENERATED += $(OBJDIR)/RenderPass.o
 GENERATED += $(OBJDIR)/RtxApp.o
 GENERATED += $(OBJDIR)/RtxPipeline.o
+GENERATED += $(OBJDIR)/SBT.o
 GENERATED += $(OBJDIR)/Scene.o
 GENERATED += $(OBJDIR)/Semaphore.o
 GENERATED += $(OBJDIR)/Shader.o
+GENERATED += $(OBJDIR)/ShaderGroup.o
 GENERATED += $(OBJDIR)/SubBuffer.o
 GENERATED += $(OBJDIR)/Swapchain.o
 GENERATED += $(OBJDIR)/Tlas.o
@@ -126,9 +128,11 @@ OBJECTS += $(OBJDIR)/Raytracer.o
 OBJECTS += $(OBJDIR)/RenderPass.o
 OBJECTS += $(OBJDIR)/RtxApp.o
 OBJECTS += $(OBJDIR)/RtxPipeline.o
+OBJECTS += $(OBJDIR)/SBT.o
 OBJECTS += $(OBJDIR)/Scene.o
 OBJECTS += $(OBJDIR)/Semaphore.o
 OBJECTS += $(OBJDIR)/Shader.o
+OBJECTS += $(OBJDIR)/ShaderGroup.o
 OBJECTS += $(OBJDIR)/SubBuffer.o
 OBJECTS += $(OBJDIR)/Swapchain.o
 OBJECTS += $(OBJDIR)/Tlas.o
@@ -309,6 +313,12 @@ $(OBJDIR)/Blas.o: src/vk_rtx/Blas.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/RtxPipeline.o: src/vk_rtx/RtxPipeline.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/SBT.o: src/vk_rtx/SBT.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ShaderGroup.o: src/vk_rtx/ShaderGroup.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Tlas.o: src/vk_rtx/Tlas.cpp

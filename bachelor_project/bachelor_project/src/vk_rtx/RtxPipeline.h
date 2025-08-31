@@ -43,8 +43,6 @@ namespace vk {
 
 		inline Ref shader_groups(const std::vector<ShaderGroup>& shader_groups) { _shader_groups = shader_groups; return *this; }
 		inline Ref add_shader_group(const ShaderGroup& shader_group) { _shader_groups.push_back(shader_group); return *this; }
-		inline Ref add_shader_group_general(const ShaderGroupGeneral& shader_group) { _shader_groups.push_back(shader_group); return *this; }
-		inline Ref add_shader_group_hit(const ShaderGroupHit& shader_group) { _shader_groups.push_back(shader_group); return *this; }
 
 		inline Ref layout(PipelineLayout&& layout) { _layout = std::move(layout).to_shared(); return *this; }
 		inline Ref layout(const ptr::Shared<const PipelineLayout>& layout) { _layout = layout; return *this; }

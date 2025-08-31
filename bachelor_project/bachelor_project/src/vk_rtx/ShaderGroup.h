@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/move.h"
 #include "utils/ptr.h"
 
 #include "vk_pipeline/Shader.h"
@@ -17,8 +18,6 @@ namespace vk {
         using Ref = ShaderGroupGeneral&;
 
         ptr::Shared<Shader> general{};
-
-        inline Ref set_general(const ptr::Shared<Shader>& general) { this->general = general; return *this; }
     };
 
     struct ShaderGroupHit {
@@ -26,13 +25,15 @@ namespace vk {
 
         ptr::Shared<Shader> closest_hit{};
         ptr::Shared<Shader> any_hit{};
-
-        inline Ref set_closest_hit(const ptr::Shared<Shader>& closest_hit) { this->closest_hit = closest_hit; return *this; }
-        inline Ref set_any_hit(const ptr::Shared<Shader>& any_hit) { this->any_hit = any_hit; return *this; }
     };
+
+    using ShaderGroupId = uint64_t;
     
     class ShaderGroup {
     private:
+        static ShaderGroupId next_id;
+
+        ShaderGroupId id{ 0 };
         std::variant<
             ShaderGroupGeneral,
             ShaderGroupHit
@@ -41,15 +42,15 @@ namespace vk {
     public:
         ShaderGroup() = default;
 
-        inline ShaderGroup(const ShaderGroupGeneral& general_group) :group{ general_group } {}
-        inline ShaderGroup(const ShaderGroupHit& hit_group) :group{ hit_group } {}
+        static ShaderGroup create_general(ptr::Shared<Shader> general);
+
+        static ShaderGroup create_hit(ptr::Shared<Shader> closest_hit, ptr::Shared<Shader> any_hit);
+        static ShaderGroup create_hit_closest(ptr::Shared<Shader> closest_hit);
+        static ShaderGroup create_hit_any(ptr::Shared<Shader> any_hit);
 
         inline ShaderGroupType type() const { return group.index() == 0 ? ShaderGroupType::General : ShaderGroupType::Hit; }
 
-        inline ShaderGroupGeneral& as_general() { return std::get<0>(group); }
         inline const ShaderGroupGeneral& as_general() const { return std::get<0>(group); }
-
-        inline ShaderGroupHit& as_hit() { return std::get<1>(group); }
         inline const ShaderGroupHit& as_hit() const { return std::get<1>(group); }
     };
 }
