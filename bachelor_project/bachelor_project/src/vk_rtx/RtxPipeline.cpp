@@ -46,7 +46,7 @@ namespace vk {
             else {
                 const auto& hit_group = shader_group.as_hit();
 
-                group_info.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+                group_info.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
 
                 group_info.closestHitShader = get_shader_idx(hit_group.closest_hit);
                 group_info.anyHitShader = get_shader_idx(hit_group.any_hit);

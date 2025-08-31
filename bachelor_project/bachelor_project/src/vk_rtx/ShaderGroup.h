@@ -14,12 +14,21 @@ namespace vk {
     };
 
     struct ShaderGroupGeneral {
+        using Ref = ShaderGroupGeneral&;
+
         ptr::Shared<Shader> general{};
+
+        inline Ref set_general(const ptr::Shared<Shader>& general) { this->general = general; return *this; }
     };
 
     struct ShaderGroupHit {
+        using Ref = ShaderGroupHit&;
+
         ptr::Shared<Shader> closest_hit{};
         ptr::Shared<Shader> any_hit{};
+
+        inline Ref set_closest_hit(const ptr::Shared<Shader>& closest_hit) { this->closest_hit = closest_hit; return *this; }
+        inline Ref set_any_hit(const ptr::Shared<Shader>& any_hit) { this->any_hit = any_hit; return *this; }
     };
     
     class ShaderGroup {
