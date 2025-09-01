@@ -6,7 +6,7 @@
 
 #include "vk_core/Context.h"
 
-void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, const Frame& frame, vk::Framebuffer* framebuffer)
+void Rasterizer::cmd_draw(vk::ReadyCommandBuffer cmd_buf, vk::Framebuffer* framebuffer)
 {
 	std::vector<glm::mat4> transforms{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
@@ -15,9 +15,9 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, const Frame& fra
 
 	pipeline.cmd_bind(cmd_buf);
 
-	frame.descriptor_pool.cmd_bind_set(cmd_buf, 0);
+	descriptor_pool.cmd_bind_set(cmd_buf, 0);
 
-	auto iterator = frame.scene->iter();
+	auto iterator = scene->iter();
 	while (iterator.has_next())
 	{
 		const auto& node = iterator.next();
@@ -47,45 +47,10 @@ void Rasterizer::cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, const Frame& fra
 	framebuffer->cmd_end_pass(cmd_buf);
 }
 
-void Rasterizer::draw_frame(const Frame& frame, vk::Framebuffer* framebuffer)
+void Rasterizer::draw(vk::Framebuffer* framebuffer)
 {
 	vk::CommandBuffer::single_time_submit(vk::QueueType::Graphics, [&](vk::ReadyCommandBuffer cmd_buffer)
-		{ this->cmd_draw_frame(cmd_buffer, frame, framebuffer); });
-}
-
-Frame Rasterizer::create_frame() const
-{
-	Frame frame;
-
-	frame.camera_uniform_buffer = vk::BufferBuilder()
-		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-		.queue_types({ vk::QueueType::Graphics })
-		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
-		.size(sizeof(CameraUBO))
-		.build()
-		.to_shared();
-	frame.p_camera_ubo = frame.camera_uniform_buffer->mapped_data<CameraUBO>();
-
-	frame.descriptor_pool = vk::DescriptorPoolBuilder()
-		.pipeline_layout(pipeline_layout)
-		.add_set(vk::DescriptorSetInfo()
-			.set_index(0)
-			.set_binding(0, { frame.camera_uniform_buffer }))
-		.build();
-
-	return frame;
-}
-
-std::vector<Frame> Rasterizer::create_frames(uint32_t count) const
-{
-	std::vector<Frame> frames{ count };
-
-	for (uint32_t i = 0; i < count; i++)
-	{
-		frames[i] = create_frame();
-	}
-
-	return frames;
+		{ this->cmd_draw(cmd_buffer, framebuffer); });
 }
 
 RasterizerBuilder::RasterizerBuilder()
@@ -141,6 +106,21 @@ Rasterizer RasterizerBuilder::build()
 	rasterizer.pass_begin_info = vk::PassBeginInfo()
 		.add_clear_value(vk::ClearValue::color(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}))
 		.add_clear_value(vk::ClearValue::depth(1.0f));
+
+	rasterizer.camera_uniform_buffer = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+		.queue_types({ vk::QueueType::Graphics })
+		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+		.size(sizeof(CameraUBO))
+		.build()
+		.to_shared();
+
+	rasterizer.descriptor_pool = vk::DescriptorPoolBuilder()
+		.pipeline_layout(rasterizer.pipeline_layout)
+		.add_set(vk::DescriptorSetInfo()
+			.set_index(0)
+			.set_binding(0, { rasterizer.camera_uniform_buffer }))
+		.build();
 
 	rasterizer.cube = Mesh::create_cube();
 

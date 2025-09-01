@@ -15,7 +15,7 @@ private:
     vk::SBT sbt{};
 
 public:
-    // TODO functionality
+    Raytracer() = default;
 };
 
 class RaytracerBuilder {

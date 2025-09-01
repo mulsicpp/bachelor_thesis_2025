@@ -65,7 +65,7 @@ App::App() {
     animation.apply_for(0.0f);
     scene->update();
 
-    frame = rasterizer->create_frame();
+    rasterizer->bind_scene(scene);
 }
 
 App::~App() {
@@ -79,10 +79,9 @@ void App::run() {
 
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
-        camera.aspect = ((float)width) / ((float)height);
+        camera->aspect = ((float)width) / ((float)height);
 
-        *frame.p_camera_ubo = camera.as_camera_ubo();
-
+        rasterizer->bind_camera(camera);
         auto new_time = std::chrono::high_resolution_clock::now();
 
         float elapsed = std::chrono::duration<float, std::chrono::seconds::period>(new_time - time).count();
@@ -92,9 +91,7 @@ void App::run() {
         animation.apply_for(elapsed * 1.0f);
         scene->update();
 
-        frame.scene = scene;
-
-        frame_manager.draw_frame(frame);
+        frame_manager.draw();
     }
 
     vk::Context::get()->wait_device_idle();
@@ -115,7 +112,7 @@ void App::scroll_callback(GLFWwindow* window, double x_offset, double y_offset) 
     input_data.zoom_exp -= y_offset;
 
     auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
-    app->camera.distance = start_distance * glm::pow(base, input_data.zoom_exp);
+    app->camera->distance = start_distance * glm::pow(base, input_data.zoom_exp);
 }
 
 void App::cursor_pos_callback(GLFWwindow* window, double x_pos, double y_pos) {
@@ -134,20 +131,20 @@ void App::cursor_pos_callback(GLFWwindow* window, double x_pos, double y_pos) {
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         glm::mat4 transform = glm::mat4{ 1.0f };
-        transform = glm::rotate(transform, app->camera.phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
-        transform = glm::rotate(transform, app->camera.theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
+        transform = glm::rotate(transform, app->camera->phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
+        transform = glm::rotate(transform, app->camera->theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
 
         glm::vec3 right = glm::inverse(transform) * glm::vec4{ 1.0f, 0.0f, 0.0f, 0.0f };
         glm::vec3 up = glm::inverse(transform) * glm::vec4{ 0.0f, 1.0f, 0.0f, 0.0f };
 
         auto delta = (float)dx * right + (float)dy * up;
 
-        app->camera.center -= delta * (float)(app->camera.distance / height);
+        app->camera->center -= delta * (float)(app->camera->distance / height);
     }
     else {
-        app->camera.theta += dx * move_factor / height;
-        app->camera.phi -= dy * move_factor / height;
-        app->camera.phi = std::clamp(app->camera.phi, -glm::pi<float>() / 2, glm::pi<float>() / 2);
+        app->camera->theta += dx * move_factor / height;
+        app->camera->phi -= dy * move_factor / height;
+        app->camera->phi = std::clamp(app->camera->phi, -glm::pi<float>() / 2, glm::pi<float>() / 2);
     }
 
 }
@@ -162,7 +159,7 @@ void App::key_callback(GLFWwindow* window, int key, int scancode, int action, in
 {
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
         auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
-        app->camera = AppCamera{};
+        *app->camera = AppCamera{};
 
         input_data.zoom_exp = 0.0f;
     }

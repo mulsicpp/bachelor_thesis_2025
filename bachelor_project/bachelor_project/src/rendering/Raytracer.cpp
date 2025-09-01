@@ -4,8 +4,6 @@
 
 #include "vk_pipeline/Shader.h"
 
-
-
 Raytracer RaytracerBuilder::build() const {
     Raytracer raytracer{};
 

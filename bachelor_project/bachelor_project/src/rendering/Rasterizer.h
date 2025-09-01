@@ -5,6 +5,7 @@
 
 #include "vk_pipeline/Pipeline.h"
 #include "vk_pipeline/Framebuffer.h"
+#include "vk_pipeline/DescriptorPool.h"
 
 #include "vk_resources/Image.h"
 
@@ -12,9 +13,8 @@
 
 #include "vk_core/Swapchain.h"
 
-#include "scene/Mesh.h"
-
-#include "Frame.h"
+#include "scene/Scene.h"
+#include "scene/Camera.h"
 
 
 class RasterizerBuilder;
@@ -30,20 +30,29 @@ private:
 
 	vk::PassBeginInfo pass_begin_info{};
 
+	ptr::Shared<vk::Buffer> camera_uniform_buffer;
+	ptr::Shared<Scene> scene{};
+
+	vk::DescriptorPool descriptor_pool{};
+
 	Mesh cube;
 
 public:
 	Rasterizer() = default;
 
-	void cmd_draw_frame(vk::ReadyCommandBuffer cmd_buf, const Frame& frame, vk::Framebuffer* framebuffer);
-	void draw_frame(const Frame& frame, vk::Framebuffer* framebuffer);
+	inline void bind_camera(const ptr::Shared<Camera>& camera) {
+		*camera_uniform_buffer->mapped_data<CameraUBO>() = camera->as_camera_ubo();
+		camera_uniform_buffer->flush();
+	}
+
+	inline void bind_scene(const ptr::Shared<Scene>& scene) { this->scene = scene; }
+
+	void draw(vk::Framebuffer* framebuffer);
+	void cmd_draw(vk::ReadyCommandBuffer cmd_buf, vk::Framebuffer* framebuffer);
 
 	inline const ptr::Shared<vk::RenderPass>& get_render_pass() const { return render_pass; }
 	inline const vk::QueueType get_queue_type() const { return vk::QueueType::Graphics; }
 	inline const ptr::Shared<vk::PipelineLayout>& get_pipeline_layout() const { return pipeline_layout; }
-
-	Frame create_frame() const;
-	std::vector<Frame> create_frames(uint32_t count) const;
 };
 
 class RasterizerBuilder {

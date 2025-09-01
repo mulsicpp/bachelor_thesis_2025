@@ -67,6 +67,13 @@ HeadlessApp::HeadlessApp()
                       .add_image(depth_image)
                       .build();
 
+    camera = ptr::make_shared<AppCamera>();
+
+    camera->aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
+    camera->theta = glm::pi<float>();
+    camera->center = glm::vec3{0.0f, -1.0f, 0.0f};
+    camera->distance /= 2;
+
     scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
 
@@ -75,16 +82,10 @@ HeadlessApp::HeadlessApp()
     scene->update();
     scene->build_acceleration_structures();
 
-    frame = rasterizer->create_frame();
+    rasterizer->bind_camera(camera);
+    rasterizer->bind_scene(scene);
 
-    camera.aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
-    camera.theta = glm::pi<float>();
-    camera.center = glm::vec3{0.0f, -1.0f, 0.0f};
-    camera.distance /= 2;
-    *frame.p_camera_ubo = camera.as_camera_ubo();
-    frame.scene = scene;
-
-    rasterizer->draw_frame(frame, &framebuffer);
+    rasterizer->draw(&framebuffer);
     color_image->store_in_file("render_result.png");
 }
 

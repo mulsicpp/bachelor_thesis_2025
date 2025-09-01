@@ -14,14 +14,13 @@
 class HeadlessApp : public utils::Move {
 private:
 	ptr::Shared<Rasterizer> rasterizer{};
-	Frame frame{};
-
+	
 	ptr::Shared<vk::Image> color_image{};
 	ptr::Shared<vk::Image> depth_image{};
-
+	
 	vk::Framebuffer framebuffer{};
-
-	AppCamera camera{};
+	
+	ptr::Shared<AppCamera> camera{};
 	ptr::Shared<Scene> scene{};
 
 public:

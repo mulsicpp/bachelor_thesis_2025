@@ -35,7 +35,7 @@ void FrameManager::bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer) {
 	create_framebuffers();
 }
 
-void FrameManager::draw_frame(const Frame& frame) {
+void FrameManager::draw() {
 	if (!renderer) {
 		throw std::runtime_error("Failed to draw frame! No rasterizer was selected");
 	}
@@ -59,8 +59,8 @@ void FrameManager::draw_frame(const Frame& frame) {
 	}
 
 
-	auto draw_recorder = [this, image_index, &frame](vk::ReadyCommandBuffer cmd_buf) {
-		renderer->cmd_draw_frame(cmd_buf, frame, &framebuffers[image_index]);
+	auto draw_recorder = [this, image_index](vk::ReadyCommandBuffer cmd_buf) {
+		renderer->cmd_draw(cmd_buf, &framebuffers[image_index]);
 		};
 
 	command_buffer

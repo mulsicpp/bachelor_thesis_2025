@@ -16,14 +16,11 @@ class App : public utils::Move {
 private:
 	GLFWwindow* window{};
 
-	AppCamera camera{};
-
 	FrameManager frame_manager{};
-
 	ptr::Shared<Rasterizer> rasterizer{};
+	
+	ptr::Shared<AppCamera> camera{};
 	ptr::Shared<Scene> scene{};
-
-	Frame frame{};
 
 	std::chrono::high_resolution_clock::time_point time{};
 
@@ -36,7 +33,7 @@ public:
 	static inline void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
 		auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
 		app->frame_manager.signal_resize();
-		app->camera.aspect = ((float)width) / ((float)height);
+		app->camera->aspect = ((float)width) / ((float)height);
 	}
 
 	static void scroll_callback(GLFWwindow* window, double x_offset, double y_offset);

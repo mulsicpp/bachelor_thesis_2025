@@ -11,7 +11,6 @@
 
 #include <vector>
 
-#include "Frame.h"
 #include "Rasterizer.h"
 
 typedef vk::CommandRecorder(Rasterizer::*DrawRecorder)(vk::Framebuffer* framebuffer);
@@ -44,7 +43,11 @@ public:
 	void bind_rasterizer(Rasterizer&& rasterizer);
 	void bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer);
 
-	void draw_frame(const Frame& frame);
+	inline void bind_camera(const ptr::Shared<Camera>& camera) { renderer->bind_camera(camera); }
+
+	inline void bind_scene(const ptr::Shared<Scene>& scene) { renderer->bind_scene(scene); }
+
+	void draw();
 
 	inline void signal_resize() { resize_signaled = true; }
 
