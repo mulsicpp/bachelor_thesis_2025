@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\HeadlessApp.h" />
+    <ClInclude Include="src\RtxApp.h" />
     <ClInclude Include="src\external\VkBootstrap.h">
       <Filter>external</Filter>
     </ClInclude>
@@ -56,13 +57,13 @@
     <ClInclude Include="src\external\volk_mem_alloc.h">
       <Filter>external</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\Frame.h">
-      <Filter>rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\rendering\FrameManager.h">
       <Filter>rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\rendering\Rasterizer.h">
+      <Filter>rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rendering\Raytracer.h">
       <Filter>rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\Animation.h">
@@ -164,6 +165,15 @@
     <ClInclude Include="src\vk_rtx\Blas.h">
       <Filter>vk_rtx</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_rtx\RtxPipeline.h">
+      <Filter>vk_rtx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_rtx\SBT.h">
+      <Filter>vk_rtx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vk_rtx\ShaderGroup.h">
+      <Filter>vk_rtx</Filter>
+    </ClInclude>
     <ClInclude Include="src\vk_rtx\Tlas.h">
       <Filter>vk_rtx</Filter>
     </ClInclude>
@@ -177,6 +187,7 @@
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\HeadlessApp.cpp" />
+    <ClCompile Include="src\RtxApp.cpp" />
     <ClCompile Include="src\external\VkBootstrap.cpp">
       <Filter>external</Filter>
     </ClCompile>
@@ -194,6 +205,9 @@
       <Filter>rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\rendering\Rasterizer.cpp">
+      <Filter>rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rendering\Raytracer.cpp">
       <Filter>rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Animation.cpp">
@@ -266,6 +280,15 @@
       <Filter>vk_resources</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_rtx\Blas.cpp">
+      <Filter>vk_rtx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_rtx\RtxPipeline.cpp">
+      <Filter>vk_rtx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_rtx\SBT.cpp">
+      <Filter>vk_rtx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vk_rtx\ShaderGroup.cpp">
       <Filter>vk_rtx</Filter>
     </ClCompile>
     <ClCompile Include="src\vk_rtx\Tlas.cpp">

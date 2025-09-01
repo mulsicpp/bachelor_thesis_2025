@@ -55,6 +55,8 @@ App::App() {
         .to_shared();
 
     frame_manager.bind_rasterizer(rasterizer);
+
+    camera = ptr::make_shared<AppCamera>();
     
     scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
