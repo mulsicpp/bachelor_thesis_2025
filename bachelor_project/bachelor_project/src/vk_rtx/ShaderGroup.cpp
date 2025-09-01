@@ -10,7 +10,7 @@ namespace vk {
 
         ShaderGroup group{};
         group.group = general_group;
-        group.id = ++next_id;
+        group._id = ++next_id;
 
         return group;
     }
@@ -23,7 +23,7 @@ namespace vk {
 
         ShaderGroup group{};
         group.group = hit_group;
-        group.id = ++next_id;
+        group._id = ++next_id;
 
         return group;
     }

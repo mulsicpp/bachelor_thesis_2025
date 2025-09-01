@@ -10,6 +10,9 @@
 #include "external/volk.h"
 
 #include "ShaderGroup.h"
+#include "SBT.h"
+
+#include <unordered_map>
 
 namespace vk {
 
@@ -19,6 +22,8 @@ namespace vk {
         friend class RtxPipelineBuilder;
     private:
 		std::vector<ShaderGroup> _shader_groups{};
+		std::unordered_map<ShaderGroupId, uint32_t> _group_id_to_idx{};
+
 		ptr::Shared<const PipelineLayout> _layout{};
 		uint32_t _max_ray_recursion_depth{};
         Handle<VkPipeline> pipeline;
@@ -27,6 +32,8 @@ namespace vk {
         RtxPipeline() = default;
 
 		inline VkPipeline handle() const { return *pipeline; }
+
+		SBT build_sbt(const SBTInfo& info) const;
     };
 
     class RtxPipelineBuilder {

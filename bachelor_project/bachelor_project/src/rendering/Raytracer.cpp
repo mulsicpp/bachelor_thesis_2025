@@ -46,7 +46,11 @@ Raytracer RaytracerBuilder::build() const {
         .build();
     dbg_log("created rtx pipeline");
 
-
+    raytracer.sbt = raytracer.pipeline.build_sbt(vk::SBTInfo()
+        .ray_gen_group(ray_gen_group)
+        .miss_groups({ miss_group })
+        .hit_groups({ hit_group }));
+    dbg_log("built sbt");
 
     return raytracer;
 }

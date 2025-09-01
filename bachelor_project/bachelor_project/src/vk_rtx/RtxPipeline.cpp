@@ -3,10 +3,101 @@
 #include "vk_core/Context.h"
 
 #include <set>
+#include <cstring>
 
 namespace vk {
+
+    static uint32_t aligned_size(uint32_t size, uint32_t alignment) {
+        return (size + alignment - 1) & ~(alignment - 1);
+    }
+
+    SBT RtxPipeline::build_sbt(const SBTInfo& info) const {
+        SBT sbt{};
+
+        VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracing_props{};
+        raytracing_props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+        VkPhysicalDeviceProperties2 props2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, &raytracing_props };
+        vkGetPhysicalDeviceProperties2(Context::get()->get_physical_device(), &props2);
+
+        const auto handle_size = raytracing_props.shaderGroupHandleSize;
+        const auto handle_alignment = raytracing_props.shaderGroupHandleAlignment;
+        const auto base_alignment = raytracing_props.shaderGroupBaseAlignment;
+
+        const auto aligned_handle_size = aligned_size(handle_size, handle_alignment);
+
+        VkDeviceSize ray_gen_size = aligned_handle_size;
+        VkDeviceSize miss_size = aligned_handle_size * info._miss_groups.size();
+        VkDeviceSize hit_size = aligned_handle_size * info._hit_groups.size();
+
+        VkDeviceSize ray_gen_offset = 0;
+        VkDeviceSize miss_offset = aligned_size(ray_gen_size, base_alignment);
+        VkDeviceSize hit_offset = miss_offset + aligned_size(miss_size, base_alignment);
+
+        Buffer staging_buffer = BufferBuilder()
+            .add_queue_type(QueueType::Transfer)
+            .usage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+            .memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+            .size(hit_offset + hit_size)
+            .build();
+
+        uint8_t* staging_data = staging_buffer.mapped_data();
+
+        std::vector<uint8_t> handle_buffer{};
+        handle_buffer.resize(_shader_groups.size() * handle_size);
+
+        const auto device = Context::get()->get_device();
+
+        if (vkGetRayTracingShaderGroupHandlesKHR(device, *pipeline, 0, static_cast<uint32_t>(_shader_groups.size()), handle_buffer.size(), handle_buffer.data()) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to get shader group handles!");
+        }
+
+        auto store_region = [&](const std::vector<ShaderGroup> groups, VkDeviceSize offset) {
+            for (uint32_t i = 0; i < groups.size(); i++) {
+                const auto& group = groups[i];
+                auto idx = _group_id_to_idx.at(group.id());
+
+                memcpy(staging_data + offset + aligned_handle_size * i, handle_buffer.data() + idx * handle_size, handle_size);
+                if (aligned_handle_size > handle_size) {
+                    memset(staging_data + offset + aligned_handle_size * i + handle_size, 0, aligned_handle_size - handle_size);
+                }
+            }
+            };
+
+        store_region(std::vector<ShaderGroup>{ info._ray_gen_group }, ray_gen_offset);
+        store_region(info._miss_groups, miss_offset);
+        store_region(info._hit_groups, hit_offset);
+
+        sbt._buffer = BufferBuilder()
+            .queue_types({ QueueType::Transfer, QueueType::Compute })
+            .add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+            .add_usage(VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR)
+            .add_usage(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+            .size(staging_buffer.size())
+            .build();
+
+        auto device_address = sbt._buffer.device_address();
+
+        staging_buffer.copy_into(&sbt._buffer);
+        
+        sbt.ray_gen_region.deviceAddress = device_address + ray_gen_offset;
+        sbt.ray_gen_region.stride = aligned_handle_size;
+        sbt.ray_gen_region.size = ray_gen_size;
+
+        sbt.miss_region.deviceAddress = device_address + miss_offset;
+        sbt.miss_region.stride = aligned_handle_size;
+        sbt.miss_region.size = miss_size;
+
+        sbt.hit_region.deviceAddress = device_address + hit_offset;
+        sbt.hit_region.stride = aligned_handle_size;
+        sbt.hit_region.size = hit_size;
+
+        return sbt;
+    }
+
+
     RtxPipeline RtxPipelineBuilder::build() const {
-        RtxPipeline pipeline;
+        RtxPipeline pipeline{};
 
         std::vector<ptr::Shared<Shader>> shaders{};
 
@@ -24,7 +115,8 @@ namespace vk {
 
         std::vector<VkRayTracingShaderGroupCreateInfoKHR> vk_group_infos{};
 
-        for (const auto shader_group : _shader_groups) {
+        for (uint32_t i = 0; i < _shader_groups.size(); i++) {
+            const auto& shader_group = _shader_groups[i];
             const auto type = shader_group.type();
 
             VkRayTracingShaderGroupCreateInfoKHR group_info = {};
@@ -56,12 +148,13 @@ namespace vk {
             }
 
             vk_group_infos.push_back(group_info);
+            pipeline._group_id_to_idx[shader_group.id()] = i;
         }
 
         std::vector<VkPipelineShaderStageCreateInfo> vk_shader_infos{};
-		for (const auto& shader : shaders) {
-			vk_shader_infos.push_back(shader->get_create_info());
-		}
+        for (const auto& shader : shaders) {
+            vk_shader_infos.push_back(shader->get_create_info());
+        }
 
         VkRayTracingPipelineCreateInfoKHR pipeline_info{};
         pipeline_info.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;

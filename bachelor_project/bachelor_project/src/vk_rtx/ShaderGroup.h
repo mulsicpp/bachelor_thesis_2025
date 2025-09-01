@@ -33,7 +33,7 @@ namespace vk {
     private:
         static ShaderGroupId next_id;
 
-        ShaderGroupId id{ 0 };
+        ShaderGroupId _id{ 0 };
         std::variant<
             ShaderGroupGeneral,
             ShaderGroupHit
@@ -49,6 +49,7 @@ namespace vk {
         static ShaderGroup create_hit_any(ptr::Shared<Shader> any_hit);
 
         inline ShaderGroupType type() const { return group.index() == 0 ? ShaderGroupType::General : ShaderGroupType::Hit; }
+        inline ShaderGroupId id() const { return _id; }
 
         inline const ShaderGroupGeneral& as_general() const { return std::get<0>(group); }
         inline const ShaderGroupHit& as_hit() const { return std::get<1>(group); }

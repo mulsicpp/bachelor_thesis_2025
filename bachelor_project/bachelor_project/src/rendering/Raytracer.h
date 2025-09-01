@@ -12,6 +12,7 @@ class Raytracer : public utils::Move, public ptr::ToShared<Raytracer> {
 private:
     ptr::Shared<vk::PipelineLayout> pipeline_layout{};
     vk::RtxPipeline pipeline{};
+    vk::SBT sbt{};
 
 public:
     // TODO functionality
