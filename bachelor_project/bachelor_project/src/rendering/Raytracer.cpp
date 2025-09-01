@@ -4,6 +4,22 @@
 
 #include "vk_pipeline/Shader.h"
 
+
+void Raytracer::cmd_draw(vk::ReadyCommandBuffer cmd_buf) {
+    pipeline.cmd_bind(cmd_buf);
+
+    descriptor_pool.cmd_bind_set(cmd_buf, 0, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR);
+
+    vk::RtxPipeline::cmd_trace_rays(cmd_buf, sbt, image_view->image()->extent());
+}
+
+void Raytracer::draw() {
+    vk::CommandBuffer::single_time_submit(vk::QueueType::Graphics, [&](vk::ReadyCommandBuffer cmd_buffer)
+        { this->cmd_draw(cmd_buffer); });
+}
+
+
+
 Raytracer RaytracerBuilder::build() const {
     Raytracer raytracer{};
 
@@ -49,6 +65,10 @@ Raytracer RaytracerBuilder::build() const {
         .miss_groups({ miss_group })
         .hit_groups({ hit_group }));
     dbg_log("built sbt");
+
+    raytracer.descriptor_pool = vk::DescriptorPoolBuilder()
+        .pipeline_layout(raytracer.pipeline_layout)
+        .build();
 
     return raytracer;
 }

@@ -23,13 +23,13 @@ namespace vk {
 		return vk_struct;
 	}
 
-	void DescriptorPool::cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, std::vector<uint32_t> offsets) const {
-		vkCmdBindDescriptorSets(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline_layout->handle(), _set_infos[set_index].index, 1, &_sets[set_index], static_cast<uint32_t>(offsets.size()), offsets.data());
+	void DescriptorPool::cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, VkPipelineBindPoint bind_point, std::vector<uint32_t> offsets) const {
+		vkCmdBindDescriptorSets(cmd_buffer.handle(), bind_point, _pipeline_layout->handle(), set_index, 1, &_sets[set_index], static_cast<uint32_t>(offsets.size()), offsets.data());
 	}
 
 	void DescriptorPool::update_set_binding(uint32_t set_index, uint32_t binding, const DescriptorInfo& info) {
 		VkDescriptorType descriptor_type{};
-		for (const auto& layout_binding : _pipeline_layout->descriptor_set_layouts()[_set_infos[set_index].index]->bindings()) {
+		for (const auto& layout_binding : _pipeline_layout->descriptor_set_layouts()[set_index]->bindings()) {
 			if (layout_binding.binding == binding) {
 				descriptor_type = layout_binding.type;
 				break;
@@ -96,8 +96,6 @@ namespace vk {
 		}
 
 		}
-
-		_set_infos[set_index].bindings[binding] = info;
 	}
 
 
@@ -106,17 +104,16 @@ namespace vk {
 		DescriptorPool pool;
 
 		pool._pipeline_layout = _pipeline_layout;
-		pool._set_infos = _set_infos;
 
 		const auto& all_set_layouts = _pipeline_layout->descriptor_set_layouts();
 		std::vector<VkDescriptorSetLayout> set_layout_handles{};
-		set_layout_handles.reserve(_set_infos.size());
+		set_layout_handles.reserve(all_set_layouts.size());
 
 		std::map<VkDescriptorType, uint32_t> size_map{};
 
-		for (const auto& set_info : _set_infos) {
-			set_layout_handles.push_back(all_set_layouts[set_info.index]->handle());
-			for (const auto& binding : all_set_layouts[set_info.index]->bindings()) {
+		for (const auto& set_layout : all_set_layouts) {
+			set_layout_handles.push_back(set_layout->handle());
+			for (const auto& binding : set_layout->bindings()) {
 				size_map[binding.type] += binding.count;
 			}
 		}
@@ -132,7 +129,7 @@ namespace vk {
 		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		pool_info.poolSizeCount = static_cast<uint32_t>(sizes.size());
 		pool_info.pPoolSizes = sizes.data();
-		pool_info.maxSets = static_cast<uint32_t>(_set_infos.size());
+		pool_info.maxSets = static_cast<uint32_t>(all_set_layouts.size());
 
 		if (vkCreateDescriptorPool(Context::get()->get_device(), &pool_info, nullptr, &*pool.descriptor_pool) != VK_SUCCESS) {
 			throw std::runtime_error("Descriptor pool creation failed!");
@@ -141,10 +138,10 @@ namespace vk {
 		VkDescriptorSetAllocateInfo alloc_info{};
 		alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		alloc_info.descriptorPool = *pool.descriptor_pool;
-		alloc_info.descriptorSetCount = static_cast<uint32_t>(_set_infos.size());
+		alloc_info.descriptorSetCount = static_cast<uint32_t>(set_layout_handles.size());
 		alloc_info.pSetLayouts = set_layout_handles.data();
 
-		pool._sets.resize(_set_infos.size());
+		pool._sets.resize(set_layout_handles.size());
 		if (vkAllocateDescriptorSets(Context::get()->get_device(), &alloc_info, pool._sets.data()) != VK_SUCCESS) {
 			throw std::runtime_error("Descriptor set allocation failed!");
 		}

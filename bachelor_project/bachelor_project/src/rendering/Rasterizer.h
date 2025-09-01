@@ -30,7 +30,7 @@ private:
 
 	vk::PassBeginInfo pass_begin_info{};
 
-	ptr::Shared<vk::Buffer> camera_uniform_buffer;
+	ptr::Shared<vk::Buffer> camera_uniform_buffer{};
 	ptr::Shared<Scene> scene{};
 
 	vk::DescriptorPool descriptor_pool{};
@@ -47,8 +47,8 @@ public:
 
 	inline void bind_scene(const ptr::Shared<Scene>& scene) { this->scene = scene; }
 
-	void draw(vk::Framebuffer* framebuffer);
 	void cmd_draw(vk::ReadyCommandBuffer cmd_buf, vk::Framebuffer* framebuffer);
+	void draw(vk::Framebuffer* framebuffer);
 
 	inline const ptr::Shared<vk::RenderPass>& get_render_pass() const { return render_pass; }
 	inline const vk::QueueType get_queue_type() const { return vk::QueueType::Graphics; }

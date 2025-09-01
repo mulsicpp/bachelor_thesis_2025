@@ -15,7 +15,7 @@ void Rasterizer::cmd_draw(vk::ReadyCommandBuffer cmd_buf, vk::Framebuffer* frame
 
 	pipeline.cmd_bind(cmd_buf);
 
-	descriptor_pool.cmd_bind_set(cmd_buf, 0);
+	descriptor_pool.cmd_bind_set(cmd_buf, 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
 	auto iterator = scene->iter();
 	while (iterator.has_next())

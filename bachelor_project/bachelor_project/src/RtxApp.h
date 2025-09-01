@@ -13,9 +13,10 @@ class RtxApp : public utils::Move {
 private:
 	Raytracer raytracer{};
 
-	ptr::Shared<vk::Image> color_image{};
+	ptr::Shared<vk::Image> image{};
+	ptr::Shared<vk::ImageView> image_view{};
 
-	AppCamera camera{};
+	ptr::Shared<AppCamera> camera{};
 	ptr::Shared<Scene> scene{};
 
 public:

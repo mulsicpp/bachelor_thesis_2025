@@ -14,20 +14,21 @@ private:
 	std::vector<ptr::Shared<Node>> nodes{};
 	std::vector<Animation> animations{};
 
-	vk::Tlas tlas{};
+	ptr::Shared<vk::Tlas> tlas{};
 
 public:
 	Scene() = default;
 
-	inline Animation& get_animation(uint32_t index) { return animations[index]; };
+	inline NodeIterator iter() {
+		return NodeIterator::from(nodes);
+	}
+
+	inline Animation& get_animation(uint32_t index) { return animations[index]; }
+	inline const ptr::Shared<vk::Tlas>& get_tlas() { return tlas; }
 
 	static Scene load(const std::string& file_path);
 
 	void update();
 
 	void build_acceleration_structures();
-
-	inline NodeIterator iter() {
-		return NodeIterator::from(nodes);
-	}
 };

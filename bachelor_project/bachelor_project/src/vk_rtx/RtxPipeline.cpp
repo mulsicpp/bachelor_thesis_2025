@@ -96,6 +96,16 @@ namespace vk {
     }
 
 
+    void RtxPipeline::cmd_bind(ReadyCommandBuffer cmd_buffer) const {
+        vkCmdBindPipeline(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, *pipeline);
+    }
+
+	void RtxPipeline::cmd_trace_rays(ReadyCommandBuffer cmd_buffer, const SBT& sbt, const VkExtent2D& image_extent) {
+        VkStridedDeviceAddressRegionKHR call_region{};
+        vkCmdTraceRaysKHR(cmd_buffer.handle(), &sbt.ray_gen_region, &sbt.miss_region, &sbt.hit_region, &call_region, image_extent.width, image_extent.height, 1);
+    }
+
+
     RtxPipeline RtxPipelineBuilder::build() const {
         RtxPipeline pipeline{};
 

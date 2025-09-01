@@ -125,17 +125,15 @@ namespace vk {
 		Handle<VkDescriptorPool> descriptor_pool{};
 
 		std::vector<VkDescriptorSet> _sets{};
-		std::vector<DescriptorSetInfo> _set_infos{};
 
 	public:
 		DescriptorPool() = default;
 
 		inline VkDescriptorPool handle() const { return *descriptor_pool; }
 
-		inline const std::vector<DescriptorSetInfo>& set_infos() const { return _set_infos; }
 		inline uint32_t set_count() const { return static_cast<uint32_t>(_sets.size()); }
 
-		void cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, std::vector<uint32_t> offsets = {}) const;
+		void cmd_bind_set(ReadyCommandBuffer cmd_buffer, uint32_t set_index, VkPipelineBindPoint bind_point, std::vector<uint32_t> offsets = {}) const;
 
 		void update_set_binding(uint32_t set_index, uint32_t binding, const DescriptorInfo& info);
 	};
@@ -145,7 +143,7 @@ namespace vk {
 		using Ref = DescriptorPoolBuilder&;
 
 	private:
-		ptr::Shared<const PipelineLayout> _pipeline_layout;
+		ptr::Shared<const PipelineLayout> _pipeline_layout{};
 		std::vector<DescriptorSetInfo> _set_infos{};
 
 	public:

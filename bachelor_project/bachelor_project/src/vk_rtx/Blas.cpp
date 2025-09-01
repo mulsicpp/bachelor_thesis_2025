@@ -104,7 +104,7 @@ namespace vk
         uint32_t total_triangle_count = 0;
         for (uint32_t i = 0; i < _geometries.size(); i++) {
             triangle_counts[i] = _geometries[i].triangle_count;
-            dbg_log("triangle count %u: %u", i, triangle_counts[i]);
+            // dbg_log("triangle count %u: %u", i, triangle_counts[i]);
             total_triangle_count += triangle_counts[i];
         }
         dbg_log("total triangle count: %u", total_triangle_count);

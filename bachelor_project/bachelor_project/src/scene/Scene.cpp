@@ -160,7 +160,7 @@ void Scene::build_acceleration_structures() {
 		}
 	}
 
-	tlas = tlas_builder.build();
+	tlas = tlas_builder.build().to_shared();
 }
 
 
@@ -500,7 +500,7 @@ void GLTFData::create_nodes() {
 		for (uint32_t j = 0; j < gltf_node->children_count; j++) {
 			uint32_t child_index = gltf_node->children[j] - data->nodes;
 
-			dbg_log("node %u has child %u", i, child_index);
+			// dbg_log("node %u has child %u", i, child_index);
 			node.children[j] = nodes[child_index];
 		}
 		*nodes[i] = std::move(node);

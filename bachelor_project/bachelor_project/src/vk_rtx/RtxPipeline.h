@@ -34,6 +34,10 @@ namespace vk {
 		inline VkPipeline handle() const { return *pipeline; }
 
 		SBT build_sbt(const SBTInfo& info) const;
+
+		void cmd_bind(ReadyCommandBuffer cmd_buffer) const;
+
+		static void cmd_trace_rays(ReadyCommandBuffer cmd_buffer, const SBT& sbt, const VkExtent2D& image_extent);
     };
 
     class RtxPipelineBuilder {
