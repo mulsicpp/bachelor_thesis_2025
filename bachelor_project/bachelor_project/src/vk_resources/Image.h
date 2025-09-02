@@ -20,7 +20,8 @@ namespace vk {
 		Undefined,
 		TransferSrc,
 		TransferDst,
-		ColorOutput
+		ColorOutput,
+		RtxOutput
 	};
 
 	class SwapchainDeprecated;

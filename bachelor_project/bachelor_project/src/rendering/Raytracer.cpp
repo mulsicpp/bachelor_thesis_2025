@@ -14,7 +14,7 @@ void Raytracer::cmd_draw(vk::ReadyCommandBuffer cmd_buf) {
 }
 
 void Raytracer::draw() {
-    vk::CommandBuffer::single_time_submit(vk::QueueType::Graphics, [&](vk::ReadyCommandBuffer cmd_buffer)
+    vk::CommandBuffer::single_time_submit(vk::QueueType::Compute, [&](vk::ReadyCommandBuffer cmd_buffer)
         { this->cmd_draw(cmd_buffer); });
 }
 

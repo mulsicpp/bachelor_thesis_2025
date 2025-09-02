@@ -9,6 +9,7 @@ layout(location = 0) rayPayloadEXT vec3 payload;
 void main()
 {
     ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
+    /*
     ivec2 imageSize = ivec2(gl_LaunchSizeEXT.xy);
 
     vec2 uv = (vec2(pixel) + 0.5) / vec2(imageSize) * 2.0 - 1.0;
@@ -31,6 +32,7 @@ void main()
         10000.0,                   // maxT
         0                          // location of payload
     );
+    */
 
-    imageStore(outputImage, pixel, vec4(payload, 1.0));
+    imageStore(outputImage, pixel, vec4(0.0, 1.0, 0.0, 1.0));
 }
