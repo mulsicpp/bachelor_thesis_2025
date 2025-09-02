@@ -142,8 +142,6 @@ namespace vk {
                 group_info.closestHitShader = VK_SHADER_UNUSED_KHR;
                 group_info.anyHitShader = VK_SHADER_UNUSED_KHR;
                 group_info.intersectionShader = VK_SHADER_UNUSED_KHR;
-
-                vk_group_infos.push_back(group_info);
             }
             else {
                 const auto& hit_group = shader_group.as_hit();
