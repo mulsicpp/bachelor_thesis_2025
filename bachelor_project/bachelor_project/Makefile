@@ -66,6 +66,7 @@ GENERATED += $(OBJDIR)/Animation.o
 GENERATED += $(OBJDIR)/App.o
 GENERATED += $(OBJDIR)/Blas.o
 GENERATED += $(OBJDIR)/Buffer.o
+GENERATED += $(OBJDIR)/Camera.o
 GENERATED += $(OBJDIR)/CommandBuffer.o
 GENERATED += $(OBJDIR)/CommandManager.o
 GENERATED += $(OBJDIR)/Context.o
@@ -107,6 +108,7 @@ OBJECTS += $(OBJDIR)/Animation.o
 OBJECTS += $(OBJDIR)/App.o
 OBJECTS += $(OBJDIR)/Blas.o
 OBJECTS += $(OBJDIR)/Buffer.o
+OBJECTS += $(OBJDIR)/Camera.o
 OBJECTS += $(OBJDIR)/CommandBuffer.o
 OBJECTS += $(OBJDIR)/CommandManager.o
 OBJECTS += $(OBJDIR)/Context.o
@@ -241,6 +243,9 @@ $(OBJDIR)/Raytracer.o: src/rendering/Raytracer.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Animation.o: src/scene/Animation.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Camera.o: src/scene/Camera.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Mesh.o: src/scene/Mesh.cpp

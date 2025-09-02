@@ -30,8 +30,8 @@ public:
     Raytracer() = default;
 
     inline void bind_camera(const ptr::Shared<Camera>& camera) {
-		//*camera_uniform_buffer->mapped_data<CameraUBO>() = camera->as_camera_ubo();
-		//camera_uniform_buffer->flush();
+		*camera_uniform_buffer->mapped_data<CameraUBO>() = camera->as_camera_ubo(true);
+		camera_uniform_buffer->flush();
 	}
 
 	inline void bind_scene(const ptr::Shared<Scene>& scene) {

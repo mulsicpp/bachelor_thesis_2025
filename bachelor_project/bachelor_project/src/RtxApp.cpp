@@ -47,7 +47,8 @@ RtxApp::RtxApp()
     camera = ptr::make_shared<AppCamera>();
 
     camera->aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
-    camera->theta = glm::pi<float>();
+    camera->theta = glm::pi<float>() * 0.75f;
+    camera->phi = glm::pi<float>() * 0.25f;
     camera->center = glm::vec3{ 0.0f, -1.0f, 0.0f };
     camera->distance /= 2;
 

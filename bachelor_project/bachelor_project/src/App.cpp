@@ -9,19 +9,6 @@
 
 #include "scene/Scene.h"
 
-CameraUBO AppCamera::as_camera_ubo() const {
-    glm::mat4 view = glm::mat4{ 1.0f };
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -distance));
-    view = glm::rotate(view, phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
-    view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
-    view = glm::translate(view, -center);
-    view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, -1.0f });
-
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, near * distance, far * distance);
-
-    return CameraUBO{ view, proj };
-}
-
 App::App() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

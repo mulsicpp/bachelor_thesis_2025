@@ -45,6 +45,13 @@ Raytracer RaytracerBuilder::build() const {
             .add_binding(vk::DescriptorSetLayoutBinding()
                 .set_type(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
                 .set_stage_flags(VK_SHADER_STAGE_RAYGEN_BIT_KHR))
+            .add_binding(vk::DescriptorSetLayoutBinding()
+				.set_type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				.set_stage_flags(
+                    VK_SHADER_STAGE_RAYGEN_BIT_KHR |
+                    VK_SHADER_STAGE_MISS_BIT_KHR |
+                    VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+                ))
             .build())
         .build().to_shared();
     dbg_log("created rtx pipeline layout");
@@ -66,8 +73,19 @@ Raytracer RaytracerBuilder::build() const {
         .hit_groups({ hit_group }));
     dbg_log("built sbt");
 
+    raytracer.camera_uniform_buffer = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+		.queue_types({ vk::QueueType::Compute })
+		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+		.size(sizeof(CameraUBO))
+		.build()
+		.to_shared();
+
     raytracer.descriptor_pool = vk::DescriptorPoolBuilder()
         .pipeline_layout(raytracer.pipeline_layout)
+        .add_set(vk::DescriptorSetInfo()
+			.set_index(0)
+			.set_binding(2, { raytracer.camera_uniform_buffer }))
         .build();
 
     return raytracer;
