@@ -6,4 +6,4 @@ cd "$(dirname "$0")"
 make
 
 cd bachelor_project
-./bin/linux-Debug/bachelor_project_linux
+./bin/linux-Debug/bachelor_project_linux "." -f 13

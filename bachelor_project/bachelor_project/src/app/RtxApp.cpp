@@ -1,9 +1,6 @@
 #include "RtxApp.h"
 
-#define IMAGE_WIDTH 640
-#define IMAGE_HEIGHT 480
-
-#define APP_NAME "Raytracing App"
+#include "utils/defines.h"
 
 #include <algorithm>
 

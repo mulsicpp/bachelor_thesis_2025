@@ -4,9 +4,10 @@
 #include "utils/defines.h"
 #include "utils/LibManager.h"
 
-#include "App.h"
-#include "HeadlessApp.h"
-#include "RtxApp.h"
+#include "app/App.h"
+#include "app/HeadlessApp.h"
+#include "app/RtxApp.h"
+#include "app/CLIOptions.h"
 
 #include "vk_core/CommandBuffer.h"
 #include "vk_core/Handle.h"
@@ -25,7 +26,7 @@ void test_image_copy_and_transitions();
 void test_image_file_store();
 void test_buffer_device_address();
 
-#define RTX false
+#define RTX true
 
 void run_app() {
 #if HEADLESS
@@ -42,8 +43,13 @@ void run_app() {
 #endif
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
+	CLIOptions opts{};
+
+	opts.parse(argc, argv);
+
+	dbg_log("f: %u", opts.frame_count);
 
 	try
 	{

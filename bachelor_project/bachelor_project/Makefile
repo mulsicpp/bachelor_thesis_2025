@@ -66,6 +66,7 @@ GENERATED += $(OBJDIR)/Animation.o
 GENERATED += $(OBJDIR)/App.o
 GENERATED += $(OBJDIR)/Blas.o
 GENERATED += $(OBJDIR)/Buffer.o
+GENERATED += $(OBJDIR)/CLIOptions.o
 GENERATED += $(OBJDIR)/Camera.o
 GENERATED += $(OBJDIR)/CommandBuffer.o
 GENERATED += $(OBJDIR)/CommandManager.o
@@ -108,6 +109,7 @@ OBJECTS += $(OBJDIR)/Animation.o
 OBJECTS += $(OBJDIR)/App.o
 OBJECTS += $(OBJDIR)/Blas.o
 OBJECTS += $(OBJDIR)/Buffer.o
+OBJECTS += $(OBJDIR)/CLIOptions.o
 OBJECTS += $(OBJDIR)/Camera.o
 OBJECTS += $(OBJDIR)/CommandBuffer.o
 OBJECTS += $(OBJDIR)/CommandManager.o
@@ -209,13 +211,16 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/App.o: src/App.cpp
+$(OBJDIR)/App.o: src/app/App.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/HeadlessApp.o: src/HeadlessApp.cpp
+$(OBJDIR)/CLIOptions.o: src/app/CLIOptions.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/RtxApp.o: src/RtxApp.cpp
+$(OBJDIR)/HeadlessApp.o: src/app/HeadlessApp.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/RtxApp.o: src/app/RtxApp.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/VkBootstrap.o: src/external/VkBootstrap.cpp
