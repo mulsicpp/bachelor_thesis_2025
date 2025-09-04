@@ -9,8 +9,12 @@
 #include "scene/Camera.h"
 #include "scene/Scene.h"
 
+#include "CLIOptions.h"
+
 class RtxApp : public utils::Move {
 private:
+	CLIOptions opts{};
+
 	Raytracer raytracer{};
 
 	ptr::Shared<vk::Image> image{};
@@ -20,7 +24,7 @@ private:
 	ptr::Shared<Scene> scene{};
 
 public:
-	RtxApp();
+	RtxApp(int argc, char* argv[]);
 
 	void run();
 };

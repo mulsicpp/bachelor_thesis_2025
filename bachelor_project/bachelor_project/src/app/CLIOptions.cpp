@@ -6,31 +6,39 @@
 #include <cstdlib>
 
 CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
-    auto positive_int = CLI::Validator(
-    [](const std::string &s) {
-        int64_t val = std::stoll(s);
+    auto validate_positive = CLI::Validator(
+        [](const std::string& s) {
+            int64_t val = std::stoll(s);
 
-        if (val <= 0) return s + " is not a positive value";
-        return std::string{};
-    },
-    "PositiveInt"
-);
+            if (val <= 0) return s + " is not a positive value";
+            return std::string{};
+        },
+        "POSITIVE"
+    );
+
+    auto validate_path = CLI::Validator(
+        [](const std::string& s) {
+            return std::string{};
+        },
+        "PATH"
+    );
 
 
     app.add_option("scene", scene_path, "The path to the scene to be loaded")
         ->check(CLI::ExistingPath)
         ->required(true);
-    
+
     app.add_option("-t,--target-dir", target_dir, "The path to the directory, where the data is stored")
-        ->default_val("raytracing_results");
+        ->default_str(target_dir)
+        ->check(validate_path);
 
     app.add_option("-f,--frames", frame_count, "The number of frames to be generated")
-        ->check(positive_int)
-        ->default_val(100);
+        ->default_str(std::to_string(frame_count))
+        ->check(validate_positive);
 
     app.add_option("-r,--resolution", resolution, "The resolution of the frames")
-        ->check(positive_int)
-        ->default_str(DEFAULT_RESOLUTION_STR);
+        ->default_str(std::to_string(std::get<0>(resolution)) + " " + std::to_string(std::get<1>(resolution)))
+        ->check(validate_positive);
 
     app.set_version_flag("-v,-V,--version", APP_NAME " 1.0.0");
 }

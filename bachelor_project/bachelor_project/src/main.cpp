@@ -28,10 +28,10 @@ void test_buffer_device_address();
 
 #define RTX true
 
-void run_app() {
+void run_app(int argc, char* argv[]) {
 #if HEADLESS
 #if RTX
-	RtxApp rtx_app{};
+	RtxApp rtx_app{ argc, argv };
 	rtx_app.run();
 #else
 	HeadlessApp headless_app{};
@@ -45,17 +45,11 @@ void run_app() {
 
 int main(int argc, char* argv[])
 {
-	CLIOptions opts{};
-
-	opts.parse(argc, argv);
-
-	dbg_log("f: %u", opts.frame_count);
-
 	try
 	{
 		utils::LibManager lib_manager{};
 
-		run_app();
+		run_app(argc, argv);
 
 		dbg_log("");
 		test_buffer_device_address();

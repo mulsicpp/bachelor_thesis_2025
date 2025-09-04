@@ -10,16 +10,22 @@
 
 #include "stb_image_write.h"
 
-RtxApp::RtxApp()
+RtxApp::RtxApp(int argc, char* argv[])
 {
+    opts.parse(argc, argv);
+
     auto context_info = vk::ContextInfo()
         .app_name(APP_NAME)
         .use_raytracing(true);
 
     vk::Context::create(context_info);
 
+    const auto&[image_width, image_height] = opts.resolution;
+
+    dbg_log("resolution: %u %u", image_width, image_height);
+
     image = vk::ImageBuilder()
-        .extent({ IMAGE_WIDTH, IMAGE_HEIGHT })
+        .extent({ image_width, image_height })
         .format(VK_FORMAT_R8G8B8A8_UNORM)
         .queue_types({ vk::QueueType::Transfer, vk::QueueType::Compute })
         .usage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT)
@@ -33,7 +39,7 @@ RtxApp::RtxApp()
 
     raytracer = RaytracerBuilder().build();
 
-    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
+    scene = ptr::make_shared<Scene>(Scene::load(opts.scene_path));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
 
     auto& animation = scene->get_animation(0);
@@ -85,7 +91,7 @@ void RtxApp::run()
     dbg_log("run");
 
 
-    for (uint32_t i = 0; i < 20; i++)
+    for (uint32_t i = 0; i < opts.frame_count; i++)
     {
         // dbg_log("run iteration %u", i);
     }

@@ -5,12 +5,14 @@
 #include <string>
 #include <tuple>
 
+#include "utils/defines.h"
+
 class CLIOptions {
 public:
     std::string scene_path{};
-    std::string target_dir{};
-    uint32_t frame_count{};
-    std::tuple<uint32_t, uint32_t> resolution{};
+    std::string target_dir{ "raytracing_results" };
+    uint32_t frame_count{ 200 };
+    std::tuple<uint32_t, uint32_t> resolution{ std::tuple<uint32_t, uint32_t>(IMAGE_WIDTH, IMAGE_HEIGHT) };
 
 private:
     CLI::App app{};
