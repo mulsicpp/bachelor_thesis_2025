@@ -3,6 +3,7 @@
 #include "external/glm.h"
 
 #include "utils/dbg_log.h"
+#include "utils/AppPath.h"
 
 #include "vk_core/Context.h"
 
@@ -70,15 +71,17 @@ Rasterizer RasterizerBuilder::build()
 
 	dbg_log("created render pass");
 
+	const auto& app_path = utils::AppPath::instance();
+
 	vk::Shader vertex_shader = vk::ShaderBuilder()
 		.vertex_stage()
-		.load_spirv("assets/shaders/mesh3d/vert.spv")
+		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/vert.spv"))
 		.build();
 	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
 		.fragment_stage()
-		.load_spirv("assets/shaders/mesh3d/frag.spv")
+		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/frag.spv"))
 		.build();
 	dbg_log("loaded fragment shader");
 

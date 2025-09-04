@@ -16,21 +16,21 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         "POSITIVE"
     );
 
-    auto validate_path = CLI::Validator(
+    auto validate_dir = CLI::Validator(
         [](const std::string& s) {
             return std::string{};
         },
-        "PATH"
+        "DIR"
     );
 
 
     app.add_option("scene", scene_path, "The path to the scene to be loaded")
-        ->check(CLI::ExistingPath)
+        ->check(CLI::ExistingFile)
         ->required(true);
 
     app.add_option("-t,--target-dir", target_dir, "The path to the directory, where the data is stored")
         ->default_str(target_dir)
-        ->check(validate_path);
+        ->check(validate_dir);
 
     app.add_option("-f,--frames", frame_count, "The number of frames to be generated")
         ->default_str(std::to_string(frame_count))

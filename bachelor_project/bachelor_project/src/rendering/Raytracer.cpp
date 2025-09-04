@@ -1,6 +1,7 @@
 #include "Raytracer.h"
 
 #include "utils/dbg_log.h"
+#include "utils/AppPath.h"
 
 #include "vk_pipeline/Shader.h"
 
@@ -23,9 +24,11 @@ void Raytracer::draw() {
 Raytracer RaytracerBuilder::build() const {
     Raytracer raytracer{};
 
-    auto ray_gen_shader = vk::ShaderBuilder().raygen_stage().load_spirv("assets/shaders/rtx/ray_gen.spv").build().to_shared();
-    auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv("assets/shaders/rtx/closest_hit.spv").build().to_shared();
-    auto miss_shader = vk::ShaderBuilder().miss_stage().load_spirv("assets/shaders/rtx/miss.spv").build().to_shared();
+    const auto& app_path = utils::AppPath::instance();
+
+    auto ray_gen_shader = vk::ShaderBuilder().raygen_stage().load_spirv(app_path.get_path("../../assets/shaders/rtx/ray_gen.spv")).build().to_shared();
+    auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("../../assets/shaders/rtx/closest_hit.spv")).build().to_shared();
+    auto miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("../../assets/shaders/rtx/miss.spv")).build().to_shared();
     dbg_log("loaded all rtx shaders");
 
     vk::ShaderGroup ray_gen_group = vk::ShaderGroup::create_general(ray_gen_shader);

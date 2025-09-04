@@ -64,6 +64,7 @@ OBJECTS :=
 
 GENERATED += $(OBJDIR)/Animation.o
 GENERATED += $(OBJDIR)/App.o
+GENERATED += $(OBJDIR)/AppPath.o
 GENERATED += $(OBJDIR)/Blas.o
 GENERATED += $(OBJDIR)/Buffer.o
 GENERATED += $(OBJDIR)/CLIOptions.o
@@ -107,6 +108,7 @@ GENERATED += $(OBJDIR)/vk_mem_alloc.o
 GENERATED += $(OBJDIR)/volk.o
 OBJECTS += $(OBJDIR)/Animation.o
 OBJECTS += $(OBJDIR)/App.o
+OBJECTS += $(OBJDIR)/AppPath.o
 OBJECTS += $(OBJDIR)/Blas.o
 OBJECTS += $(OBJDIR)/Buffer.o
 OBJECTS += $(OBJDIR)/CLIOptions.o
@@ -260,6 +262,9 @@ $(OBJDIR)/Node.o: src/scene/Node.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Scene.o: src/scene/Scene.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/AppPath.o: src/utils/AppPath.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/LibManager.o: src/utils/LibManager.cpp
