@@ -105,7 +105,7 @@ Mesh Mesh::create_cube() {
 }
 
 void Mesh::build_blas() {
-	auto blas_builder = vk::BlasBuilder();
+	auto blas_builder = vk::BlasBuilder().dynamic(true);
 
 	auto vertex_input = Primitive::get_vertex_input();
 	for (const auto& primitive : primitives) {
@@ -113,4 +113,6 @@ void Mesh::build_blas() {
 	}
 
 	blas = blas_builder.build().to_shared();
+	blas->rebuild();
+	blas->refit();
 }

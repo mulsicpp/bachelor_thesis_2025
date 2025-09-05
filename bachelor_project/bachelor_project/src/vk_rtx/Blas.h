@@ -43,30 +43,52 @@ namespace vk
     {
         friend class BlasBuilder;
     private:
+        enum class BuildMode {
+            InitialBuild,
+            Rebuild,
+            Refit
+        };
+
+        Buffer build_scratch_buffer{};
         Buffer update_scratch_buffer{};
         Buffer buffer{};
         Handle<VkAccelerationStructureKHR> blas{};
 
         std::vector<BlasGeometry> _geometries{};
+        bool _dynamic{};
+        bool _fast_build{};
 
     public:
         Blas() = default;
 
-		inline VkAccelerationStructureKHR handle() const { return *blas; }
+        inline VkAccelerationStructureKHR handle() const { return *blas; }
+        
+        inline bool is_dynamic() const { return _dynamic; }
+        inline bool was_fast_build() const { return _fast_build; }
 
         VkDeviceAddress device_address() const;
+
+        void refit();
+        void rebuild();
+    private:
+        void build(BuildMode mode);
     };
 
     class BlasBuilder
     {
     public:
-        using Ref = BlasBuilder &;
+        using Ref = BlasBuilder&;
 
     private:
         std::vector<BlasGeometry> _geometries{};
+        bool _dynamic{ false };
+        bool _fast_build{ false };
     public:
         Ref geometries(const std::vector<BlasGeometry>& geometries) { _geometries = geometries; return *this; }
         Ref add_geometry(const BlasGeometry& geometry) { _geometries.push_back(geometry); return *this; }
+
+        inline Ref dynamic(bool dynamic) { _dynamic = dynamic; return *this; }
+        inline Ref fast_build(bool fast_build) { _fast_build = fast_build; return *this; }
 
         Blas build() const;
     };

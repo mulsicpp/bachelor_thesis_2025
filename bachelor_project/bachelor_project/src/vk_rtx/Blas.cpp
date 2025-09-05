@@ -65,14 +65,24 @@ namespace vk
 
     VkDeviceAddress Blas::device_address() const {
         VkAccelerationStructureDeviceAddressInfoKHR addr_info{};
-        addr_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
-            addr_info.accelerationStructure = *blas;
+        addr_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+        addr_info.accelerationStructure = *blas;
 
         return vkGetAccelerationStructureDeviceAddressKHR(Context::get()->get_device(), &addr_info);
     }
 
-    Blas BlasBuilder::build() const {
-        Blas blas;
+    void Blas::refit() {
+        build(BuildMode::Refit);
+    }
+
+    void Blas::rebuild() {
+        build(BuildMode::Rebuild);
+    }
+
+    void Blas::build(Blas::BuildMode mode) {
+        if(mode == BuildMode::Refit && !_dynamic) {
+            throw std::runtime_error("BLAS refitting is only possible for a dynamic BLAS!");
+        }
 
         std::vector<VkAccelerationStructureGeometryKHR> vk_geometries{};
 
@@ -84,70 +94,89 @@ namespace vk
             vk_geometries[i] = _geometries[i].as_vk_struct();
         }
 
+        VkBuildAccelerationStructureFlagsKHR build_flags = 0;
+
+        build_flags |= _fast_build ?
+            VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR :
+            VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+
+        if (_dynamic) {
+            build_flags |= VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
+        }
+        VkBuildAccelerationStructureModeKHR build_mode = mode == BuildMode::Refit ?
+            VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR :
+            VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+
         VkAccelerationStructureBuildGeometryInfoKHR build_info{};
         build_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         build_info.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-        build_info.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-        build_info.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        build_info.flags = build_flags;
+        build_info.mode = build_mode;
         build_info.geometryCount = static_cast<uint32_t>(vk_geometries.size());
         build_info.pGeometries = vk_geometries.data();
 
-        VkAccelerationStructureBuildSizesInfoKHR size_info{};
-        size_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+        if (mode == BuildMode::InitialBuild) {
 
-        const auto device = Context::get()->get_device();
+            VkAccelerationStructureBuildSizesInfoKHR size_info{};
+            size_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 
-        std::vector<uint32_t> triangle_counts{};
+            const auto device = Context::get()->get_device();
 
-        triangle_counts.resize(_geometries.size());
+            std::vector<uint32_t> triangle_counts{};
 
-        uint32_t total_triangle_count = 0;
-        for (uint32_t i = 0; i < _geometries.size(); i++) {
-            triangle_counts[i] = _geometries[i].triangle_count;
-            // dbg_log("triangle count %u: %u", i, triangle_counts[i]);
-            total_triangle_count += triangle_counts[i];
+            triangle_counts.resize(_geometries.size());
+
+            uint32_t total_triangle_count = 0;
+            for (uint32_t i = 0; i < _geometries.size(); i++) {
+                triangle_counts[i] = _geometries[i].triangle_count;
+                // dbg_log("triangle count %u: %u", i, triangle_counts[i]);
+                total_triangle_count += triangle_counts[i];
+            }
+            dbg_log("total triangle count: %u", total_triangle_count);
+
+            vkGetAccelerationStructureBuildSizesKHR(
+                device,
+                VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+                &build_info,
+                triangle_counts.data(),
+                &size_info);
+
+            build_scratch_buffer = BufferBuilder()
+                .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                .size(size_info.buildScratchSize)
+                .build();
+
+            if (_dynamic) {
+                update_scratch_buffer = BufferBuilder()
+                    .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                    .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                    .size(size_info.updateScratchSize)
+                    .build();
+            }
+
+            buffer = BufferBuilder()
+                .usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .queue_types({ QueueType::Transfer, QueueType::Compute })
+                .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                .size(size_info.accelerationStructureSize)
+                .build();
+
+
+            VkAccelerationStructureCreateInfoKHR blas_create_info{};
+            blas_create_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+            blas_create_info.buffer = buffer.handle();
+            blas_create_info.size = size_info.accelerationStructureSize;
+            blas_create_info.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+
+            if (vkCreateAccelerationStructureKHR(device, &blas_create_info, nullptr, &*blas) != VK_SUCCESS) {
+                throw std::runtime_error("BLAS handle creation failed!");
+            }
         }
-        dbg_log("total triangle count: %u", total_triangle_count);
-
-        vkGetAccelerationStructureBuildSizesKHR(
-            device,
-            VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
-            &build_info,
-            triangle_counts.data(),
-            &size_info);
-
-        Buffer build_scratch_buffer = BufferBuilder()
-            .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-            .size(size_info.buildScratchSize)
-            .build();
-
-        // blas.update_scratch_buffer = BufferBuilder()
-        //     .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-        //     .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-        //     .size(size_info.updateScratchSize)
-        //     .build();
-
-        blas.buffer = BufferBuilder()
-            .usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-            .queue_types({ QueueType::Transfer, QueueType::Compute })
-            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-            .size(size_info.accelerationStructureSize)
-            .build();
-
-
-        VkAccelerationStructureCreateInfoKHR blas_create_info{};
-        blas_create_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
-        blas_create_info.buffer = blas.buffer.handle();
-        blas_create_info.size = size_info.accelerationStructureSize;
-        blas_create_info.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-
-        if (vkCreateAccelerationStructureKHR(device, &blas_create_info, nullptr, &*blas.blas) != VK_SUCCESS) {
-            throw std::runtime_error("BLAS handle creation failed!");
-        }
-
-        build_info.dstAccelerationStructure = *blas.blas;
-        build_info.scratchData.deviceAddress = build_scratch_buffer.device_address();
+        
+        build_info.srcAccelerationStructure = mode == BuildMode::InitialBuild ? VK_NULL_HANDLE : *blas;
+        build_info.dstAccelerationStructure = *blas;
+        build_info.scratchData.deviceAddress = (mode == BuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address();
 
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> range_infos{};
 
@@ -186,11 +215,21 @@ namespace vk
             };
 
         CommandBuffer::single_time_submit(QueueType::Compute, recorder);
+    }
+
+
+
+    Blas BlasBuilder::build() const {
+        Blas blas;
 
         blas._geometries = _geometries;
+        blas._dynamic = _dynamic;
+        blas._fast_build = _fast_build;
+
+        blas.build(Blas::BuildMode::InitialBuild);
 
         dbg_log("blas buffer size: %u", blas.buffer.size());
-        dbg_log("blas scratch size: %u", build_scratch_buffer.size());
+        dbg_log("blas scratch size: %u", blas.build_scratch_buffer.size());
 
         return blas;
     }
