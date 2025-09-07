@@ -20,7 +20,7 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     vk::Context::create(context_info);
 
-    const auto&[image_width, image_height] = opts.resolution;
+    const auto& [image_width, image_height] = opts.resolution;
 
     dbg_log("resolution: %u %u", image_width, image_height);
 
@@ -41,10 +41,7 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     scene = ptr::make_shared<Scene>(Scene::load(opts.scene_path));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
-
-    auto& animation = scene->get_animation(0);
-    animation.apply_for(0.0f);
-    scene->update_transforms();
+    scene->update();
     scene->build_acceleration_structures();
 
     camera = ptr::make_shared<AppCamera>();
@@ -69,18 +66,7 @@ RtxApp::RtxApp(int argc, char* argv[])
     //     .size(image->extent().width * image->extent().height * 4)
     //     .build();
 
-    vk::CommandBuffer cmd_buf = vk::CommandBufferBuilder(vk::QueueType::Compute).build();
-
-    auto draw_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
-        image->cmd_transition(cmd_buf, vk::ImageState::Undefined, vk::ImageState::RtxOutput);
-        raytracer.cmd_draw(cmd_buf);
-        image->cmd_transition(cmd_buf, vk::ImageState::RtxOutput, vk::ImageState::TransferSrc);
-        // image->cmd_store(cmd_buf, &buffer);
-        };
-
-    cmd_buf.record(draw_recorder).submit().wait();
-
-    image->store_in_file("raytrace_result.png");
+    cmd_buffer = vk::CommandBufferBuilder(vk::QueueType::Compute).build();
 
     // auto* data = buffer.mapped_data<uint8_t>();
     // stbi_write_png("raytrace_result.png", image->extent().width, image->extent().height, 4, buffer.mapped_data<void>(), 0);
@@ -90,10 +76,23 @@ void RtxApp::run()
 {
     dbg_log("run");
 
+    auto& animation = scene->get_animation(0);
 
-    for (uint32_t i = 0; i < opts.frame_count; i++)
+    auto draw_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
+        image->cmd_transition(cmd_buf, vk::ImageState::Undefined, vk::ImageState::RtxOutput);
+        raytracer.cmd_draw(cmd_buf);
+        image->cmd_transition(cmd_buf, vk::ImageState::RtxOutput, vk::ImageState::TransferSrc);
+        };
+
+    for (uint32_t i = 0; i < 5; i++)
     {
-        // dbg_log("run iteration %u", i);
+        dbg_log("run iteration %u", i);
+        animation.apply_for(i * 0.1f);
+        scene->update();
+        scene->refit_acceleration_structures();
+
+        cmd_buffer.record(draw_recorder).submit().wait();
+        image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
     }
 
     vk::Context::get()->wait_device_idle();

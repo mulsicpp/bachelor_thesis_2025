@@ -28,7 +28,9 @@ public:
 
 	static Scene load(const std::string& file_path);
 
-	void update_transforms();
+	void update();
 
 	void build_acceleration_structures();
+	void rebuild_acceleration_structures();
+	void refit_acceleration_structures();
 };

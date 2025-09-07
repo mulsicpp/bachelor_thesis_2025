@@ -23,6 +23,8 @@ private:
 	ptr::Shared<AppCamera> camera{};
 	ptr::Shared<Scene> scene{};
 
+	vk::CommandBuffer cmd_buffer{};
+
 public:
 	RtxApp(int argc, char* argv[]);
 

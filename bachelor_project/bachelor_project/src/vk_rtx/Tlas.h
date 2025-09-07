@@ -49,6 +49,7 @@ namespace vk {
         inline bool is_dynamic() const { return _dynamic; }
         inline bool was_fast_build() const { return _fast_build; }
         inline const std::vector<TlasInstance>& instances() const { return _instances; }
+        inline std::vector<TlasInstance>& instances() { return _instances; }
 
         VkDeviceAddress device_address() const;
 

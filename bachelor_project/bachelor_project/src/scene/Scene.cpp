@@ -85,7 +85,7 @@ Scene Scene::load(const std::string& file_path) {
 	return scene;
 }
 
-void Scene::update_transforms() {
+void Scene::update() {
 	for (auto& node : nodes) {
 		node->update_global_transfrom();
 	}
@@ -138,18 +138,15 @@ void Scene::update_transforms() {
 void Scene::build_acceleration_structures() {
 	NodeIterator it = iter();
 
-	auto tlas_builder = vk::TlasBuilder();
+	auto tlas_builder = vk::TlasBuilder().dynamic(true);
 
 	int32_t next_instance_idx = 0;
 
-	while(it.has_next()) {
+	while (it.has_next()) {
 		const auto node = it.next();
 
-		if(node->mesh) {
+		if (node->mesh) {
 			node->build_blas();
-			if(node->skin) {
-				node->rebuild_blas();
-			}
 
 			vk::TlasInstance tlas_instance{};
 			tlas_instance.blas = node->blas;
@@ -158,12 +155,59 @@ void Scene::build_acceleration_structures() {
 			tlas_builder.add_instance(tlas_instance);
 
 			node->instance_index = next_instance_idx++;
-		} else {
+		}
+		else {
 			node->instance_index = -1;
 		}
 	}
 
 	tlas = tlas_builder.build().to_shared();
+}
+
+void Scene::rebuild_acceleration_structures() {
+	NodeIterator it = iter();
+
+	auto& tlas_instances = tlas->instances();
+
+	while (it.has_next()) {
+		const auto node = it.next();
+
+		if (!node->blas) {
+			continue;
+		}
+
+		node->rebuild_blas();
+
+		auto& tlas_instance = tlas_instances[node->instance_index];
+		tlas_instance.blas = node->blas;
+		tlas_instance.transform = node->global_transform;
+
+	}
+
+	tlas->rebuild();
+}
+
+void Scene::refit_acceleration_structures() {
+	NodeIterator it = iter();
+
+	auto& tlas_instances = tlas->instances();
+
+	while (it.has_next()) {
+		const auto node = it.next();
+
+		if (!node->blas) {
+			continue;
+		}
+
+		node->refit_blas();
+
+		auto& tlas_instance = tlas_instances[node->instance_index];
+		tlas_instance.blas = node->blas;
+		tlas_instance.transform = node->global_transform;
+
+	}
+
+	tlas->refit();
 }
 
 
@@ -193,13 +237,13 @@ struct AttributeData {
 	inline VkDeviceSize element_size() const { return sizeof(T); }
 };
 
-static const VkBufferUsageFlags VERTEX_BUFFER_USAGES = 
+static const VkBufferUsageFlags VERTEX_BUFFER_USAGES =
 VK_BUFFER_USAGE_TRANSFER_DST_BIT |
 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
 VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
 VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 
-static const VkBufferUsageFlags INDEX_BUFFER_USAGES = 
+static const VkBufferUsageFlags INDEX_BUFFER_USAGES =
 VK_BUFFER_USAGE_TRANSFER_DST_BIT |
 VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
 VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |

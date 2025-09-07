@@ -49,7 +49,7 @@ App::App() {
 
     auto& animation = scene->get_animation(0);
     animation.apply_for(0.0f);
-    scene->update_transforms();
+    scene->update();
 
     rasterizer->bind_scene(scene);
 }
@@ -75,7 +75,7 @@ void App::run() {
 
         auto& animation = scene->get_animation(0);
         animation.apply_for(elapsed * 1.0f);
-        scene->update_transforms();
+        scene->update();
 
         frame_manager.draw();
     }
