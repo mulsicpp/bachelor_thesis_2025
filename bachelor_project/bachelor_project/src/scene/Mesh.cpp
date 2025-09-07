@@ -55,17 +55,19 @@ vk::VertexInput Primitive::get_vertex_input() {
 			.set_format(vk::format_of_type<PositionType>()));
 }
 
-vk::BlasGeometry Primitive::get_blas_geometry() const {
+vk::BlasGeometry Primitive::get_blas_geometry(const vk::SubBuffer& dynamic_positions) const {
 	vk::BlasGeometry geometry{};
 
-	geometry.set_position_input(positions, positions.length() / sizeof(PositionType), get_vertex_input(), 0);
+	const vk::SubBuffer& blas_positions = dynamic_positions.buffer() ? dynamic_positions : positions;
+
+	geometry.set_position_input(blas_positions, blas_positions.length() / sizeof(PositionType), get_vertex_input(), 0);
 
 	if (indices.buffer()) {
 		geometry.set_index_input(indices, get_index_type());
 		geometry.set_triangle_count(get_index_count() / 3);
 	}
 	else {
-		geometry.set_triangle_count(positions.length() / (sizeof(PositionType) * 3));
+		geometry.set_triangle_count(blas_positions.length() / (sizeof(PositionType) * 3));
 	}
 
 	return geometry;
@@ -104,15 +106,20 @@ Mesh Mesh::create_cube() {
 	return mesh;
 }
 
-void Mesh::build_blas() {
-	auto blas_builder = vk::BlasBuilder().dynamic(true);
+std::vector<vk::BlasGeometry> Mesh::get_blas_geometries() const {
+	std::vector<vk::BlasGeometry> geometries{};
+	geometries.reserve(primitives.size());
 
-	auto vertex_input = Primitive::get_vertex_input();
 	for (const auto& primitive : primitives) {
-		blas_builder.add_geometry(primitive.get_blas_geometry());
+		geometries.push_back(primitive.get_blas_geometry());
 	}
 
-	blas = blas_builder.build().to_shared();
-	blas->rebuild();
-	blas->refit();
+	return geometries;
+}
+
+void Mesh::build_blas() {
+	blas = vk::BlasBuilder()
+		.geometries(get_blas_geometries())
+		.dynamic(false)
+		.build().to_shared();
 }

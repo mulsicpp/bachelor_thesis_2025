@@ -79,7 +79,6 @@ HeadlessApp::HeadlessApp()
     auto &animation = scene->get_animation(0);
     animation.apply_for(0.0f);
     scene->update();
-    scene->build_acceleration_structures();
 
     rasterizer->bind_camera(camera);
     rasterizer->bind_scene(scene);

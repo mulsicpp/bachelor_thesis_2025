@@ -146,10 +146,13 @@ void Scene::build_acceleration_structures() {
 		const auto node = it.next();
 
 		if(node->mesh) {
-			node->mesh->build_blas();
+			node->build_blas();
+			if(node->skin) {
+				node->rebuild_blas();
+			}
 
 			vk::TlasInstance tlas_instance{};
-			tlas_instance.blas = node->mesh->blas;
+			tlas_instance.blas = node->blas;
 			tlas_instance.transform = node->global_transform;
 
 			tlas_builder.add_instance(tlas_instance);

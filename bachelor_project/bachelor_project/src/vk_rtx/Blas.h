@@ -68,10 +68,10 @@ namespace vk
 
         VkDeviceAddress device_address() const;
 
-        void refit();
-        void rebuild();
+        void refit(std::vector<BlasGeometry> geometries = {});
+        void rebuild(std::vector<BlasGeometry> geometries = {});
     private:
-        void build(BuildMode mode);
+        void build(BuildMode mode, std::vector<BlasGeometry> geometries = {});
     };
 
     class BlasBuilder

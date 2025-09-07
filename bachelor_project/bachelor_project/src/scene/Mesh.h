@@ -81,7 +81,7 @@ struct Primitive {
 		return indices.length() / sizeof(IndexType);
 	}
 
-	vk::BlasGeometry get_blas_geometry() const;
+	vk::BlasGeometry get_blas_geometry(const vk::SubBuffer& dynamic_positions = {}) const;
 };
 
 struct MeshPushConst {
@@ -95,6 +95,8 @@ struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
 	ptr::Shared<vk::Blas> blas{};
 
 	static Mesh create_cube();
+
+	std::vector<vk::BlasGeometry> get_blas_geometries() const;
 
 	void build_blas();
 };

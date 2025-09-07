@@ -71,17 +71,21 @@ namespace vk
         return vkGetAccelerationStructureDeviceAddressKHR(Context::get()->get_device(), &addr_info);
     }
 
-    void Blas::refit() {
-        build(BuildMode::Refit);
+    void Blas::refit(std::vector<BlasGeometry> geometries) {
+        build(BuildMode::Refit, geometries);
     }
 
-    void Blas::rebuild() {
-        build(BuildMode::Rebuild);
+    void Blas::rebuild(std::vector<BlasGeometry> geometries) {
+        build(BuildMode::Rebuild, geometries);
     }
 
-    void Blas::build(Blas::BuildMode mode) {
-        if(mode == BuildMode::Refit && !_dynamic) {
+    void Blas::build(Blas::BuildMode mode, std::vector<BlasGeometry> geometries) {
+        if (mode == BuildMode::Refit && !_dynamic) {
             throw std::runtime_error("BLAS refitting is only possible for a dynamic BLAS!");
+        }
+
+        if (!geometries.empty()) {
+            _geometries = geometries;
         }
 
         std::vector<VkAccelerationStructureGeometryKHR> vk_geometries{};
@@ -173,7 +177,7 @@ namespace vk
                 throw std::runtime_error("BLAS handle creation failed!");
             }
         }
-        
+
         build_info.srcAccelerationStructure = mode == BuildMode::InitialBuild ? VK_NULL_HANDLE : *blas;
         build_info.dstAccelerationStructure = *blas;
         build_info.scratchData.deviceAddress = (mode == BuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address();

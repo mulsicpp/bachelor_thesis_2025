@@ -45,10 +45,17 @@ struct Node {
 	ptr::Shared<Mesh> mesh{};
 	ptr::Shared<Skin> skin{};
 	std::vector<vk::SubBuffer> dynamic_positions{};
+	ptr::Shared<vk::Blas> blas{};
 
 	int32_t instance_index{ -1 };
 
 	void update_global_transfrom(glm::mat4 parent_transform = { 1.0f });
+
+	std::vector<vk::BlasGeometry> get_dynamic_blas_geometries() const;
+
+	void build_blas();
+	void rebuild_blas();
+	void refit_blas();
 };
 
 class NodeIterator {
