@@ -12,6 +12,8 @@
 
 #include "external/volk.h"
 
+#include "ASBuildMode.h"
+
 namespace vk
 {
     struct BlasGeometry {
@@ -43,12 +45,6 @@ namespace vk
     {
         friend class BlasBuilder;
     private:
-        enum class BuildMode {
-            InitialBuild,
-            Rebuild,
-            Refit
-        };
-
         Buffer build_scratch_buffer{};
         Buffer update_scratch_buffer{};
         Buffer buffer{};
@@ -65,13 +61,14 @@ namespace vk
         
         inline bool is_dynamic() const { return _dynamic; }
         inline bool was_fast_build() const { return _fast_build; }
+        inline const std::vector<BlasGeometry>& geometries() const { return _geometries; }
 
         VkDeviceAddress device_address() const;
 
-        void refit(std::vector<BlasGeometry> geometries = {});
-        void rebuild(std::vector<BlasGeometry> geometries = {});
+        void refit(const std::vector<BlasGeometry>& geometries = {});
+        void rebuild(const std::vector<BlasGeometry>& geometries = {});
     private:
-        void build(BuildMode mode, std::vector<BlasGeometry> geometries = {});
+        void build(ASBuildMode mode, const std::vector<BlasGeometry>& geometries = {});
     };
 
     class BlasBuilder

@@ -85,7 +85,7 @@ Scene Scene::load(const std::string& file_path) {
 	return scene;
 }
 
-void Scene::update() {
+void Scene::update_transforms() {
 	for (auto& node : nodes) {
 		node->update_global_transfrom();
 	}

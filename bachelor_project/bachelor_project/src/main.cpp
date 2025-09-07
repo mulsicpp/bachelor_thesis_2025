@@ -26,7 +26,7 @@ void test_image_copy_and_transitions();
 void test_image_file_store();
 void test_buffer_device_address();
 
-#define RTX false
+#define RTX true
 
 void run_app(int argc, char* argv[]) {
 #if HEADLESS

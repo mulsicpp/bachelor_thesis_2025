@@ -31,38 +31,54 @@ namespace vk {
     }
 
 
+    void Tlas::refit(const std::vector<TlasInstance>& instances) {
+        build(ASBuildMode::Refit, instances);
+    }
 
-    Tlas TlasBuilder::build() const {
-        Tlas tlas;
+    void Tlas::rebuild(const std::vector<TlasInstance>& instances) {
+        build(ASBuildMode::Rebuild, instances);
+    }
 
-        Buffer staging_buffer = BufferBuilder()
-            .add_queue_type(QueueType::Transfer)
-            .usage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
-            .memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
-            .size(sizeof(VkAccelerationStructureInstanceKHR) * _instances.size())
-            .build();
+    void Tlas::build(ASBuildMode mode, const std::vector<TlasInstance>& instances) {
+        if (mode == ASBuildMode::Refit && !_dynamic) {
+            throw std::runtime_error("TLAS refitting is only possible for a dynamic TLAS!");
+        }
 
-        auto* p_instances = staging_buffer.mapped_data<VkAccelerationStructureInstanceKHR>();
+        if (!instances.empty()) {
+            _instances = instances;
+        }
+
+        if (mode == ASBuildMode::InitialBuild) {
+            instances_staging_buffer = BufferBuilder()
+                .add_queue_type(QueueType::Transfer)
+                .usage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT)
+                .memory_usage(VMA_MEMORY_USAGE_CPU_ONLY)
+                .size(sizeof(VkAccelerationStructureInstanceKHR) * _instances.size())
+                .build();
+
+            instances_buffer = BufferBuilder()
+                .queue_types({ QueueType::Transfer, QueueType::Compute })
+                .add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+                .add_usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR)
+                .add_usage(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                .size(sizeof(VkAccelerationStructureInstanceKHR) * _instances.size())
+                .build();
+        }
+
+        auto* p_instances = instances_staging_buffer.mapped_data<VkAccelerationStructureInstanceKHR>();
 
         for (uint32_t i = 0; i < _instances.size(); i++) {
             p_instances[i] = _instances[i].as_vk_struct();
         }
 
-        Buffer instance_buffer = BufferBuilder()
-            .queue_types({ QueueType::Transfer, QueueType::Compute })
-            .add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
-            .add_usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR)
-            .add_usage(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-            .size(sizeof(VkAccelerationStructureInstanceKHR) * _instances.size())
-            .build();
 
-        staging_buffer.copy_into(&instance_buffer);
+        instances_staging_buffer.copy_into(&instances_buffer);
 
         VkAccelerationStructureGeometryInstancesDataKHR instances_data{};
         instances_data.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
         instances_data.arrayOfPointers = VK_FALSE;
-        instances_data.data.deviceAddress = instance_buffer.device_address();
+        instances_data.data.deviceAddress = instances_buffer.device_address();
 
         VkAccelerationStructureGeometryKHR geometry{};
         geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -78,53 +94,76 @@ namespace vk {
 
         const VkAccelerationStructureBuildRangeInfoKHR* p_range_info = &range_info;
 
+        VkBuildAccelerationStructureFlagsKHR build_flags = 0;
+
+        build_flags |= _fast_build ?
+            VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR :
+            VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+
+        if (_dynamic) {
+            build_flags |= VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
+        }
+        VkBuildAccelerationStructureModeKHR build_mode = mode == ASBuildMode::Refit ?
+            VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR :
+            VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+
         VkAccelerationStructureBuildGeometryInfoKHR build_info{};
         build_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         build_info.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
-        build_info.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-        build_info.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        build_info.flags = build_flags;
+        build_info.mode = build_mode;
         build_info.geometryCount = 1;
         build_info.pGeometries = &geometry;
 
-        const auto device = Context::get()->get_device();
+        if (mode == ASBuildMode::InitialBuild) {
+            VkAccelerationStructureBuildSizesInfoKHR size_info{};
+            size_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 
-        VkAccelerationStructureBuildSizesInfoKHR size_info{};
-        size_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+            const auto device = Context::get()->get_device();
 
+            vkGetAccelerationStructureBuildSizesKHR(
+                device,
+                VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
+                &build_info,
+                &range_info.primitiveCount,
+                &size_info
+            );
 
-        vkGetAccelerationStructureBuildSizesKHR(
-            device,
-            VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
-            &build_info,
-            &range_info.primitiveCount,
-            &size_info
-        );
+            build_scratch_buffer = BufferBuilder()
+                .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                .size(size_info.buildScratchSize)
+                .build();
 
-        Buffer build_scratch_buffer = BufferBuilder()
-            .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-            .size(size_info.buildScratchSize)
-            .build();
+            if (_dynamic) {
+                update_scratch_buffer = BufferBuilder()
+                    .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                    .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                    .size(size_info.updateScratchSize)
+                    .build();
+            }
 
-        tlas.buffer = BufferBuilder()
-            .usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
-            .queue_types({ QueueType::Transfer, QueueType::Compute })
-            .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-            .size(size_info.accelerationStructureSize)
-            .build();
+            buffer = BufferBuilder()
+                .usage(VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+                .queue_types({ QueueType::Transfer, QueueType::Compute })
+                .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+                .size(size_info.accelerationStructureSize)
+                .build();
 
-        VkAccelerationStructureCreateInfoKHR tlas_create_info{};
-        tlas_create_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
-        tlas_create_info.buffer = tlas.buffer.handle();
-        tlas_create_info.size = size_info.accelerationStructureSize;
-        tlas_create_info.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+            VkAccelerationStructureCreateInfoKHR tlas_create_info{};
+            tlas_create_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+            tlas_create_info.buffer = buffer.handle();
+            tlas_create_info.size = size_info.accelerationStructureSize;
+            tlas_create_info.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
 
-        if (vkCreateAccelerationStructureKHR(device, &tlas_create_info, nullptr, &*tlas.tlas) != VK_SUCCESS) {
-            throw std::runtime_error("TLAS handle creation failed!");
+            if (vkCreateAccelerationStructureKHR(device, &tlas_create_info, nullptr, &*tlas) != VK_SUCCESS) {
+                throw std::runtime_error("TLAS handle creation failed!");
+            }
         }
 
-        build_info.dstAccelerationStructure = *tlas.tlas;
-        build_info.scratchData.deviceAddress = build_scratch_buffer.device_address();
+        build_info.srcAccelerationStructure = mode == ASBuildMode::InitialBuild ? VK_NULL_HANDLE : *tlas;
+        build_info.dstAccelerationStructure = *tlas;
+        build_info.scratchData.deviceAddress = (mode == ASBuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address();
 
         const auto recorder = [&](ReadyCommandBuffer cmd_buffer) {
             vkCmdBuildAccelerationStructuresKHR(cmd_buffer.handle(), 1, &build_info, &p_range_info);
@@ -147,11 +186,21 @@ namespace vk {
             };
 
         CommandBuffer::single_time_submit(QueueType::Compute, recorder);
+    }
+
+
+
+    Tlas TlasBuilder::build() const {
+        Tlas tlas;
 
         tlas._instances = _instances;
+        tlas._dynamic = _dynamic;
+        tlas._fast_build = _fast_build;
+
+        tlas.build(ASBuildMode::InitialBuild);
 
         dbg_log("tlas buffer size: %u", tlas.buffer.size());
-        dbg_log("tlas scratch size: %u", build_scratch_buffer.size());
+        dbg_log("tlas scratch size: %u", tlas.build_scratch_buffer.size());
 
         return tlas;
     }

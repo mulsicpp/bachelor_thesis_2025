@@ -71,16 +71,16 @@ namespace vk
         return vkGetAccelerationStructureDeviceAddressKHR(Context::get()->get_device(), &addr_info);
     }
 
-    void Blas::refit(std::vector<BlasGeometry> geometries) {
-        build(BuildMode::Refit, geometries);
+    void Blas::refit(const std::vector<BlasGeometry>& geometries) {
+        build(ASBuildMode::Refit, geometries);
     }
 
-    void Blas::rebuild(std::vector<BlasGeometry> geometries) {
-        build(BuildMode::Rebuild, geometries);
+    void Blas::rebuild(const std::vector<BlasGeometry>& geometries) {
+        build(ASBuildMode::Rebuild, geometries);
     }
 
-    void Blas::build(Blas::BuildMode mode, std::vector<BlasGeometry> geometries) {
-        if (mode == BuildMode::Refit && !_dynamic) {
+    void Blas::build(ASBuildMode mode, const std::vector<BlasGeometry>& geometries) {
+        if (mode == ASBuildMode::Refit && !_dynamic) {
             throw std::runtime_error("BLAS refitting is only possible for a dynamic BLAS!");
         }
 
@@ -107,7 +107,7 @@ namespace vk
         if (_dynamic) {
             build_flags |= VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
         }
-        VkBuildAccelerationStructureModeKHR build_mode = mode == BuildMode::Refit ?
+        VkBuildAccelerationStructureModeKHR build_mode = mode == ASBuildMode::Refit ?
             VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR :
             VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
 
@@ -119,7 +119,7 @@ namespace vk
         build_info.geometryCount = static_cast<uint32_t>(vk_geometries.size());
         build_info.pGeometries = vk_geometries.data();
 
-        if (mode == BuildMode::InitialBuild) {
+        if (mode == ASBuildMode::InitialBuild) {
 
             VkAccelerationStructureBuildSizesInfoKHR size_info{};
             size_info.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
@@ -178,9 +178,9 @@ namespace vk
             }
         }
 
-        build_info.srcAccelerationStructure = mode == BuildMode::InitialBuild ? VK_NULL_HANDLE : *blas;
+        build_info.srcAccelerationStructure = mode == ASBuildMode::InitialBuild ? VK_NULL_HANDLE : *blas;
         build_info.dstAccelerationStructure = *blas;
-        build_info.scratchData.deviceAddress = (mode == BuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address();
+        build_info.scratchData.deviceAddress = (mode == ASBuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address();
 
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> range_infos{};
 
@@ -230,7 +230,7 @@ namespace vk
         blas._dynamic = _dynamic;
         blas._fast_build = _fast_build;
 
-        blas.build(Blas::BuildMode::InitialBuild);
+        blas.build(ASBuildMode::InitialBuild);
 
         dbg_log("blas buffer size: %u", blas.buffer.size());
         dbg_log("blas scratch size: %u", blas.build_scratch_buffer.size());
