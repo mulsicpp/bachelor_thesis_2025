@@ -1,6 +1,8 @@
 #include "Tlas.h"
 #include "vk_core/Context.h"
 
+#include "utils/align_up.h"
+
 namespace vk {
 
     VkAccelerationStructureInstanceKHR TlasInstance::as_vk_struct() const {
@@ -14,7 +16,7 @@ namespace vk {
             }
         }
 
-        vk_struct.instanceCustomIndex = 0;
+        vk_struct.instanceCustomIndex = custom_index;
         vk_struct.mask = 0xFF;
         vk_struct.instanceShaderBindingTableRecordOffset = 0; // TODO selects correct hit group
         vk_struct.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
@@ -40,6 +42,9 @@ namespace vk {
     }
 
     void Tlas::build(ASBuildMode mode, const std::vector<TlasInstance>& instances) {
+        const auto& acceleration_structure_props = Context::get()->get_acceleration_structure_props();
+        const auto scratch_alignment = acceleration_structure_props.minAccelerationStructureScratchOffsetAlignment;
+
         if (mode == ASBuildMode::Refit && !_dynamic) {
             throw std::runtime_error("TLAS refitting is only possible for a dynamic TLAS!");
         }
@@ -132,14 +137,14 @@ namespace vk {
             build_scratch_buffer = BufferBuilder()
                 .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
                 .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-                .size(size_info.buildScratchSize)
+                .size(size_info.buildScratchSize + scratch_alignment)
                 .build();
 
             if (_dynamic) {
                 update_scratch_buffer = BufferBuilder()
                     .usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
                     .memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
-                    .size(size_info.updateScratchSize)
+                    .size(size_info.updateScratchSize + scratch_alignment)
                     .build();
             }
 
@@ -163,7 +168,7 @@ namespace vk {
 
         build_info.srcAccelerationStructure = mode == ASBuildMode::InitialBuild ? VK_NULL_HANDLE : *tlas;
         build_info.dstAccelerationStructure = *tlas;
-        build_info.scratchData.deviceAddress = (mode == ASBuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address();
+        build_info.scratchData.deviceAddress = utils::align_up<VkDeviceAddress>((mode == ASBuildMode::Refit ? update_scratch_buffer : build_scratch_buffer).device_address(), scratch_alignment);
 
         const auto recorder = [&](ReadyCommandBuffer cmd_buffer) {
             vkCmdBuildAccelerationStructuresKHR(cmd_buffer.handle(), 1, &build_info, &p_range_info);

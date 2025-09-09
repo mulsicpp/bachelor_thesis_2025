@@ -29,19 +29,9 @@ private:
 public:
     Raytracer() = default;
 
-    inline void bind_camera(const ptr::Shared<Camera>& camera) {
-		*camera_uniform_buffer->mapped_data<CameraUBO>() = camera->as_camera_ubo(true);
-		camera_uniform_buffer->flush();
-	}
-
-	inline void bind_scene(const ptr::Shared<Scene>& scene) {
-        this->scene = scene;
-        descriptor_pool.update_set_binding(0, 0, vk::TlasDescriptorInfo(scene->get_tlas()));
-    }
-    inline void bind_image(const ptr::Shared<vk::ImageView>& image_view) { 
-        this->image_view = image_view;
-        descriptor_pool.update_set_binding(0, 1, vk::ImageDescriptorInfo(image_view));
-    }
+    void bind_camera(const ptr::Shared<Camera>& camera);
+	void bind_scene(const ptr::Shared<Scene>& scene);
+    void bind_image(const ptr::Shared<vk::ImageView>& image_view);
 
 	void cmd_draw(vk::ReadyCommandBuffer cmd_buf);
     void draw();

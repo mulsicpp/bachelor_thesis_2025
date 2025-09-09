@@ -18,8 +18,8 @@ namespace vk {
         using Ref = TlasInstance&;
 
         ptr::Shared<Blas> blas{};
-
         glm::mat4 transform{ 1.0f };
+        uint32_t custom_index{ 0 };
 
         VkAccelerationStructureInstanceKHR as_vk_struct() const;
     };

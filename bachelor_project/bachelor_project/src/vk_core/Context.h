@@ -33,6 +33,9 @@ namespace vk {
 
 		VmaAllocator allocator{ VK_NULL_HANDLE };
 
+		VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracing_props{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR };
+		VkPhysicalDeviceAccelerationStructurePropertiesKHR acceleration_structure_props{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR };
+
 	public:
 		static inline Context* create(const ContextInfo& info) {
 			if (context != nullptr)
@@ -67,6 +70,9 @@ namespace vk {
 
 		const CommandManager& get_command_manager() const { return command_manager; }
 		VmaAllocator get_allocator() const { return allocator; }
+
+		inline const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& get_raytracing_props() const { return raytracing_props; }
+		inline const VkPhysicalDeviceAccelerationStructurePropertiesKHR& get_acceleration_structure_props() const { return acceleration_structure_props; }
 
 		void wait_device_idle() const { vkDeviceWaitIdle(device.device); }
 

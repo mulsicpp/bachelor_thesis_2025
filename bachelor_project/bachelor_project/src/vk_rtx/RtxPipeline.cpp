@@ -2,36 +2,31 @@
 
 #include "vk_core/Context.h"
 
+#include "utils/align_up.h"
+
 #include <set>
 #include <cstring>
 
 namespace vk {
 
-    static uint32_t aligned_size(uint32_t size, uint32_t alignment) {
-        return (size + alignment - 1) & ~(alignment - 1);
-    }
-
     SBT RtxPipeline::build_sbt(const SBTInfo& info) const {
         SBT sbt{};
 
-        VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracing_props{};
-        raytracing_props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
-        VkPhysicalDeviceProperties2 props2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, &raytracing_props };
-        vkGetPhysicalDeviceProperties2(Context::get()->get_physical_device(), &props2);
+        const auto& raytracing_props = Context::get()->get_raytracing_props();
 
         const auto handle_size = raytracing_props.shaderGroupHandleSize;
         const auto handle_alignment = raytracing_props.shaderGroupHandleAlignment;
         const auto base_alignment = raytracing_props.shaderGroupBaseAlignment;
 
-        const auto aligned_handle_size = aligned_size(handle_size, handle_alignment);
+        const auto aligned_handle_size = utils::align_up(handle_size, handle_alignment);
 
         VkDeviceSize ray_gen_size = aligned_handle_size;
         VkDeviceSize miss_size = aligned_handle_size * info._miss_groups.size();
         VkDeviceSize hit_size = aligned_handle_size * info._hit_groups.size();
 
         VkDeviceSize ray_gen_offset = 0;
-        VkDeviceSize miss_offset = aligned_size(ray_gen_size, base_alignment);
-        VkDeviceSize hit_offset = miss_offset + aligned_size(miss_size, base_alignment);
+        VkDeviceSize miss_offset = utils::align_up<VkDeviceSize>(ray_gen_size, base_alignment);
+        VkDeviceSize hit_offset = miss_offset + utils::align_up<VkDeviceSize>(miss_size, base_alignment);
 
         Buffer staging_buffer = BufferBuilder()
             .add_queue_type(QueueType::Transfer)

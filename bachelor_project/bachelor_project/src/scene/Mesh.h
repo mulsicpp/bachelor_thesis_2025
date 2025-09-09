@@ -91,6 +91,7 @@ struct MeshPushConst {
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {
 	std::vector<Primitive> primitives{};
+	uint32_t primitive_offset_start{ 0 };
 
 	ptr::Shared<vk::Blas> blas{};
 

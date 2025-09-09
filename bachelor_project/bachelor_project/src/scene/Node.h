@@ -48,6 +48,7 @@ struct Node {
 	ptr::Shared<vk::Blas> blas{};
 
 	int32_t instance_index{ -1 };
+	uint32_t dyn_primitive_offset_start{ 0 };
 
 	void update_global_transfrom(glm::mat4 parent_transform = { 1.0f });
 

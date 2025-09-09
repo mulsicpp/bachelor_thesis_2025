@@ -2,6 +2,7 @@
 
 #include "Node.h"
 #include "Animation.h"
+#include "SceneBuffers.h"
 
 #include <vector>
 #include <string>
@@ -16,6 +17,8 @@ private:
 
 	ptr::Shared<vk::Tlas> tlas{};
 
+	SceneBuffers buffers{};
+
 public:
 	Scene() = default;
 
@@ -25,6 +28,8 @@ public:
 
 	inline Animation& get_animation(uint32_t index) { return animations[index]; }
 	inline const ptr::Shared<vk::Tlas>& get_tlas() { return tlas; }
+
+	inline const SceneBuffers& get_buffers() { return buffers; }
 
 	static Scene load(const std::string& file_path);
 

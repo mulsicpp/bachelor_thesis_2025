@@ -108,6 +108,16 @@ namespace vk {
 
 		create_allocator();
 
+		if (info._use_raytracing) {
+			VkPhysicalDeviceProperties2 props2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
+
+			props2.pNext = &raytracing_props;
+			vkGetPhysicalDeviceProperties2(physical_device.physical_device, &props2);
+
+			props2.pNext = &acceleration_structure_props;
+			vkGetPhysicalDeviceProperties2(physical_device.physical_device, &props2);
+		}
+
 		dbg_log("created");
 	}
 

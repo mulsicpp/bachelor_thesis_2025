@@ -76,15 +76,8 @@ HeadlessApp::HeadlessApp()
     scene = ptr::make_shared<Scene>(Scene::load(utils::AppPath::instance().get_path("../../assets/scenes/BrainStem/glTF/BrainStem.gltf")));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
 
-    auto& animation = scene->get_animation(0);
-    animation.apply_for(0.0f);
-    scene->update();
-
     rasterizer->bind_camera(camera);
     rasterizer->bind_scene(scene);
-
-    rasterizer->draw(&framebuffer);
-    color_image->store_in_file("render_result.png");
 }
 
 void HeadlessApp::run()
