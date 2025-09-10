@@ -84,12 +84,12 @@ void RtxApp::run()
         image->cmd_transition(cmd_buf, vk::ImageState::RtxOutput, vk::ImageState::TransferSrc);
         };
 
-    for (uint32_t i = 0; i < 5; i++)
+    for (uint32_t i = 0; i < 9; i++)
     {
         dbg_log("run iteration %u", i);
-        animation.apply_for(i * 0.1f);
+        animation.apply_for(i * 0.05f);
         scene->update();
-        scene->refit_acceleration_structures();
+        scene->rebuild_acceleration_structures();
 
         cmd_buffer.record(draw_recorder).submit().wait();
         image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");

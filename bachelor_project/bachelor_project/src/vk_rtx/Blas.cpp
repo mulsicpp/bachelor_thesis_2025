@@ -96,7 +96,7 @@ namespace vk
 
         vk_geometries.resize(_geometries.size());
 
-        dbg_log("geometry count: %lu", _geometries.size());
+        // dbg_log("geometry count: %lu", _geometries.size());
 
         for (uint32_t i = 0; i < vk_geometries.size(); i++) {
             vk_geometries[i] = _geometries[i].as_vk_struct();
