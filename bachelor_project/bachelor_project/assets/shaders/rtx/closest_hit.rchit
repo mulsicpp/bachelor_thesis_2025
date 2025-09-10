@@ -14,19 +14,19 @@ layout(set = 0, binding = 2) uniform Camera {
     mat4 proj;
 } camera;
 
-layout(set = 0, binding = 3) buffer Indices {
+layout(set = 0, binding = 3) readonly buffer Indices {
     uint indices[]; 
 } indices;
 
-layout(set = 0, binding = 4) buffer Positions {
+layout(set = 0, binding = 4) readonly buffer Positions {
     Pos positions[];
 } positions;
 
-layout(set = 0, binding = 5) buffer DynamicPositions {
+layout(set = 0, binding = 5) readonly buffer DynamicPositions {
     Pos positions[];
 } dynamic_positions;
 
-layout(set = 0, binding = 6) buffer Offsets {
+layout(set = 0, binding = 6) readonly buffer Offsets {
     uvec2 offsets[];
 } offsets;
 
