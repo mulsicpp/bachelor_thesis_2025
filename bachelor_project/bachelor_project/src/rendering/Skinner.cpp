@@ -11,8 +11,6 @@ void Skinner::cmd_skin_scene(vk::ReadyCommandBuffer cmd_buf)
 
 	descriptor_pool.cmd_bind_set(cmd_buf, 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
-	dbg_log("rendering setup");
-
 	auto iterator = scene->iter();
 	while (iterator.has_next())
 	{
@@ -38,15 +36,12 @@ void Skinner::cmd_skin_scene(vk::ReadyCommandBuffer cmd_buf)
 	}
 
 	framebuffer.cmd_end_pass(cmd_buf);
-	dbg_log("finished recording");
 }
 
 void Skinner::skin_scene()
 {
-	dbg_log("before skinning");
 	vk::CommandBuffer::single_time_submit(vk::QueueType::Graphics, [&](vk::ReadyCommandBuffer cmd_buffer)
 		{ this->cmd_skin_scene(cmd_buffer); });
-	dbg_log("after skinning");
 }
 
 void Skinner::bind_scene(const ptr::Shared<Scene>& scene) {
