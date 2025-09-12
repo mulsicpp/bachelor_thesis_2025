@@ -45,4 +45,6 @@ void main() {
     dyn_positions.dyn_positions[skinning_push.dynamic_positions_offset + gl_VertexIndex].x = transformed_pos.x;
     dyn_positions.dyn_positions[skinning_push.dynamic_positions_offset + gl_VertexIndex].y = transformed_pos.y;
     dyn_positions.dyn_positions[skinning_push.dynamic_positions_offset + gl_VertexIndex].z = transformed_pos.z;
+
+    gl_PointSize = 1.0;
 }
