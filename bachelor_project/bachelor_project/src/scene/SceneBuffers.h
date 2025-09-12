@@ -10,4 +10,7 @@ struct SceneBuffers {
     ptr::Shared<vk::Buffer> dynamic_positions{};
 
     ptr::Shared<vk::Buffer> primitive_offsets{};
+
+    ptr::Shared<vk::Buffer> joint_matrices{};
+    ptr::Shared<vk::Buffer> joint_weights{};
 };

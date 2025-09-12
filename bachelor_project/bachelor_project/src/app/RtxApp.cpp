@@ -38,10 +38,11 @@ RtxApp::RtxApp(int argc, char* argv[])
     image_view = vk::ImageView::create_from(image, image->aspect()).to_shared();
 
     raytracer = RaytracerBuilder().build();
+    skinner = SkinnerBuilder().build();
 
     scene = ptr::make_shared<Scene>(Scene::load(opts.scene_path));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
-    scene->update();
+    scene->update_transforms();
     scene->build_acceleration_structures();
 
     camera = ptr::make_shared<AppCamera>();
@@ -59,6 +60,8 @@ RtxApp::RtxApp(int argc, char* argv[])
     raytracer.bind_image(image_view);
     dbg_log("bound image view");
 
+    skinner.bind_scene(scene);
+
     // vk::Buffer buffer = vk::BufferBuilder()
     //     .usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
     //     .add_queue_type(vk::QueueType::Transfer)
@@ -66,7 +69,8 @@ RtxApp::RtxApp(int argc, char* argv[])
     //     .size(image->extent().width * image->extent().height * 4)
     //     .build();
 
-    cmd_buffer = vk::CommandBufferBuilder(vk::QueueType::Compute).build();
+    cmd_buffer_raytracing = vk::CommandBufferBuilder(vk::QueueType::Compute).build();
+    cmd_buffer_graphics = vk::CommandBufferBuilder(vk::QueueType::Graphics).build();
 
     // auto* data = buffer.mapped_data<uint8_t>();
     // stbi_write_png("raytrace_result.png", image->extent().width, image->extent().height, 4, buffer.mapped_data<void>(), 0);
@@ -84,14 +88,19 @@ void RtxApp::run()
         image->cmd_transition(cmd_buf, vk::ImageState::RtxOutput, vk::ImageState::TransferSrc);
         };
 
+    auto skin_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
+        skinner.cmd_skin_scene(cmd_buf);
+        };
+
     for (uint32_t i = 0; i < 9; i++)
     {
         dbg_log("run iteration %u", i);
         animation.apply_for(i * 0.05f);
-        scene->update();
+        scene->update_transforms();
+        cmd_buffer_graphics.record(skin_recorder).submit().wait();
         scene->rebuild_acceleration_structures();
 
-        cmd_buffer.record(draw_recorder).submit().wait();
+        cmd_buffer_raytracing.record(draw_recorder).submit().wait();
         image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
     }
 

@@ -5,6 +5,7 @@
 #include "vk_core/Context.h"
 
 #include "rendering/Raytracer.h"
+#include "rendering/Skinner.h"
 
 #include "scene/Camera.h"
 #include "scene/Scene.h"
@@ -16,6 +17,7 @@ private:
 	CLIOptions opts{};
 
 	Raytracer raytracer{};
+	Skinner skinner{};
 
 	ptr::Shared<vk::Image> image{};
 	ptr::Shared<vk::ImageView> image_view{};
@@ -23,7 +25,8 @@ private:
 	ptr::Shared<AppCamera> camera{};
 	ptr::Shared<Scene> scene{};
 
-	vk::CommandBuffer cmd_buffer{};
+	vk::CommandBuffer cmd_buffer_raytracing{};
+	vk::CommandBuffer cmd_buffer_graphics{};
 
 public:
 	RtxApp(int argc, char* argv[]);

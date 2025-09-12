@@ -25,6 +25,20 @@ void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, 
 	}
 }
 
+void Primitive::skin(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, vk::SubBuffer dynamic_positions, vk::SubBuffer joint_matrices) const {
+	SkinningPushConstant skinning_push_const{};
+
+	skinning_push_const.dynamic_positions_offset = dynamic_positions.offset() / sizeof(PositionType);
+	skinning_push_const.joint_matrices_offset = joint_matrices.offset() / sizeof(glm::mat4);
+	skinning_push_const.joint_weights_offset = joint_weights.offset() / sizeof(JointWeight);
+	skinning_push_const.joint_weights_per_vertex = joint_weights_cpu.size() > 0 ? joint_weights_cpu[0].size() : 0;
+	pipeline->cmd_push_constant(cmd_buffer, &skinning_push_const);
+
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, positions.buffer().get(), positions.offset());
+	
+	vk::Pipeline::cmd_draw(cmd_buffer, positions.length() / sizeof(PositionType), 1);
+}
+
 
 
 static const std::vector<Primitive::PositionType> cube_vertices = {

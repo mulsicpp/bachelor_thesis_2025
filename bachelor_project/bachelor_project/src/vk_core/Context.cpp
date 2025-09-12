@@ -52,6 +52,10 @@ namespace vk {
 
 		selector.add_required_extensions(REQUIRED_EXTENSIONS);
 
+		VkPhysicalDeviceFeatures features{};
+		features.vertexPipelineStoresAndAtomics = VK_TRUE;
+		selector.set_required_features(features);
+
 		if (info._window != nullptr) {
 			if (glfwCreateWindowSurface(instance.instance, window, nullptr, &surface) != VK_SUCCESS) {
 				throw std::runtime_error("Surface creation failed!");
@@ -82,6 +86,11 @@ namespace vk {
 		bda_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		bda_features.bufferDeviceAddress = true;
 		device_builder.add_pNext(&bda_features);
+
+		// VkPhysicalDeviceDynamicRenderingFeaturesKHR dyn_rendering_features{};
+		// dyn_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+		// dyn_rendering_features.dynamicRendering = VK_TRUE;
+		// device_builder.add_pNext(&dyn_rendering_features);
 
 		if (info._use_raytracing) {
 			VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features{};

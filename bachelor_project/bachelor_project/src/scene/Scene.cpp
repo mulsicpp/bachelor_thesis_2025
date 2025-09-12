@@ -93,11 +93,13 @@ Scene Scene::load(const std::string& file_path) {
 	return scene;
 }
 
-void Scene::update() {
+void Scene::update_transforms() {
 	for (auto& node : nodes) {
 		node->update_global_transfrom();
 	}
+}
 
+void Scene::skin_cpu() {
 	auto node_iter = iter();
 
 	while (node_iter.has_next()) {
@@ -124,7 +126,7 @@ void Scene::update() {
 			for (uint32_t j = 0; j < position_count; j++) {
 				glm::vec4 position = glm::vec4{ primitive.positions_cpu[j], 1.0f };
 
-				const auto& joint_weights = primitive.joint_weights[j];
+				const auto& joint_weights = primitive.joint_weights_cpu[j];
 
 				glm::mat4 matrix = glm::mat4{};
 
@@ -270,6 +272,9 @@ void GLTFData::create_meshes() {
 
 	AttributeData<uint8_t> garbage_attr;
 
+	VkDeviceSize joint_weights_buffer_size = 0;
+	buffers.joint_weights = ptr::make_shared<vk::Buffer>();
+
 	for (uint32_t i = 0; i < meshes.size(); i++) {
 		auto* gltf_mesh = &data->meshes[i];
 		Mesh mesh{};
@@ -371,8 +376,11 @@ void GLTFData::create_meshes() {
 			}
 
 			if (joints.size() > 0) {
+				uint32_t element_size = 4 * joints.size();
+				primitive.joint_weights_cpu.resize(element_count, std::vector<JointWeight>{ element_size });
 
-				primitive.joint_weights.resize(element_count, std::vector<JointWeight>{ 4 * joints.size() });
+				primitive.joint_weights = vk::SubBuffer::from(buffers.joint_weights, joint_weights_buffer_size, element_count * element_size * sizeof(JointWeight));
+				joint_weights_buffer_size += primitive.joint_weights.length();
 
 				std::vector<cgltf_uint> joint_data{};
 				joint_data.resize(element_count * 4);
@@ -385,10 +393,12 @@ void GLTFData::create_meshes() {
 					}
 					cgltf_accessor_unpack_floats(weights[i], (cgltf_float*)weight_data.data(), glm::vec4::length() * element_count);
 
-					for (uint32_t k = 0; k < primitive.joint_weights.size(); k++) {
+					for (uint32_t k = 0; k < primitive.joint_weights_cpu.size(); k++) {
 						for (uint32_t j = 0; j < 4; j++) {
-							primitive.joint_weights[k][j + 4 * i].index = joint_data[k * 4 + j];
-							primitive.joint_weights[k][j + 4 * i].weight = weight_data[k][j];
+
+							JointWeight value = { joint_data[k * 4 + j], weight_data[k][j] };
+
+							primitive.joint_weights_cpu[k][4 * i + j] = value;
 						}
 					}
 				}
@@ -434,6 +444,29 @@ void GLTFData::create_meshes() {
 
 		buffers.indices = index_attr.buffer;
 	}
+
+	auto joint_weights_staging_buffer = vk::BufferBuilder().staging_buffer().size(joint_weights_buffer_size).build();
+	
+	for(const auto& mesh : meshes) {
+		for(const auto& primitive : mesh->primitives) {
+			JointWeight* joint_weight_data = (JointWeight*)(joint_weights_staging_buffer.mapped_data() + primitive.joint_weights.offset());
+			uint32_t offset = 0;
+			for(const auto& vertex_weights : primitive.joint_weights_cpu) {
+				for(const auto& weight : vertex_weights) {
+					joint_weight_data[offset++] = weight;
+				}
+			}
+		}
+	}
+
+	*buffers.joint_weights = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
+		.size(joint_weights_buffer_size)
+		.build();
+
+	joint_weights_staging_buffer.copy_into(&*buffers.joint_weights);
 }
 
 void GLTFData::create_empty_nodes() {
@@ -530,6 +563,10 @@ void GLTFData::create_nodes() {
 	VkDeviceSize dynamic_buffer_size = 0;
 	buffers.dynamic_positions = ptr::make_shared<vk::Buffer>();
 
+	VkDeviceSize joint_matrix_buffer_size = 0;
+	buffers.joint_matrices = ptr::make_shared<vk::Buffer>();
+
+
 	for (uint32_t i = 0; i < nodes.size(); i++) {
 		Node node{};
 		cgltf_node* gltf_node = &data->nodes[i];
@@ -557,6 +594,10 @@ void GLTFData::create_nodes() {
 			node.mesh = meshes[cgltf_mesh_index(data, gltf_node->mesh)];
 			if (gltf_node->skin != nullptr) {
 				node.skin = skins[cgltf_skin_index(data, gltf_node->skin)];
+
+				node.joint_matrices = vk::SubBuffer::from(buffers.joint_matrices, joint_matrix_buffer_size, sizeof(glm::mat4) * node.skin->nodes.size());
+
+				joint_matrix_buffer_size += node.joint_matrices.length();
 
 				for (auto& primitive : node.mesh->primitives) {
 					auto subbuffer = vk::SubBuffer::from(buffers.dynamic_positions, dynamic_buffer_size, primitive.positions.length());
@@ -587,6 +628,13 @@ void GLTFData::create_nodes() {
 		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
 		.size(dynamic_buffer_size)
+		.build();
+
+	*buffers.joint_matrices = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_CPU_TO_GPU)
+		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
+		.size(joint_matrix_buffer_size)
 		.build();
 
 	buffers.primitive_offsets = vk::BufferBuilder()

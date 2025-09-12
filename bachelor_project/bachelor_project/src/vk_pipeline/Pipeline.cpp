@@ -38,6 +38,12 @@ namespace vk {
         vkCmdSetScissor(cmd_buffer.handle(), 0, 1, &new_scissor);
     }
 
+    void Pipeline::cmd_bind_no_rasterizer(ReadyCommandBuffer cmd_buffer) const {
+        vkCmdBindPipeline(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.get());
+    }
+
+
+
     void Pipeline::cmd_push_constant(ReadyCommandBuffer cmd_buffer, const void* value) {
         vkCmdPushConstants(cmd_buffer.handle(), layout->handle(), layout->push_constant().stage_flags, 0, layout->push_constant().size, value);
     }
@@ -59,22 +65,23 @@ namespace vk {
         vkCmdDraw(cmd_buffer.handle(), vertex_count, instance_count, first_vertex, first_instance);
     }
 
-	Pipeline PipelineBuilder::build() {
-		Pipeline pipeline;
+    Pipeline PipelineBuilder::build() {
+        Pipeline pipeline;
 
-		std::vector<VkPipelineShaderStageCreateInfo> shader_infos{};
-		for (const auto& shader : _shaders) {
-			shader_infos.push_back(shader->get_create_info());
-		}
+        std::vector<VkPipelineShaderStageCreateInfo> shader_infos{};
+        for (const auto& shader : _shaders) {
+            shader_infos.push_back(shader->get_create_info());
+        }
 
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info = _vertex_input.as_create_info();
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly{};
         input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        input_assembly.topology = _topology;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 
+        
         VkPipelineViewportStateCreateInfo viewport_state{};
         viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewport_state.viewportCount = 1;
@@ -83,7 +90,7 @@ namespace vk {
         VkPipelineRasterizationStateCreateInfo rasterizer{};
         rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizer.depthClampEnable = VK_FALSE;
-        rasterizer.rasterizerDiscardEnable = VK_FALSE;
+        rasterizer.rasterizerDiscardEnable = _rasterizer_discard;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
@@ -157,6 +164,6 @@ namespace vk {
         pipeline.layout = _layout;
 
 
-		return pipeline;
-	}
+        return pipeline;
+    }
 }

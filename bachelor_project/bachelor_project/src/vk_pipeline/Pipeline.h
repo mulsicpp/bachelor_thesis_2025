@@ -36,6 +36,7 @@ namespace vk {
 		inline VkPipeline handle() const { return *pipeline; }
 
 		void cmd_bind(ReadyCommandBuffer cmd_buffer, const VkRect2D& viewport = { {0,0}, {UINT32_MAX, UINT32_MAX} }, const VkRect2D& scissor = { {0,0}, {UINT32_MAX, UINT32_MAX} }) const;
+		void cmd_bind_no_rasterizer(ReadyCommandBuffer cmd_buffer) const;
 
 		void cmd_push_constant(ReadyCommandBuffer cmd_buffer, const void* value);
 
@@ -55,6 +56,8 @@ namespace vk {
 		std::vector<ptr::Shared<const Shader>> _shaders{};
 		ptr::Shared<const PipelineLayout> _layout{};
 		VertexInput _vertex_input{};
+		bool _rasterizer_discard{ false };
+		VkPrimitiveTopology _topology{ VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
 
 	public:
 		PipelineBuilder() = default;
@@ -70,6 +73,10 @@ namespace vk {
 		inline Ref layout(const ptr::Shared<const PipelineLayout>& layout) { _layout = layout; return *this; }
 
 		inline Ref vertex_input(const VertexInput& vertex_input) { _vertex_input = vertex_input; return *this; }
+
+		inline Ref rasterizer_discard(bool rasterizer_discard) { _rasterizer_discard = rasterizer_discard; return *this; }
+
+		inline Ref topology(VkPrimitiveTopology topology) { _topology = topology; return *this; }
 
 		Pipeline build();
 	};

@@ -95,6 +95,7 @@ GENERATED += $(OBJDIR)/Scene.o
 GENERATED += $(OBJDIR)/Semaphore.o
 GENERATED += $(OBJDIR)/Shader.o
 GENERATED += $(OBJDIR)/ShaderGroup.o
+GENERATED += $(OBJDIR)/Skinner.o
 GENERATED += $(OBJDIR)/SubBuffer.o
 GENERATED += $(OBJDIR)/Swapchain.o
 GENERATED += $(OBJDIR)/Tlas.o
@@ -139,6 +140,7 @@ OBJECTS += $(OBJDIR)/Scene.o
 OBJECTS += $(OBJDIR)/Semaphore.o
 OBJECTS += $(OBJDIR)/Shader.o
 OBJECTS += $(OBJDIR)/ShaderGroup.o
+OBJECTS += $(OBJDIR)/Skinner.o
 OBJECTS += $(OBJDIR)/SubBuffer.o
 OBJECTS += $(OBJDIR)/Swapchain.o
 OBJECTS += $(OBJDIR)/Tlas.o
@@ -247,6 +249,9 @@ $(OBJDIR)/Rasterizer.o: src/rendering/Rasterizer.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Raytracer.o: src/rendering/Raytracer.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Skinner.o: src/rendering/Skinner.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Animation.o: src/scene/Animation.cpp

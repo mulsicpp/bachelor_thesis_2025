@@ -39,14 +39,15 @@ struct Primitive {
 	using IndexType = uint32_t;
 
 	std::vector<PositionType> positions_cpu{};
+	std::vector<std::vector<JointWeight>> joint_weights_cpu{};
 
 	vk::SubBuffer positions{};
 	vk::SubBuffer uvs{};
 	vk::SubBuffer colors{};
+	vk::SubBuffer joint_weights{};
 
 	vk::SubBuffer indices{};
 
-	std::vector<std::vector<JointWeight>> joint_weights{};
 
 	enum class Topology {
 		Triangles,
@@ -59,6 +60,7 @@ struct Primitive {
 
 
 	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, vk::SubBuffer dynamic_positions = {}) const;
+	void skin(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, vk::SubBuffer dynamic_positions, vk::SubBuffer joint_matrices) const;
 
 	static vk::VertexInput get_vertex_input();
 
@@ -87,6 +89,13 @@ struct Primitive {
 struct MeshPushConst {
 	glm::mat4 transform;
 	glm::vec4 base_color;
+};
+
+struct SkinningPushConstant {
+	uint32_t dynamic_positions_offset{};
+	uint32_t joint_matrices_offset{};
+	uint32_t joint_weights_offset{};
+	uint32_t joint_weights_per_vertex{};
 };
 
 struct Mesh : public utils::Move, public ptr::ToShared<Mesh> {

@@ -33,7 +33,8 @@ public:
 
 	static Scene load(const std::string& file_path);
 
-	void update();
+	void update_transforms();
+	void skin_cpu();
 
 	void build_acceleration_structures();
 	void rebuild_acceleration_structures();

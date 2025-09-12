@@ -65,6 +65,8 @@ HeadlessApp::HeadlessApp()
         .add_image(depth_image)
         .build();
 
+    skinner = SkinnerBuilder().build();
+
     camera = ptr::make_shared<AppCamera>();
 
     camera->aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
@@ -78,6 +80,8 @@ HeadlessApp::HeadlessApp()
 
     rasterizer->bind_camera(camera);
     rasterizer->bind_scene(scene);
+
+    skinner.bind_scene(scene);
 }
 
 void HeadlessApp::run()
@@ -90,7 +94,8 @@ void HeadlessApp::run()
         dbg_log("run iteration %u", i);
 
         animation.apply_for(i * 0.1f);
-        scene->update();
+        scene->update_transforms();
+        skinner.skin_scene();
 
         rasterizer->draw(&framebuffer);
         color_image->store_in_file("render_result_" + std::to_string(i) +  ".png");

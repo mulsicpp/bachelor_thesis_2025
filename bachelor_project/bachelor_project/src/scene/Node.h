@@ -45,6 +45,7 @@ struct Node {
 	ptr::Shared<Mesh> mesh{};
 	ptr::Shared<Skin> skin{};
 	std::vector<vk::SubBuffer> dynamic_positions{};
+	vk::SubBuffer joint_matrices{};
 	ptr::Shared<vk::Blas> blas{};
 
 	int32_t instance_index{ -1 };

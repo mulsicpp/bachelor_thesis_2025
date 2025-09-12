@@ -18,7 +18,7 @@ App::App() {
     glfwSetCursorPosCallback(window, cursor_pos_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetKeyCallback(window, key_callback);
-    
+
     auto context_info = vk::ContextInfo()
         .window(window)
         .app_name(APP_NAME)
@@ -41,7 +41,7 @@ App::App() {
     frame_manager.bind_rasterizer(rasterizer);
 
     camera = ptr::make_shared<AppCamera>();
-    
+
     scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
 
@@ -49,7 +49,8 @@ App::App() {
 
     auto& animation = scene->get_animation(0);
     animation.apply_for(0.0f);
-    scene->update();
+    scene->update_transforms();
+    scene->skin_cpu();
 
     rasterizer->bind_scene(scene);
 }
@@ -75,7 +76,8 @@ void App::run() {
 
         auto& animation = scene->get_animation(0);
         animation.apply_for(elapsed * 1.0f);
-        scene->update();
+        scene->update_transforms();
+        scene->skin_cpu();
 
         frame_manager.draw();
     }

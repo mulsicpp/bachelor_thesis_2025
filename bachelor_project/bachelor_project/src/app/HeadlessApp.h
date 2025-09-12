@@ -5,6 +5,7 @@
 #include "vk_core/Context.h"
 
 #include "rendering/Rasterizer.h"
+#include "rendering/Skinner.h"
 
 #include "scene/Camera.h"
 #include "scene/Scene.h"
@@ -14,6 +15,7 @@
 class HeadlessApp : public utils::Move {
 private:
 	ptr::Shared<Rasterizer> rasterizer{};
+	Skinner skinner{};
 	
 	ptr::Shared<vk::Image> color_image{};
 	ptr::Shared<vk::Image> depth_image{};
