@@ -25,13 +25,13 @@ struct Sampler {
 	Interpolation interpolation;
 
 	T sample_at(float time) const {
-		uint32_t index = 0;
+		int32_t index = 0;
 
 		time = std::fmod(time, samples.back().time);
 
 		for (index = 0; index < samples.size() && samples[index].time <= time; index++);
 
-		uint32_t prev_index = index - 1;
+		int32_t prev_index = index - 1;
 
 		if (prev_index < 0) {
 			return samples[index].value;

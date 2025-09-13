@@ -25,7 +25,7 @@ namespace utils {
         dbg_log("path to app: %s", exe_path);
         app_path = fs::canonical(fs::path(std::string(exe_path)));
         app_dir = app_path.parent_path();
-        app_name = app_path.filename();
+        app_name = app_path.filename().string();
     }
 
     fs::path AppPath::get_path(const fs::path& path) const {

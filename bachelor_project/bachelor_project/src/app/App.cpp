@@ -38,12 +38,15 @@ App::App() {
         .build()
         .to_shared();
 
+    skinner = SkinnerBuilder().build();
+
     frame_manager.bind_rasterizer(rasterizer);
 
     camera = ptr::make_shared<AppCamera>();
 
-    scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
+    // scene = ptr::make_shared<Scene>(Scene::load("assets/scenes/BrainStem/glTF/BrainStem.gltf"));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
+    scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/space_station_3/scene.gltf"));
 
     time = std::chrono::high_resolution_clock::now();
 
@@ -53,6 +56,8 @@ App::App() {
     scene->skin_cpu();
 
     rasterizer->bind_scene(scene);
+
+    skinner.bind_scene(scene);
 }
 
 App::~App() {
@@ -77,7 +82,7 @@ void App::run() {
         auto& animation = scene->get_animation(0);
         animation.apply_for(elapsed * 1.0f);
         scene->update_transforms();
-        scene->skin_cpu();
+        skinner.skin_scene();
 
         frame_manager.draw();
     }

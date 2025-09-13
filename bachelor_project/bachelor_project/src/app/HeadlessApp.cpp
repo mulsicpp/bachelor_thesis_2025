@@ -75,7 +75,7 @@ HeadlessApp::HeadlessApp()
     camera->center = glm::vec3{ 0.0f, -1.0f, 0.0f };
     camera->distance /= 2;
 
-    scene = ptr::make_shared<Scene>(Scene::load(utils::AppPath::instance().get_path("../../assets/scenes/BrainStem/glTF/BrainStem.gltf")));
+    scene = ptr::make_shared<Scene>(Scene::load(utils::AppPath::instance().get_path("../../assets/scenes/BrainStem/glTF/BrainStem.gltf").string()));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
 
     rasterizer->bind_camera(camera);

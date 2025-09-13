@@ -248,6 +248,18 @@ struct AttributeData {
 	inline VkDeviceSize element_size() const { return sizeof(T); }
 };
 
+#ifdef _WIN32
+
+static const VkBufferUsageFlags VERTEX_BUFFER_USAGES =
+VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+static const VkBufferUsageFlags INDEX_BUFFER_USAGES =
+VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+#else
+
 static const VkBufferUsageFlags VERTEX_BUFFER_USAGES =
 VK_BUFFER_USAGE_TRANSFER_DST_BIT |
 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
@@ -261,6 +273,8 @@ VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
 VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
 VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
 VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+
+#endif
 
 void GLTFData::create_meshes() {
 	meshes.resize(data->meshes_count);
@@ -446,13 +460,14 @@ void GLTFData::create_meshes() {
 	}
 
 	auto joint_weights_staging_buffer = vk::BufferBuilder().staging_buffer().size(joint_weights_buffer_size).build();
-	
-	for(const auto& mesh : meshes) {
-		for(const auto& primitive : mesh->primitives) {
+
+
+	for (const auto& mesh : meshes) {
+		for (const auto& primitive : mesh->primitives) {
 			JointWeight* joint_weight_data = (JointWeight*)(joint_weights_staging_buffer.mapped_data() + primitive.joint_weights.offset());
 			uint32_t offset = 0;
-			for(const auto& vertex_weights : primitive.joint_weights_cpu) {
-				for(const auto& weight : vertex_weights) {
+			for (const auto& vertex_weights : primitive.joint_weights_cpu) {
+				for (const auto& weight : vertex_weights) {
 					joint_weight_data[offset++] = weight;
 				}
 			}

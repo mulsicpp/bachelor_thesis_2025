@@ -62,6 +62,10 @@ namespace vk
 	{
 		Buffer buffer{};
 
+		if (_size == 0) {
+			_size = 1;
+		}
+
 		const auto &context = *Context::get();
 
 		VkBufferCreateInfo buffer_info{};

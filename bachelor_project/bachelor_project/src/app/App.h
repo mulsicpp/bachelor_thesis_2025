@@ -6,6 +6,7 @@
 
 #include "rendering/FrameManager.h"
 #include "rendering/Rasterizer.h"
+#include "rendering/Skinner.h"
 
 #include "scene/Camera.h"
 #include "scene/Scene.h"
@@ -18,6 +19,7 @@ private:
 
 	FrameManager frame_manager{};
 	ptr::Shared<Rasterizer> rasterizer{};
+	Skinner skinner{};
 	
 	ptr::Shared<AppCamera> camera{};
 	ptr::Shared<Scene> scene{};

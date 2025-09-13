@@ -23,7 +23,7 @@ void Rasterizer::cmd_draw(vk::ReadyCommandBuffer cmd_buf, vk::Framebuffer* frame
 	{
 		const auto& node = iterator.next();
 
-		cube.primitives[0].draw(cmd_buf, &pipeline, node->global_transform * glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 0.04f }));
+		// cube.primitives[0].draw(cmd_buf, &pipeline, node->global_transform * glm::scale(glm::mat4{ 1.0f }, glm::vec3{ 0.04f }));
 
 		const auto& mesh = node->mesh;
 		if (!mesh)
@@ -75,13 +75,13 @@ Rasterizer RasterizerBuilder::build()
 
 	vk::Shader vertex_shader = vk::ShaderBuilder()
 		.vertex_stage()
-		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/vert.spv"))
+		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/vert.spv").string())
 		.build();
 	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
 		.fragment_stage()
-		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/frag.spv"))
+		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/frag.spv").string())
 		.build();
 	dbg_log("loaded fragment shader");
 

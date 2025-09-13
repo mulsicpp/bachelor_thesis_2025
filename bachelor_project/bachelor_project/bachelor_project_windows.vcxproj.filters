@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="app">
+      <UniqueIdentifier>{665E880B-D267-887C-5BE3-9E7CC7EB937C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="external">
       <UniqueIdentifier>{2839F3DC-1406-4EE8-3D1F-3C90294B8376}</UniqueIdentifier>
     </Filter>
@@ -33,9 +36,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\App.h" />
-    <ClInclude Include="src\HeadlessApp.h" />
-    <ClInclude Include="src\RtxApp.h" />
+    <ClInclude Include="src\app\App.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\CLIOptions.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\HeadlessApp.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\RtxApp.h">
+      <Filter>app</Filter>
+    </ClInclude>
     <ClInclude Include="src\external\VkBootstrap.h">
       <Filter>external</Filter>
     </ClInclude>
@@ -66,6 +78,9 @@
     <ClInclude Include="src\rendering\Raytracer.h">
       <Filter>rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\rendering\Skinner.h">
+      <Filter>rendering</Filter>
+    </ClInclude>
     <ClInclude Include="src\scene\Animation.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -81,10 +96,19 @@
     <ClInclude Include="src\scene\Scene.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\SceneBuffers.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\AppPath.h">
+      <Filter>utils</Filter>
+    </ClInclude>
     <ClInclude Include="src\utils\LibManager.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\NoCopy.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\align_up.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\dbg_log.h">
@@ -162,6 +186,9 @@
     <ClInclude Include="src\vk_resources\SubBuffer.h">
       <Filter>vk_resources</Filter>
     </ClInclude>
+    <ClInclude Include="src\vk_rtx\ASBuildMode.h">
+      <Filter>vk_rtx</Filter>
+    </ClInclude>
     <ClInclude Include="src\vk_rtx\Blas.h">
       <Filter>vk_rtx</Filter>
     </ClInclude>
@@ -185,9 +212,18 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\HeadlessApp.cpp" />
-    <ClCompile Include="src\RtxApp.cpp" />
+    <ClCompile Include="src\app\App.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\CLIOptions.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\HeadlessApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\RtxApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
     <ClCompile Include="src\external\VkBootstrap.cpp">
       <Filter>external</Filter>
     </ClCompile>
@@ -210,7 +246,13 @@
     <ClCompile Include="src\rendering\Raytracer.cpp">
       <Filter>rendering</Filter>
     </ClCompile>
+    <ClCompile Include="src\rendering\Skinner.cpp">
+      <Filter>rendering</Filter>
+    </ClCompile>
     <ClCompile Include="src\scene\Animation.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\Camera.cpp">
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\Mesh.cpp">
@@ -221,6 +263,9 @@
     </ClCompile>
     <ClCompile Include="src\scene\Scene.cpp">
       <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils\AppPath.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="src\utils\LibManager.cpp">
       <Filter>utils</Filter>
