@@ -121,7 +121,7 @@ namespace vk {
 
 
 	void CommandBuffer::single_time_submit(QueueType type, CommandRecorder recorder) {
-		auto cmd_buffer = CommandBufferBuilder(type).single_use(true).build();
+		auto cmd_buffer = CommandBufferBuilder().queue_type(type).single_use(true).build();
 
 		cmd_buffer.record(recorder).submit().wait();
 	}
@@ -134,13 +134,6 @@ namespace vk {
 		wait();
 		vkFreeCommandBuffers(p_context->get_device(), queue.command_pool, 1, &command_buffer);
 	}
-
-
-
-	CommandBufferBuilder::CommandBufferBuilder(QueueType queue_type)
-		: _queue_type{ queue_type }
-		, _single_use{ false }
-	{}
 
 	CommandBuffer CommandBufferBuilder::build() {
 		CommandBuffer cmd_buffer;

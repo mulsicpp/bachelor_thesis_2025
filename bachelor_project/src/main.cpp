@@ -80,7 +80,8 @@ void test_move_semantics()
 
 void test_command_buffer()
 {
-	vk::CommandBuffer command_buffer = vk::CommandBufferBuilder(vk::QueueType::Transfer)
+	vk::CommandBuffer command_buffer = vk::CommandBufferBuilder()
+		.queue_type(vk::QueueType::Transfer)
 		.single_use(true)
 		.build();
 
@@ -206,7 +207,8 @@ void test_image_copy_and_transitions()
 
 	printf("%s %s\n", src_mapped, dst_mapped);
 
-	auto cmd_buffer = vk::CommandBufferBuilder(vk::QueueType::Transfer)
+	auto cmd_buffer = vk::CommandBufferBuilder()
+		.queue_type(vk::QueueType::Transfer)
 		.single_use(true)
 		.build();
 

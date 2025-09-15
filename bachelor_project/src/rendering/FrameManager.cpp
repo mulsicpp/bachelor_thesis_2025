@@ -30,7 +30,7 @@ void FrameManager::bind_rasterizer(const ptr::Shared<Rasterizer>& rasterizer) {
 	submit_info.add_wait_semaphore(vk::Semaphore::create(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 	submit_info.add_signal_semaphore(vk::Semaphore::create());
 
-	command_buffer = vk::CommandBufferBuilder(rasterizer->get_queue_type()).single_use(false).build();
+	command_buffer = vk::CommandBufferBuilder().queue_type(rasterizer->get_queue_type()).single_use(false).build();
 
 	create_framebuffers();
 }

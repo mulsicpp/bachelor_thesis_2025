@@ -60,8 +60,8 @@ RtxApp::RtxApp(int argc, char* argv[])
     //     .size(image->extent().width * image->extent().height * 4)
     //     .build();
 
-    cmd_buffer_raytracing = vk::CommandBufferBuilder(vk::QueueType::Compute).build();
-    cmd_buffer_graphics = vk::CommandBufferBuilder(vk::QueueType::Graphics).build();
+    cmd_buffer_raytracing = vk::CommandBufferBuilder().queue_type(vk::QueueType::Compute).build();
+    cmd_buffer_graphics = vk::CommandBufferBuilder().queue_type(vk::QueueType::Graphics).build();
 
     // auto* data = buffer.mapped_data<uint8_t>();
     // stbi_write_png("raytrace_result.png", image->extent().width, image->extent().height, 4, buffer.mapped_data<void>(), 0);

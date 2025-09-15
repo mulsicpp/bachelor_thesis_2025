@@ -87,12 +87,10 @@ namespace vk {
 		bool _single_use;
 
 	public:
-		CommandBufferBuilder(QueueType queue_type);
+		CommandBufferBuilder() = default;
 
-		inline Ref single_use(bool single_use) {
-			_single_use = single_use;
-			return *this;
-		}
+		inline Ref queue_type(QueueType queue_type) { _queue_type = queue_type; return *this; }
+		inline Ref single_use(bool single_use) { _single_use = single_use; return *this; }
 
 
 		CommandBuffer build();
