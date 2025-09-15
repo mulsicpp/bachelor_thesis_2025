@@ -2,7 +2,15 @@
 
 obj/
 
+bachelor_project_linux
+bachelor_project_linux_dbg
+
 Makefile
+*.make
+
+*.sln
+*.vcxproj
+*.vcxproj.*
 
 *.png
 
