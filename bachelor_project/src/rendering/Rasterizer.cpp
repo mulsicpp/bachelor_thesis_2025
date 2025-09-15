@@ -73,12 +73,12 @@ Rasterizer RasterizerBuilder::build()
 
 	vk::Shader vertex_shader = vk::ShaderBuilder()
 		.vertex_stage()
-		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/vert.spv").string())
+		.load_spirv(app_path.get_path("assets/shaders/mesh3d/vert.spv").string())
 		.build();
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
 		.fragment_stage()
-		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/frag.spv").string())
+		.load_spirv(app_path.get_path("assets/shaders/mesh3d/frag.spv").string())
 		.build();
 
 	rasterizer.pipeline_layout = vk::PipelineLayoutBuilder()

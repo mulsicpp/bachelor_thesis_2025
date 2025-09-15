@@ -40,23 +40,19 @@ workspace("bachelor_project_" .. _TARGET_OS)
     filter {}
 
     project("bachelor_project_" .. _TARGET_OS)
+    
+        filter {"configurations:Debug"}
+            targetsuffix "_dbg"
+        filter {"configurations:Release"}
+            targetsuffix ""
+        filter {}
+
         kind "ConsoleApp"
-        files {"bachelor_project/src/**.h", "bachelor_project/src/**.cpp", "bachelor_project/src/**.c"}
+        files {"src/**.h", "src/**.cpp", "src/**.c"}
 
-        includedirs "bachelor_project/src"
+        includedirs "src"
 
-        location("bachelor_project")
-        targetdir("bachelor_project/bin/" .. _TARGET_OS .. "-%{cfg.buildcfg}")
-        objdir("bachelor_project/obj/" .. _TARGET_OS .. "-%{cfg.buildcfg}")
-        ignoredefaultlibraries { "LIBCMT" }
-
-    project("vk_tutorial_" .. _TARGET_OS)
-        kind "ConsoleApp"
-        files {"vk_tutorial/src/**.h", "vk_tutorial/src/**.cpp"}
-
-        includedirs "vk_tutorial/src"
-
-        location("vk_tutorial")
-        targetdir("vk_tutorial/bin/" .. _TARGET_OS .. "-%{cfg.buildcfg}")
-        objdir("vk_tutorial/obj/" .. _TARGET_OS .. "-%{cfg.buildcfg}")
+        location "."
+        targetdir "." 
+        objdir("obj/" .. _TARGET_OS .. "-%{cfg.buildcfg}")
         ignoredefaultlibraries { "LIBCMT" }

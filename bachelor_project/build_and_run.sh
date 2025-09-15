@@ -3,7 +3,6 @@
 cd "$(dirname "$0")"
 
 ./premake/linux/premake5 gmake2
-make
+make config=release
 
-cd bachelor_project
-./bin/linux-Debug/bachelor_project_linux -f 9 -s brainstem --store-images
+./bachelor_project_linux -f 9 -s brainstem --store-images

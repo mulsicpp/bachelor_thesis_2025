@@ -15,10 +15,10 @@ std::string get_scene_path(TestScene test_scene) {
     const auto& app_path = utils::AppPath::instance();
 
     switch (test_scene) {
-    case TestScene::Brainstem: return app_path.get_path("../../assets/scenes/BrainStem/glTF/BrainStem.gltf").string();
-    case TestScene::Whirlwind: return app_path.get_path("../../assets/scenes/reap_the_whirlwind/scene.gltf").string();
-    case TestScene::SpaceStation: return app_path.get_path("../../assets/scenes/space_station_3/scene.gltf").string();
-    default: return app_path.get_path("../../assets/scenes/ultimate_monster_pack/scene.gltf").string();
+    case TestScene::Brainstem: return app_path.get_path("assets/scenes/BrainStem/glTF/BrainStem.gltf").string();
+    case TestScene::Whirlwind: return app_path.get_path("assets/scenes/reap_the_whirlwind/scene.gltf").string();
+    case TestScene::SpaceStation: return app_path.get_path("assets/scenes/space_station_3/scene.gltf").string();
+    default: return app_path.get_path("assets/scenes/ultimate_monster_pack/scene.gltf").string();
     }
 }
 
