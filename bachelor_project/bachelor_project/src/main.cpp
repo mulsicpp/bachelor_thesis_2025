@@ -51,9 +51,7 @@ int main(int argc, char* argv[])
 
 		run_app(argc, argv);
 
-		dbg_log("");
-		test_buffer_device_address();
-		dbg_log("");
+		//test_buffer_device_address();
 	}
 	catch (const std::exception& e)
 	{
@@ -146,24 +144,22 @@ void test_shaders()
 		.vertex_stage()
 		.load_spirv("assets/shaders/vert.spv")
 		.build();
-	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
 		.fragment_stage()
 		.load_spirv("assets/shaders/frag.spv")
 		.build();
-	dbg_log("loaded fragment shader");
 
 	try
 	{
-		vk::Shader invlaid_sahder = vk::ShaderBuilder()
+		vk::Shader invalid_shader = vk::ShaderBuilder()
 			.fragment_stage()
 			.load_spirv("assets/shaders/bla.spv")
 			.build();
 	}
 	catch (const std::runtime_error& e)
 	{
-		dbg_log("expected error: %s", e.what());
+		printf("expected error: %s\n", e.what());
 	}
 }
 
@@ -208,7 +204,7 @@ void test_image_copy_and_transitions()
 			image.cmd_store(cmd_buffer, &dst_buffer);
 		};
 
-	dbg_log("%s %s", src_mapped, dst_mapped);
+	printf("%s %s\n", src_mapped, dst_mapped);
 
 	auto cmd_buffer = vk::CommandBufferBuilder(vk::QueueType::Transfer)
 		.single_use(true)
@@ -218,7 +214,7 @@ void test_image_copy_and_transitions()
 		.submit()
 		.wait();
 
-	dbg_log("%s %s", src_mapped, dst_mapped);
+	printf("%s %s\n", src_mapped, dst_mapped);
 }
 
 void test_image_file_store()
@@ -274,6 +270,6 @@ void test_buffer_device_address() {
 	auto b1 = builder.build();
 	auto b2 = builder.build();
 
-	dbg_log("#1 device address: %p", b1.device_address());
-	dbg_log("#2 device address: %p", b2.device_address());
+	printf("#1 device address: %p\n", (void*)b1.device_address());
+	printf("#2 device address: %p\n", (void*)b2.device_address());
 }

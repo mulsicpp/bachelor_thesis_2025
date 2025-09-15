@@ -79,7 +79,6 @@ Skinner SkinnerBuilder::build() const {
 		.vertex_stage()
 		.load_spirv(app_path.get_path("../../assets/shaders/skinning/vert.spv").string())
 		.build();
-	dbg_log("loaded vertex shader");
 
 	skinner.pipeline_layout = vk::PipelineLayoutBuilder()
 		.add_layout(vk::DescriptorSetLayoutBuilder()

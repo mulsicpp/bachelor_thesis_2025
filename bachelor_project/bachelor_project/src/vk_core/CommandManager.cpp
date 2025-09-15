@@ -126,14 +126,6 @@ namespace vk {
 			}
 		}
 
-		for (const auto command_pool : manager.command_pools) {
-			dbg_log("pool: %p", command_pool);
-		}
-
-		for (const auto queue : manager.queues) {
-			dbg_log("queue: %p pool_index: %i", queue.queue, queue.family_index);
-		}
-
 		return manager;
 	}
 

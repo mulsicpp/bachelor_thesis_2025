@@ -86,13 +86,11 @@ HeadlessApp::HeadlessApp()
 
 void HeadlessApp::run()
 {
-    dbg_log("run");
     auto& animation = scene->get_animation(0);
 
     for (uint32_t i = 0; i < 5; i++)
     {
-        dbg_log("run iteration %u", i);
-
+        printf("drawing frame: %u\n", i);
         animation.apply_for(i * 0.1f);
         scene->update_transforms();
         skinner.skin_scene();

@@ -96,8 +96,6 @@ namespace vk
 
         vk_geometries.resize(_geometries.size());
 
-        // dbg_log("geometry count: %lu", _geometries.size());
-
         for (uint32_t i = 0; i < vk_geometries.size(); i++) {
             vk_geometries[i] = _geometries[i].as_vk_struct();
         }
@@ -137,10 +135,8 @@ namespace vk
             uint32_t total_triangle_count = 0;
             for (uint32_t i = 0; i < _geometries.size(); i++) {
                 triangle_counts[i] = _geometries[i].triangle_count;
-                // dbg_log("triangle count %u: %u", i, triangle_counts[i]);
                 total_triangle_count += triangle_counts[i];
             }
-            dbg_log("total triangle count: %u", total_triangle_count);
 
             vkGetAccelerationStructureBuildSizesKHR(
                 device,
@@ -235,10 +231,6 @@ namespace vk
         blas._fast_build = _fast_build;
 
         blas.build(ASBuildMode::InitialBuild);
-
-        dbg_log("blas buffer size: %u", blas.buffer.size());
-        dbg_log("blas scratch size: %u", blas.build_scratch_buffer.size());
-
         return blas;
     }
 }

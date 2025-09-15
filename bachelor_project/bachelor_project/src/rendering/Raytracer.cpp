@@ -50,12 +50,10 @@ Raytracer RaytracerBuilder::build() const {
     auto ray_gen_shader = vk::ShaderBuilder().raygen_stage().load_spirv(app_path.get_path("../../assets/shaders/rtx/ray_gen.spv").string()).build().to_shared();
     auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("../../assets/shaders/rtx/closest_hit.spv").string()).build().to_shared();
     auto miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("../../assets/shaders/rtx/miss.spv").string()).build().to_shared();
-    dbg_log("loaded all rtx shaders");
 
     vk::ShaderGroup ray_gen_group = vk::ShaderGroup::create_general(ray_gen_shader);
     vk::ShaderGroup miss_group = vk::ShaderGroup::create_general(miss_shader);
     vk::ShaderGroup hit_group = vk::ShaderGroup::create_hit_closest(closest_hit_shader);
-    dbg_log("created shader groups");
 
     raytracer.pipeline_layout = vk::PipelineLayoutBuilder()
         .add_layout(vk::DescriptorSetLayoutBuilder()
@@ -90,7 +88,6 @@ Raytracer RaytracerBuilder::build() const {
                 .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
             .build())
         .build().to_shared();
-    dbg_log("created rtx pipeline layout");
 
 
     // TODO build raytracer
@@ -101,13 +98,11 @@ Raytracer RaytracerBuilder::build() const {
         .layout(raytracer.pipeline_layout)
         .max_ray_recursion_depth(1)
         .build();
-    dbg_log("created rtx pipeline");
 
     raytracer.sbt = raytracer.pipeline.build_sbt(vk::SBTInfo()
         .ray_gen_group(ray_gen_group)
         .miss_groups({ miss_group })
         .hit_groups({ hit_group }));
-    dbg_log("built sbt");
 
     raytracer.camera_uniform_buffer = vk::BufferBuilder()
         .usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)

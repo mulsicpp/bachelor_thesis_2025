@@ -98,6 +98,7 @@ GENERATED += $(OBJDIR)/ShaderGroup.o
 GENERATED += $(OBJDIR)/Skinner.o
 GENERATED += $(OBJDIR)/SubBuffer.o
 GENERATED += $(OBJDIR)/Swapchain.o
+GENERATED += $(OBJDIR)/TestScene.o
 GENERATED += $(OBJDIR)/Tlas.o
 GENERATED += $(OBJDIR)/VertexInput.o
 GENERATED += $(OBJDIR)/VkBootstrap.o
@@ -143,6 +144,7 @@ OBJECTS += $(OBJDIR)/ShaderGroup.o
 OBJECTS += $(OBJDIR)/Skinner.o
 OBJECTS += $(OBJDIR)/SubBuffer.o
 OBJECTS += $(OBJDIR)/Swapchain.o
+OBJECTS += $(OBJDIR)/TestScene.o
 OBJECTS += $(OBJDIR)/Tlas.o
 OBJECTS += $(OBJDIR)/VertexInput.o
 OBJECTS += $(OBJDIR)/VkBootstrap.o
@@ -225,6 +227,9 @@ $(OBJDIR)/HeadlessApp.o: src/app/HeadlessApp.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/RtxApp.o: src/app/RtxApp.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/TestScene.o: src/app/TestScene.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/VkBootstrap.o: src/external/VkBootstrap.cpp

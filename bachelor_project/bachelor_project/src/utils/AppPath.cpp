@@ -22,7 +22,6 @@ namespace utils {
         ssize_t count = readlink("/proc/self/exe", exe_path, PATH_MAX);
         exe_path[count] = 0;
 #endif
-        dbg_log("path to app: %s", exe_path);
         app_path = fs::canonical(fs::path(std::string(exe_path)));
         app_dir = app_path.parent_path();
         app_name = app_path.filename().string();

@@ -35,7 +35,6 @@ namespace vk {
 				break;
 			}
 		}
-		dbg_log("descriptor type: %u", descriptor_type);
 
 		VkWriteDescriptorSet descriptor_write{};
 		descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

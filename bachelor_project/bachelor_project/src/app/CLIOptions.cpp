@@ -33,10 +33,17 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         "DIR"
     );
 
+    const std::map<std::string, TestScene> scene_map{
+        {get_scene_name(TestScene::Brainstem), TestScene::Brainstem},
+        {get_scene_name(TestScene::Whirlwind), TestScene::Whirlwind},
+        {get_scene_name(TestScene::SpaceStation), TestScene::SpaceStation},
+        {get_scene_name(TestScene::Monsters), TestScene::Monsters}
+    };
 
-    app.add_option("scene", scene_path, "The path to the scene to be loaded")
-        ->check(CLI::ExistingFile)
-        ->required(true);
+
+    app.add_option("-s, --scene", scene, "The test scene to be loaded")
+        ->transform(CLI::CheckedTransformer(scene_map))
+        ->default_str(get_scene_name(scene));
 
     app.add_option("-t,--target-dir", target_dir, "The path to the directory, where the data is stored")
         ->default_str(target_dir)
@@ -53,6 +60,17 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
     app.add_option("-d,--delta-time", delta_time, "The time that passes between two frames")
         ->default_str(std::to_string(delta_time))
         ->check(validate_positive_float);
+
+    const std::map<std::string, bool> skinning_map{
+        {"cpu", true},
+        {"gpu", false}
+    };
+
+    app.add_option("--skin-mode", cpu_skinning, "The mode in which models are skinned when animated")
+        ->transform(CLI::CheckedTransformer(skinning_map))
+        ->default_str(cpu_skinning ? "cpu" : "gpu");
+
+    app.add_flag("--store-images", store_images, "Store the rendered frames as PNG images");
 
     app.set_version_flag("-v,-V,--version", APP_NAME " 1.0.0");
 }

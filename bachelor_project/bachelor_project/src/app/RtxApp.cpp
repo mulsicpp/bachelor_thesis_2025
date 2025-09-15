@@ -22,8 +22,6 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     const auto& [image_width, image_height] = opts.resolution;
 
-    dbg_log("resolution: %u %u", image_width, image_height);
-
     image = vk::ImageBuilder()
         .extent({ image_width, image_height })
         .format(VK_FORMAT_R8G8B8A8_UNORM)
@@ -40,25 +38,18 @@ RtxApp::RtxApp(int argc, char* argv[])
     raytracer = RaytracerBuilder().build();
     skinner = SkinnerBuilder().build();
 
-    scene = ptr::make_shared<Scene>(Scene::load(opts.scene_path));
+    scene = ptr::make_shared<Scene>(Scene::load(get_scene_path(opts.scene)));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
     scene->update_transforms();
     scene->build_acceleration_structures();
 
-    camera = ptr::make_shared<AppCamera>();
+    camera = ptr::make_shared<AppCamera>(get_scene_camera(opts.scene));
 
     camera->aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
-    camera->theta = glm::pi<float>() * 0.75f;
-    camera->phi = glm::pi<float>() * 0.25f;
-    camera->center = glm::vec3{ 0.0f, -1.0f, 0.0f };
-    camera->distance /= 2;
 
     raytracer.bind_camera(camera);
-    dbg_log("bound camera");
     raytracer.bind_scene(scene);
-    dbg_log("bound scene");
     raytracer.bind_image(image_view);
-    dbg_log("bound image view");
 
     skinner.bind_scene(scene);
 
@@ -78,8 +69,6 @@ RtxApp::RtxApp(int argc, char* argv[])
 
 void RtxApp::run()
 {
-    dbg_log("run");
-
     auto& animation = scene->get_animation(0);
 
     auto draw_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
@@ -92,16 +81,22 @@ void RtxApp::run()
         skinner.cmd_skin_scene(cmd_buf);
         };
 
-    for (uint32_t i = 0; i < 9; i++)
+    for (uint32_t i = 0; i < opts.frame_count; i++)
     {
-        dbg_log("run iteration %u", i);
-        animation.apply_for(i * 0.05f);
+        printf("drawing frame: %u\n", i);
+        animation.apply_for(i * opts.delta_time);
         scene->update_transforms();
-        cmd_buffer_graphics.record(skin_recorder).submit().wait();
+        if(opts.cpu_skinning) {
+            scene->skin_cpu();
+        } else {
+            cmd_buffer_graphics.record(skin_recorder).submit().wait();
+        }
         scene->rebuild_acceleration_structures();
 
         cmd_buffer_raytracing.record(draw_recorder).submit().wait();
-        image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
+        if(opts.store_images) {
+            image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
+        }
     }
 
     vk::Context::get()->wait_device_idle();

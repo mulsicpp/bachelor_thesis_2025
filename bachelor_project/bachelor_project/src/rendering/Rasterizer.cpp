@@ -69,21 +69,17 @@ Rasterizer RasterizerBuilder::build()
 		.build()
 		.to_shared();
 
-	dbg_log("created render pass");
-
 	const auto& app_path = utils::AppPath::instance();
 
 	vk::Shader vertex_shader = vk::ShaderBuilder()
 		.vertex_stage()
 		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/vert.spv").string())
 		.build();
-	dbg_log("loaded vertex shader");
 
 	vk::Shader fragment_shader = vk::ShaderBuilder()
 		.fragment_stage()
 		.load_spirv(app_path.get_path("../../assets/shaders/mesh3d/frag.spv").string())
 		.build();
-	dbg_log("loaded fragment shader");
 
 	rasterizer.pipeline_layout = vk::PipelineLayoutBuilder()
 		.add_layout(vk::DescriptorSetLayoutBuilder()
@@ -104,8 +100,6 @@ Rasterizer RasterizerBuilder::build()
 		.layout(rasterizer.pipeline_layout)
 		.vertex_input(Primitive::get_vertex_input())
 		.build();
-
-	dbg_log("created pipeline");
 
 	rasterizer.pass_begin_info = vk::PassBeginInfo()
 		.add_clear_value(vk::ClearValue::color(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}))

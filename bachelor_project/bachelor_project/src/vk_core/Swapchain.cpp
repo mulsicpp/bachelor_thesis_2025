@@ -148,7 +148,6 @@ namespace vk {
 
 			image._format = _surface_format.format;
 			image._extent = _extent;
-			dbg_log("swapchain image: %p", (void*)image_handle);
 			_images.push_back(std::move(image).to_shared());
 		}
 	}
@@ -239,6 +238,6 @@ namespace vk {
 
 		swapchain.create_images();
 
-		return swapchain;
+		return std::move(swapchain);
 	}
 }

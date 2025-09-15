@@ -65,7 +65,6 @@ App::~App() {
 }
 
 void App::run() {
-    dbg_log("run");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -77,7 +76,6 @@ void App::run() {
         auto new_time = std::chrono::high_resolution_clock::now();
 
         float elapsed = std::chrono::duration<float, std::chrono::seconds::period>(new_time - time).count();
-        dbg_log("elapsed time: %f", elapsed);
 
         auto& animation = scene->get_animation(0);
         animation.apply_for(elapsed * 1.0f);

@@ -71,5 +71,5 @@ void main()
 
     vec3 normal = normalize(cross(v1 - v0, v2 - v0));
 
-    payload = normal * 0.5f + 0.5f;
+    payload = vec3(clamp(normal.z, 0.0f, 1.0f));
 }

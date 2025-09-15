@@ -126,8 +126,6 @@ namespace vk {
 			props2.pNext = &acceleration_structure_props;
 			vkGetPhysicalDeviceProperties2(physical_device.physical_device, &props2);
 		}
-
-		dbg_log("created");
 	}
 
 	void Context::create_allocator() {
@@ -180,7 +178,5 @@ namespace vk {
 		if (instance.instance != VK_NULL_HANDLE && surface != VK_NULL_HANDLE)
 			vkDestroySurfaceKHR(instance.instance, surface, nullptr);
 		vkb::destroy_instance(instance);
-
-		dbg_log("destroyed");
 	}
 }

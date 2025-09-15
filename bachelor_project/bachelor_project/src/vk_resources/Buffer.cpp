@@ -82,8 +82,6 @@ namespace vk
 		allocation_flags |= _use_mapping ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
 		allocation_flags |= (_usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) ? VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT : 0;
 
-		// dbg_log("allocation flags: %u", allocation_flags);
-
 		VmaAllocationCreateInfo allocation_info{};
 		allocation_info.usage = _memory_usage;
 		allocation_info.flags = allocation_flags;
@@ -91,7 +89,6 @@ namespace vk
 		VmaAllocationInfo alloc_info{};
 		if (vmaCreateBuffer(context.get_allocator(), &buffer_info, &allocation_info, &*buffer.buffer, &*buffer.allocation, &alloc_info) != VK_SUCCESS)
 		{
-			dbg_log("buffer size: %u", _size);
 			throw std::runtime_error("Buffer creation failed!");
 		}
 

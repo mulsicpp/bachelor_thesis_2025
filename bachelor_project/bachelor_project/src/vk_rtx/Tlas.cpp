@@ -204,9 +204,6 @@ namespace vk {
 
         tlas.build(ASBuildMode::InitialBuild);
 
-        dbg_log("tlas buffer size: %u", tlas.buffer.size());
-        dbg_log("tlas scratch size: %u", tlas.build_scratch_buffer.size());
-
         return tlas;
     }
 }

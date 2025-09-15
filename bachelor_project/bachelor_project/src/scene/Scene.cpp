@@ -141,7 +141,6 @@ void Scene::skin_cpu() {
 				dynamic_positions[j].z = position.z;
 			}
 		}
-		// dbg_log("updated dynamic positions");
 	}
 }
 
@@ -298,7 +297,6 @@ void GLTFData::create_meshes() {
 		for (uint32_t j = 0; j < gltf_mesh->primitives_count; j++) {
 			auto* gltf_primitive = &gltf_mesh->primitives[j];
 			if (gltf_primitive->type != cgltf_primitive_type_triangles) {
-				dbg_log("meshes[%u].primitives[%u].type != triangles! Ignored!", i, j);
 				continue;
 			}
 
@@ -569,8 +567,6 @@ void GLTFData::create_skins() {
 		skin.inverse_bind_matrices = inverse_bind_matrices;
 
 		skins[i] = ptr::make_shared<Skin>(skin);
-
-		dbg_log("skin added");
 	}
 }
 
@@ -631,8 +627,6 @@ void GLTFData::create_nodes() {
 		node.children = std::vector<ptr::Shared<Node>>{ gltf_node->children_count };
 		for (uint32_t j = 0; j < gltf_node->children_count; j++) {
 			uint32_t child_index = gltf_node->children[j] - data->nodes;
-
-			// dbg_log("node %u has child %u", i, child_index);
 			node.children[j] = nodes[child_index];
 		}
 		*nodes[i] = std::move(node);
