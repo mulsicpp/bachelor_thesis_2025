@@ -1,5 +1,9 @@
 \PassOptionsToPackage{table,svgnames,dvipsnames}{xcolor}
 
+\usepackage{minted}
+\usemintedstyle{friendly}
+
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[sc]{mathpazo}
@@ -37,7 +41,7 @@
 \usepackage{pdfpages} % for including multiple pages of pdfs
 \usepackage{adjustbox} % can center content wider than the \textwidth
 \usepackage{tablefootnote} % for footnotes in tables as \tablefootnote
-\usepackage{threeparttable} % another way to add footnotes as \tablenotes with \item [x] <your footnote> after setting \tnote{x} 
+\usepackage{threeparttable} % another way to add footnotes as \tablenotes with \item [x] <your footnote> after setting \tnote{x}
 
 
 % https://tex.stackexchange.com/questions/42619/x-mark-to-match-checkmark
@@ -91,7 +95,8 @@
   columns=fullflexible,
   autogobble,
   keywordstyle=\bfseries\color{TUMBlue},
-  stringstyle=\color{TUMAccentGreen}
+  stringstyle=\color{TUMAccentGreen},
+  commentstyle=\itshape\color{gray},
 }
 
 % use this for C# highlighting

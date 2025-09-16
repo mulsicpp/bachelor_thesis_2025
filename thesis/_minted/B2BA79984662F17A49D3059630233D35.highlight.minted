@@ -1,0 +1,11 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n}{vk}\PYG{o}{::}\PYG{n}{Buffer}\PYG{+w}{ }\PYG{n}{buffer}\PYG{p}{;}\PYG{+w}{ }\PYG{c+c1}{// declare a buffer (handle is VK\PYGZus{}NULL\PYGZus{}HANDLE)}
+
+\PYG{n}{buffer}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{vk}\PYG{o}{::}\PYG{n}{BufferBuilder}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{.}\PYG{n}{usage}\PYG{p}{(}\PYG{n}{VK\PYGZus{}BUFFER\PYGZus{}USAGE\PYGZus{}TRANSFER\PYGZus{}DST\PYGZus{}BIT}\PYG{+w}{ }\PYG{o}{|}\PYG{+w}{ }\PYG{n}{VK\PYGZus{}BUFFER\PYGZus{}USAGE\PYGZus{}VERTEX\PYGZus{}BUFFER\PYGZus{}BIT}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{.}\PYG{n}{memory\PYGZus{}usage}\PYG{p}{(}\PYG{n}{VMA\PYGZus{}MEMORY\PYGZus{}USAGE\PYGZus{}GPU\PYGZus{}ONLY}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{.}\PYG{n}{size}\PYG{p}{(}\PYG{l+m+mi}{128}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{.}\PYG{n}{build}\PYG{p}{();}
+
+
+\end{MintedVerbatim}
