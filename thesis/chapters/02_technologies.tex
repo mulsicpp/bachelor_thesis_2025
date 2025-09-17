@@ -1,0 +1,59 @@
+% !TeX root = ../main.tex
+% Add the above to each chapter to make compiling the PDF easier in some editors.
+
+\chapter{Technologies}\label{chapter:methods}
+
+\section{Operating System}
+
+Ubuntu 24.04.2 LTS
+
+\section{Build Tools}
+
+\begin{itemize}
+    \item Premake 5
+    \item GNU Make 4.3
+    \item Visual Studio 2022
+\end{itemize}
+
+The project uses Premake 5, which does not build the project directly, but it is a command line utility which reads a scripted definition of a software project and, most commonly, uses it to generate project files for toolsets like Visual Studio, Xcode, or GNU Make ~\parencite{premake}. It is a simpler alternative to CMake.
+On Linux we use it to create “Makefiles”, which then ultimately build our project. On windows we create Solution- and Project-files for Visual Studio 2022 and we can build and run the project inside Visual Studio. 
+
+\section{Graphics API}
+
+As the graphics API for our project we chose Vulkan 1.2. Vulkan is a modern platform-agnostic API to handle GPU operations. It is the successor to OpenGL, which was discontinued in 2016. Vulkan allows for much more fine-grained control over the GPU, supports multi-threading and for this project most importantly raytracing, through extensions like \texttt{VK\_KHR\_ray\_tracing\_pipeline} and \texttt{VK\_KHR\_acceleration\_structure}. Since these extensions were introduced in Vulkan 1.2, that is the version used in the project.
+
+\section{Programming Language}
+
+At the start of the project Rust was considered as the projects programming language. Rust is a new, memory-safe, low-level programming language and a modern alternative to languages like C and C++. While Rust does have a lot of advantages over C++, we chose C++ in the end. The main reason for this is that the Vulkan API was designed for C/C++. There are a lot of great Vulkan-libraries for Rust, like the popular "Ash" create, which is generated from "vk.xml". However, way you use the API does differ from the classic C API. This could be problematic, considering that nearly all the few resources relating to raytracing in Vulkan use C/C++. This could have made it difficult to translate the raytracing code into Rust later down the line, so C++ was the safer choice.
+
+\section{Libraries}
+
+\subsection{Volk}
+
+volk is a meta-loader for Vulkan. It allows you to dynamically load entry points required to use Vulkan without linking to vulkan-1.dll or statically linking Vulkan loader. Additionally, volk simplifies the use of Vulkan extensions by automatically loading all associated entry points [https://github.com/zeux/volk].
+
+\subsection{VMA (Vulkan Memory Allocator)}
+
+Memory Management in Vulkan is quite difficult. For example, when you create a buffer or image in Vulkan there is no memory associated with it. The programmer needs to manually allocate block of memory with a certain type from a certain memory heap. The properties of these memory heaps depend on the underlying physical device and need to be queried first. Additionally, creating a new memory allocation for each resource may be suboptimal, since the number of allocations can be very limited and many allocations may negatively impact performance. VMA (Vulkan Memory Allocator) simplifies, automates and optimizes memory management in Vulkan.
+
+\subsection{vk-bootstrap}
+
+Initializing Vulkan involves a lot of boilerplate code, which is going to be basically the same in every Vulkan application. VkBootstrap can be used to reduce the amount of boilerplate code in a project. It can simplify the following tasks:
+
+\begin{itemize}
+    \item Instance creation
+    \item Physical device selection
+    \item (Logical) device creation
+    \item Queue acquisition
+    \item Swapchain creation
+\end{itemize}
+
+\subsection{glTF-2.0}
+
+glTF-2.0 is used as the file format for the dynamic 3D scenes that the project renders.  It stores its models in a scene graph and supports skeletal animation as well as morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary in BIN files and textures are stored in image files (PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
+
+To load a glTF file in the project, cgltf is used. cgltf parses the glTF file, which is stored in JSON. It would also have been possible to read the JSON directly, but cgltf takes care of validating the file, loads the required buffers from their BIN-files into memory and creates a C-structure, which is a lot more comfortable to use. Our project does not this structure directly, but rather used to generate a \texttt{Scene} object.
+
+\subsection{CLI11}
+
+CLI11 is a header-only library written in modern C++, that is designed to parse the command-line options of your application.It is simple, feature-rich and safe. CLI11 allows you to define flags, options, commands and subcommands. Your can also add certain restrictions to your parameters, like only allowing positive numbers or that a parameter is an existing path.
