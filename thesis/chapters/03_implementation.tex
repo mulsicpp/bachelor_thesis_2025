@@ -67,3 +67,18 @@ buffer = vk::BufferBuilder()
 
 
 \end{lstlisting}
+
+\section{The Vulkan context}
+
+Before we can actually do any work in Vulkan, we need to do a lot of setup. This usually includes the following steps:
+
+\begin{enumerate}
+    \item Create a \texttt{VkInstance}.
+    \item Select a \texttt{VkPhysicalDevice}, which supports the extenstions, features and capabilities required by the project.
+    \item Create a \texttt{VkDevice} from the selected \texttt{VkPhysicalDevice}.
+    \item When creating the \texttt{VkDevice}, \texttt{VkQueue}s from a certain queue family need to be enabled, to be able to submit command buffers later.
+\end{enumerate}
+
+These \getVkObjects{} are accessed very frequently throughout the project. For example, you need to pass the \texttt{VkDevice} as a parameter when creating or destroying most \getVkObjects{} and a command buffer, which executes a sequence of Vulkan commands, needs to be submitted to a certain \texttt{VkQueue}. Keeping track of all of these \getVkObjects is quite tideous, which is why we introduced the Vulkan context. It is represented by the \texttt{vk::Context} class, which stores these \getVkObjects, allows the programmer to access them anywhere and reduces the effort of stting up Vulkan.
+
+The class is designed similar to a singleton, but it deviates in some parts. A singleton usually creates its instance at the start of the application or when it is used for the first time (lazy instantiation). However, \texttt{vk::Context} can not be implicitly instanciated this way, because it needs some parameters stored in a \texttt{vk::ContextInfo}, when being instanciated. For this reason we need to explicitly create the Vulkan context using \texttt{vk::Context::create(...)} with the desired \texttt{vk::ContextInfo} before calling \texttt{vk::Context::instance()} for the first time or we will get a \texttt{nullptr}. While all other objects in our project get cleaned up automatically when going out of scope, the Vulkan context also needs to be destroyed explicitly using \texttt{vk::Context::destroy()} when it is no longer needed. If we now want to get the current \texttt{VkDevice}, we can call \texttt{vk::Context::instance()->get\_device()}.
