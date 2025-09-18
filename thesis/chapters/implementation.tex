@@ -81,4 +81,49 @@ Before we can actually do any work in Vulkan, we need to do a lot of setup. This
 
 These \getVkObjects{} are accessed very frequently throughout the project. For example, you need to pass the \texttt{VkDevice} as a parameter when creating or destroying most \getVkObjects{} and a command buffer, which executes a sequence of Vulkan commands, needs to be submitted to a certain \texttt{VkQueue}. Keeping track of all of these \getVkObjects is quite tideous, which is why we introduced the Vulkan context. It is represented by the \texttt{vk::Context} class, which stores these \getVkObjects, allows the programmer to access them anywhere and reduces the effort of stting up Vulkan.
 
+The Vulkan context contains the following objects:
+
+\begin{itemize}
+    \item the \texttt{VkInstance}
+    \item the \texttt{VkPhysicalDevice} and \texttt{VkDevice}
+    \item an optional \texttt{GLFWwindow*} from which a \texttt{VkSurfaceKHR} is created and also stored (this is necessary for rendering to a window, but it will not be used in our main application, since it is headless)
+    \item the \texttt{vk::CommandManager}
+    \item the \texttt{VmaAllocator}
+\end{itemize}
+
 The class is designed similar to a singleton, but it deviates in some parts. A singleton usually creates its instance at the start of the application or when it is used for the first time (lazy instantiation). However, \texttt{vk::Context} can not be implicitly instanciated this way, because it needs some parameters stored in a \texttt{vk::ContextInfo}, when being instanciated. For this reason we need to explicitly create the Vulkan context using \texttt{vk::Context::create(...)} with the desired \texttt{vk::ContextInfo} before calling \texttt{vk::Context::instance()} for the first time or we will get a \texttt{nullptr}. While all other objects in our project get cleaned up automatically when going out of scope, the Vulkan context also needs to be destroyed explicitly using \texttt{vk::Context::destroy()} when it is no longer needed. If we now want to get the current \texttt{VkDevice}, we can call \texttt{vk::Context::instance()->get\_device()}.
+
+\section{The command manager}
+
+Queue management in Vulkan is a big and complex topic. Vulkan exposes the different queue families on your GPU, which support a subset of the following command types:
+
+\begin{itemize}
+    \item Graphics
+    \item Transfer
+    \item Compute
+    \item Present
+\end{itemize}
+
+When submitting a command buffer to a queue, the queue needs to belong to a queue family, which supports the different types of the commands in the command buffer.
+
+The management of Vulkan queues is completly up to the programmer. You can query the capabilities of the queue families and then enable an arbitrary amount of queues from different queue families. This is especially useful in a multi-threaded application, where you can submit two command buffers to two different queues and they will be executed in parallel.
+
+The \texttt{vk::CommandManager} class makes queue management easier. It manages the queue families, aswell as their enabled queues and created descriptor pools. Our application is signle-threaded in order to avoid too much complexity and because our main objective is to benchmark the performace of dynamic raytracing, which works better in a single-threaded environment. For this reason we also do not need multiple queues or queues designated for a certain type of operations (for example a designated transfer queue). However we do need a queue for every command type, which our command manager ensures. For every command type, it will iterate over all queue families and select the first family, which supports the command type. When creating the device, we enable the first queue of every queue family, which has been selected at least one time for a command type.
+
+The following are some examples of possible queue setups:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/queue_setup_example_1.png}
+    \caption{Queue setup example with only one queue}
+    \label{fig:queue_example_1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/queue_setup_example_2.png}
+    \caption{Queue setup example with two queues}
+    \label{fig:queue_example_2}
+\end{figure}
+
+We also need command pool to be able to allocate command buffers. When creating a command pool, a queue family has to be specified. Because the allocated command buffers can only be submitted to queues of the specified family, we create one command pool for every queue family that is used.
