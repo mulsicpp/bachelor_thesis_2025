@@ -116,20 +116,93 @@ The following are some examples of possible queue setups:
     \centering
     \includegraphics[width=1.0\textwidth]{figures/queue_setup_example_1.png}
     \caption{Queue setup example with only one queue}
-    \label{fig:queue_example_1}
+    \label{fig:queue-example-1}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.0\textwidth]{figures/queue_setup_example_2.png}
     \caption{Queue setup example with two queues}
-    \label{fig:queue_example_2}
+    \label{fig:queue-example-2}
 \end{figure}
 
 We also need a command pool to be able to allocate command buffers. When creating a command pool, a queue family has to be specified. Because the allocated command buffers can only be submitted to queues of the specified family, we create one command pool for every queue family that is used.
 
+\section{Command buffers}
+
+As we know, commands can not be executed in Vulkan directly, like they can for example in OpenGL. Instead, you first need to allocate a command buffer from a command pool. You can then record all of the commands you want to execute into the buffer and can then submit it for execution to a queue, that supports the type of the commands. It is important to note that when you submit the command buffer the current CPU-thread does not wait for all the commands to finish. This allows for the CPU to keep working, while the GPU runs our commands. If we want to wait for the command buffer to finish, we can specify a fence when submitting the command buffer, which will be signaled once all commands have finished.
+
+We abstract this logic in the \texttt{vk::CommandBuffer} class. It contains a \texttt{VkCommandBuffer} handle, a \texttt{vk::Queue}, which tells the command buffer, where it should be submitted to, and a \texttt{vk::Fence} (see \autoref{sec:sync_objects}), which is used to wait for the command buffer to finish executing.
+
+The \texttt{vk::CommandBufferBuilder} has the following two parameters:
+
+\begin{itemize}
+    \item \textbf{\texttt{queue\_type}}: A value of type \texttt{vk::QueueType}, which contains the elements \texttt{Transfer}, \texttt{Graphics}, \texttt{Compute} and \texttt{Present}. It is a mandatory parameter, which tells the builder to which of the queues inside the queue manager the command buffer is going to be submitted to (for example \texttt{vk::QueueType::Graphics} means the command buffer will be submitted to the graphics queue of the command manager).
+    \item \textbf{\texttt{single\_use}}: An optional boolean value, which is set to \texttt{false} by default. If set to \texttt{true}, it sets the \texttt{VK\_COMMAND\_BUFFER\_USAGE\_ONE\_TIME\_SUBMIT\_BIT} flag when recording the command buffer. This flag specifies, that the command buffer will only be submitted once, which lets the driver apply optimizations.
+\end{itemize}
+
+Inside \texttt{vk::CommandBuffer} we can find the following member functions:
+
+\begin{itemize}
+    \item \textbf{\texttt{Ref record(vk::CommandRecorder)}}:
+    
+    This function takes in a \texttt{vk::CommandRecorder} as argument, which is an alias for \break \texttt{std::function<void(vk::ReadyCommandBuffer)>}. In other words it is a function pointer or lambda function, which takes a \texttt{vk::ReadyCommandBuffer} as an argument and returns \texttt{void}. A \texttt{vk::ReadyCommandBuffer} is simply a wrapper around a \texttt{VkCommandBuffer} handle, which can only be constructed by the command buffer. The job of the \texttt{vk::CommandRecorder} is, to record commands into the command buffer.
+
+    Functions, that record a commands can be recognized by their \texttt{"cmd\_"} prefix. These functions have to be called inside a \texttt{vk::CommandRecorder}, because thier first argument is always a \texttt{vk::ReadyCommandBuffer}.
+
+    \item \texttt{Ref submit(vk::SubmitInfo)}:
+    
+    This function submits the command buffer to the queue, for which it was created for. The \texttt{vk::SubmitInfo} parameter is optional and empty by default. This parameter allows us to specify semaphores, that we want to wait for before executing the command buffer, and semaphores, that we want to signal once the command buffer is finished executing (see \autoref{sec:sync_objects}).
+
+    \item \texttt{Ref wait()}:
+    
+    This functions simply waits for the execution of the command buffer to finish using a fence. If the command buffer is not currently getting executed, the function does nothing.
+
+    It is also important to mention, that this function also gets called in the desctructor of the \texttt{vk::CommandBuffer}, since it is not allowed to destroy a \texttt{VkCommandBuffer} while it is in execution. This also means, that a command buffer implicitly wait for execution to finish, when it goes out of scope.
+\end{itemize}
+
+The \texttt{vk::CommandBuffer} class also contains the following static method:
+
+\begin{center}
+    \textbf{\texttt{static void single\_time\_submit(vk::QueueType, vk::CommandRecorder)}}
+\end{center}
+
+It creates a single-use command buffer for the queue with the specified \texttt{vk::QueueType}. Then, it records the given \texttt{vk::CommandRecorder}, submits it with an empty \texttt{vk::SubmitInfo} and waits for execution to finish. It is basically just a quality-of-life function for creating and executing single-use command buffers.
+
+The folloing code snippet shows, how the command buffer and its functions can be used:
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{c}
+\begin{lstlisting}[language=C++]
+
+// create the command buffer
+vk::CommandBuffer cmd_buf = vk::CommandBufferBuilder()
+    .queue_type(vk::QueueType::Graphics)
+    .single_use(true)
+    .build();
+
+// create a callback, which records the commands
+vk::CommandRecorder recorder = [&] (vk::ReadyCommandBuffer ready_buf) {
+    // record commands
+    // ...
+}
+
+// record the commands, submit to queue and 
+// wait for execution to finish in one line
+cmd_buf.record(recorder).submit().wait();
+
+
+\end{lstlisting}
+
+\end{tabular}
+\caption{An example of how to use command buffers in your code.}\label{fig:command-buffer}
+\end{figure}
+
 \section{The VMA allocator}
 
-As already mentioned in the \nameref{chapter:technologies} (\autoref{sec:vma}), our project uses VMA (Vulkan Memory Allocator) to make memory management in Vulkan easier. In order to be able to be allocate memory for our buffers and images later, we need an allocator. The allocator should be easily accessible when we create a buffer or image and for that reason we will also create and store the VMA allocator in the Vulkan context. How we use the allocator can be seen in the section \nameref{sec:resource_objects}.
+As already mentioned in the chapter \nameref{chapter:technologies} (\autoref{sec:vma}), our project uses VMA (Vulkan Memory Allocator) to make memory management in Vulkan easier. In order to be able to be allocate memory for our buffers and images later, we need an allocator. The allocator should be easily accessible when we create a buffer or image and for that reason we will also create and store the VMA allocator in the Vulkan context. We will use this allocator later, when allocation our resource objects (see \autoref{sec:resource_objects}).
 
 \section{Resource Objects}\label{sec:resource_objects}
+
+\section{Synchronization Objects}\label{sec:sync_objects}
