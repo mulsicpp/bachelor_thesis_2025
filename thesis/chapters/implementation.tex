@@ -68,7 +68,7 @@ buffer = vk::BufferBuilder()
 
 \end{lstlisting}
 
-\section{The Vulkan context}
+\section{The Vulkan Context}
 
 Before we can actually do any work in Vulkan, we need to do a lot of setup. This usually includes the following steps:
 
@@ -93,7 +93,7 @@ The Vulkan context contains the following objects:
 
 The class is designed similar to a singleton, but it deviates in some parts. A singleton usually creates its instance at the start of the application or when it is used for the first time (lazy instantiation). However, \texttt{vk::Context} can not be implicitly instanciated this way, because it needs some parameters stored in a \texttt{vk::ContextInfo}, when being instanciated. For this reason we need to explicitly create the Vulkan context using \texttt{vk::Context::create(...)} with the desired \texttt{vk::ContextInfo} before calling \texttt{vk::Context::instance()} for the first time or we will get a \texttt{nullptr}. While all other objects in our project get cleaned up automatically when going out of scope, the Vulkan context also needs to be destroyed explicitly using \texttt{vk::Context::destroy()} when it is no longer needed. If we now want to get the current \texttt{VkDevice}, we can call \texttt{vk::Context::instance()->get\_device()}.
 
-\section{The command manager}
+\section{The Command Manager}
 
 Queue management in Vulkan is a big and complex topic. Vulkan exposes the different queue families on your GPU, which support a subset of the following command types:
 
@@ -128,7 +128,11 @@ The following are some examples of possible queue setups:
 
 We also need a command pool to be able to allocate command buffers. When creating a command pool, a queue family has to be specified. Because the allocated command buffers can only be submitted to queues of the specified family, we create one command pool for every queue family that is used.
 
-\section{Command buffers}
+\section{The VMA Allocator}
+
+As already mentioned in the chapter \nameref{chapter:technologies} (\autoref{sec:vma}), our project uses VMA (Vulkan Memory Allocator) to make memory management in Vulkan easier. In order to be able to be allocate memory for our buffers and images later, we need an allocator. The allocator should be easily accessible when we create a buffer or image and for that reason we will also create and store the VMA allocator in the Vulkan context. We will use this allocator later, when allocation our resource objects (see \autoref{sec:resource_objects}).
+
+\section{Command Buffers}
 
 As we know, commands can not be executed in Vulkan directly, like they can for example in OpenGL. Instead, you first need to allocate a command buffer from a command pool. You can then record all of the commands you want to execute into the buffer and can then submit it for execution to a queue, that supports the type of the commands. It is important to note that when you submit the command buffer the current CPU-thread does not wait for all the commands to finish. This allows for the CPU to keep working, while the GPU runs our commands. If we want to wait for the command buffer to finish, we can specify a fence when submitting the command buffer, which will be signaled once all commands have finished.
 
@@ -150,11 +154,11 @@ Inside \texttt{vk::CommandBuffer} we can find the following member functions:
 
     Functions, that record a commands can be recognized by their \texttt{"cmd\_"} prefix. These functions have to be called inside a \texttt{vk::CommandRecorder}, because thier first argument is always a \texttt{vk::ReadyCommandBuffer}.
 
-    \item \texttt{Ref submit(vk::SubmitInfo)}:
+    \item \textbf{\texttt{Ref submit(vk::SubmitInfo)}}:
     
     This function submits the command buffer to the queue, for which it was created for. The \texttt{vk::SubmitInfo} parameter is optional and empty by default. This parameter allows us to specify semaphores, that we want to wait for before executing the command buffer, and semaphores, that we want to signal once the command buffer is finished executing (see \autoref{sec:sync_objects}).
 
-    \item \texttt{Ref wait()}:
+    \item \textbf{\texttt{Ref wait()}}:
     
     This functions simply waits for the execution of the command buffer to finish using a fence. If the command buffer is not currently getting executed, the function does nothing.
 
@@ -199,10 +203,49 @@ cmd_buf.record(recorder).submit().wait();
 \caption{An example of how to use command buffers in your code.}\label{fig:command-buffer}
 \end{figure}
 
-\section{The VMA allocator}
-
-As already mentioned in the chapter \nameref{chapter:technologies} (\autoref{sec:vma}), our project uses VMA (Vulkan Memory Allocator) to make memory management in Vulkan easier. In order to be able to be allocate memory for our buffers and images later, we need an allocator. The allocator should be easily accessible when we create a buffer or image and for that reason we will also create and store the VMA allocator in the Vulkan context. We will use this allocator later, when allocation our resource objects (see \autoref{sec:resource_objects}).
-
 \section{Resource Objects}\label{sec:resource_objects}
+\textbf{Resource objects} are used to store data on the GPU, which can then be read and written to in shaders. In Vulkan we distinguish two types of resource objects:
+
+\begin{itemize}
+    \item \textbf{Buffer:}
+    
+    Buffers represent linear arrays of data which are used for various purposes by binding them to a graphics or compute pipeline via descriptor sets or certain commands, or by directly specifying them as parameters to certain commands~\parencite[see Section~12.1]{vulkan-spec}. The data is raw and not associated with any format, layout or dimensionality, therefore very flexible.
+
+    Common usages:
+    \begin{itemize}
+        \item Vertex buffer
+        \item Index buffer
+        \item Uniform buffer
+        \item Storage buffer
+    \end{itemize}
+
+    \item \textbf{Image:}
+
+    Images are specialized resources that have multi-dimensional access rather than the typical linear access to memory~\parencite[see Section~13]{vulkan-spec}. They can also be multi-dimensional and are associated with a format and layout.
+    
+    Common usages:
+    \begin{itemize}
+        \item Texture
+        \item Render target
+    \end{itemize}
+\end{itemize}
+
+We represent these two objects by the \texttt{vk::Buffer} class and {vk::Image} class. Since they are both resource objects, they are very similar in certain aspects. One challange, that they both share, is memory management, which can be quite difficult.
+
+When creating a resource object, they are not actually backed by memory immediately, but you need to allocate a block of device memory and bind that memory to the resource. When allocating the memory, you need to specify a memory type, which corresponds to a certain memory heap and can have a set of properties, which impact the visibility of your memory aswell as performance. It is also important to mention, that too many allocations are not just bad for the performance of your application, but there is also a limit of allocations, that cannot be superceeded.
+
+To make our lives a little bit easier, we use VMA (Vulkan Memory Allocator) (see \autoref{sec:vma}). 
 
 \section{Synchronization Objects}\label{sec:sync_objects}
+
+A lot of vulkan operations can be executed in parallel, which is why we need synchronization objects. There are two types:
+
+\begin{itemize}
+    \item \textbf{Semaphore:}
+    
+    A semaphore is used to synchronize two operations, which both happen on the GPU. We do this by specifying and array of wait-semaphores and an array of signal-semaphores. The GPU operation waits for all wait-semaphores to be signaled before starting and signals all signal-semaphores when it is finished.
+
+    \item \textbf{Fence:}
+    
+    A fence is used to synchronize operations on the GPU with the CPU. This is done by specifying a fence when starting a GPU operation. When the GPU operation finishes, the fence gets signaled. The CPU can wait on a fence, which will block the thread until the fence gets signaled.
+\end{itemize}

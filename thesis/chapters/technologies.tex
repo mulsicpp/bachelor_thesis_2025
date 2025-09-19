@@ -20,11 +20,15 @@ On Linux we use it to create “Makefiles”, which then ultimately build our pr
 
 \section{Graphics API}
 
-As the graphics API for our project we chose Vulkan 1.2. Vulkan is a modern platform-agnostic API to handle GPU operations. It is the successor to OpenGL, which was discontinued in 2016. Vulkan allows for much more fine-grained control over the GPU, supports multi-threading and for this project most importantly raytracing, through extensions like \texttt{VK\_KHR\_ray\_tracing\_pipeline} and \texttt{VK\_KHR\_acceleration\_structure}. Since these extensions were introduced in Vulkan 1.2, that is the version used in the project.
+As the graphics API for our project we chose \textbf{Vulkan 1.2}. Vulkan is a modern platform-agnostic API to handle GPU operations. It is the successor to OpenGL, which was discontinued in 2016. Vulkan allows for much more fine-grained control over the GPU, supports multi-threading and for this project most importantly raytracing, through extensions like \texttt{VK\_KHR\_ray\_tracing\_pipeline} and \texttt{VK\_KHR\_acceleration\_structure}. Since these extensions were introduced in Vulkan 1.2, that is the version used in the project.
 
 \section{Programming Language}
 
-At the start of the project Rust was considered as the projects programming language. Rust is a new, memory-safe, low-level programming language and a modern alternative to languages like C and C++. While Rust does have a lot of advantages over C++, we chose C++ in the end. The main reason for this is that the Vulkan API was designed for C/C++. There are a lot of great Vulkan-libraries for Rust, like the popular "Ash" create, which is generated from "vk.xml". However, way you use the API does differ from the classic C API. This could be problematic, considering that nearly all the few resources relating to raytracing in Vulkan use C/C++. This could have made it difficult to translate the raytracing code into Rust later down the line, so C++ was the safer choice.
+At the start of the project Rust was considered as the projects programming language. Rust is a new, memory-safe, low-level programming language and a modern alternative to languages like C and C++. While Rust does have a lot of advantages over C++, we chose \textbf{C++} in the end. The main reason for this is that the Vulkan API was designed for C/C++. There are a lot of great Vulkan-libraries for Rust, like the popular "Ash" create, which is generated from "vk.xml". However, way you use the API does differ from the classic C API. This could be problematic, considering that nearly all the few resources relating to raytracing in Vulkan use C/C++. This could have made it difficult to translate the raytracing code into Rust later down the line, so C++ was the safer choice.
+
+\section{3D Scene File Format}
+
+The dynamic 3D scenes, that the project uses, are stored in the \textbf{glTF-2.0} file format. It stores its models in a scene graph and supports skeletal animation as well as morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary in BIN files and textures are stored in image files (PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
 
 \section{Libraries}
 
@@ -38,19 +42,20 @@ Memory Management in Vulkan is quite difficult. For example, when you create a b
 
 \subsection{vk-bootstrap}
 
-Initializing Vulkan involves a lot of boilerplate code, which is going to be basically the same in every Vulkan application. VkBootstrap can be used to reduce the amount of boilerplate code in a project. It can simplify the following tasks:
+Initializing Vulkan involves a lot of boilerplate code, which is going to be basically the same in every Vulkan application. VkBootstrap can be used to reduce the amount of boilerplate code in a project.
+
+This library simplifies the tedious process of:
 
 \begin{itemize}
     \item Instance creation
-    \item Physical device selection
-    \item (Logical) device creation
-    \item Queue acquisition
+    \item Physical Device selection
+    \item Device creation
+    \item Getting queues
     \item Swapchain creation
 \end{itemize}
+~\parencite{vk-bootstrap}
 
-\subsection{glTF-2.0}
-
-glTF-2.0 is used as the file format for the dynamic 3D scenes that the project renders.  It stores its models in a scene graph and supports skeletal animation as well as morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary in BIN files and textures are stored in image files (PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
+\subsection{cgltf}
 
 To load a glTF file in the project, cgltf is used. cgltf parses the glTF file, which is stored in JSON. It would also have been possible to read the JSON directly, but cgltf takes care of validating the file, loads the required buffers from their BIN-files into memory and creates a C-structure, which is a lot more comfortable to use. Our project does not this structure directly, but rather used to generate a \texttt{Scene} object.
 

@@ -798,9 +798,16 @@ INPUT ./main.lot
 INPUT ./main.lot
 INPUT main.lot
 OUTPUT main.lot
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplri9c.tfm
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplrc9e.tfm
+INPUT c:/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplri9c.vf
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplrij8r.tfm
+INPUT c:/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplrc9e.vf
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
 INPUT main.aux
 INPUT main.run.xml
 OUTPUT main.run.xml
+INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/fpl/fplrc8a.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtk10.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtti10.pfb
