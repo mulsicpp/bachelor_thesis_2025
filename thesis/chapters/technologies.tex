@@ -1,7 +1,7 @@
 % !TeX root = ../main.tex
 % Add the above to each chapter to make compiling the PDF easier in some editors.
 
-\chapter{Technologies}\label{chapter:methods}
+\chapter{Technologies}\label{chapter:technologies}
 
 \section{Operating System}
 
@@ -32,7 +32,7 @@ At the start of the project Rust was considered as the projects programming lang
 
 volk is a meta-loader for Vulkan. It allows you to dynamically load entry points required to use Vulkan without linking to vulkan-1.dll or statically linking Vulkan loader. Additionally, volk simplifies the use of Vulkan extensions by automatically loading all associated entry points [https://github.com/zeux/volk].
 
-\subsection{VMA (Vulkan Memory Allocator)}
+\subsection{VMA (Vulkan Memory Allocator)}\label{sec:vma}
 
 Memory Management in Vulkan is quite difficult. For example, when you create a buffer or image in Vulkan there is no memory associated with it. The programmer needs to manually allocate block of memory with a certain type from a certain memory heap. The properties of these memory heaps depend on the underlying physical device and need to be queried first. Additionally, creating a new memory allocation for each resource may be suboptimal, since the number of allocations can be very limited and many allocations may negatively impact performance. VMA (Vulkan Memory Allocator) simplifies, automates and optimizes memory management in Vulkan.
 

@@ -126,4 +126,10 @@ The following are some examples of possible queue setups:
     \label{fig:queue_example_2}
 \end{figure}
 
-We also need command pool to be able to allocate command buffers. When creating a command pool, a queue family has to be specified. Because the allocated command buffers can only be submitted to queues of the specified family, we create one command pool for every queue family that is used.
+We also need a command pool to be able to allocate command buffers. When creating a command pool, a queue family has to be specified. Because the allocated command buffers can only be submitted to queues of the specified family, we create one command pool for every queue family that is used.
+
+\section{The VMA allocator}
+
+As already mentioned in the \nameref{chapter:technologies} (\autoref{sec:vma}), our project uses VMA (Vulkan Memory Allocator) to make memory management in Vulkan easier. In order to be able to be allocate memory for our buffers and images later, we need an allocator. The allocator should be easily accessible when we create a buffer or image and for that reason we will also create and store the VMA allocator in the Vulkan context. How we use the allocator can be seen in the section \nameref{sec:resource_objects}.
+
+\section{Resource Objects}\label{sec:resource_objects}
