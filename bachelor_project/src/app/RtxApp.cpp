@@ -10,6 +10,8 @@
 
 #include "stb_image_write.h"
 
+#include "app/FrameBenchmark.h"
+
 RtxApp::RtxApp(int argc, char* argv[])
 {
     opts.parse(argc, argv);
@@ -99,8 +101,11 @@ void RtxApp::run()
             image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
         }
     } else {
+
+        std::vector<FrameBenchmark> frame_benchmarks{}; 
         for (uint32_t i = 0; i < opts.frame_count; i++)
         {
+            FrameBenchmark frame_benchmark{};
             printf("drawing frame: %u\n", i);
             animation.apply_for(i * opts.delta_time);
             scene->update_transforms();
@@ -110,9 +115,16 @@ void RtxApp::run()
             else {
                 cmd_buffer_graphics.record(skin_recorder).submit().wait();
             }
-            scene->rebuild_acceleration_structures();
+            frame_benchmark.start = FrameBenchmark::now();
+            scene->refit_acceleration_structures();
+            frame_benchmark.rebuilt_acc = FrameBenchmark::now();
 
             cmd_buffer_raytracing.record(draw_recorder).submit().wait();
+            frame_benchmark.traced_rays = FrameBenchmark::now();
+
+            printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
+            printf("trace time: %lf ms\n", frame_benchmark.trace_rays_time());
+            printf("total time: %lf ms\n\n", frame_benchmark.total_time());
         }
     }
 

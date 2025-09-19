@@ -3,4 +3,4 @@
 cd "$(dirname "$0")"
 
 ./premake/linux/premake5 gmake2
-make
+make config=release
