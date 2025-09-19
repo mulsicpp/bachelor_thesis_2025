@@ -11,7 +11,8 @@
 
 class CLIOptions {
 public:
-    TestScene scene{ TestScene::Brainstem };
+    std::string scene_str{ get_scene_name(TestScene::Brainstem) };
+    TestScene scene{};
     std::string target_dir{ "raytracing_results" };
     uint32_t frame_count{ 200 };
     std::tuple<uint32_t, uint32_t> resolution{ std::tuple<uint32_t, uint32_t>(IMAGE_WIDTH, IMAGE_HEIGHT) };

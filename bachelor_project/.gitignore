@@ -2,8 +2,9 @@
 
 obj/
 
-bachelor_project_linux
-bachelor_project_linux_dbg
+test_rtx_linux
+test_rtx_linux_dbg
+
 
 Makefile
 *.make

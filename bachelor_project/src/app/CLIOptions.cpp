@@ -1,6 +1,7 @@
 #include "CLIOptions.h"
 
 #include "utils/defines.h"
+#include "utils/AppPath.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -33,16 +34,32 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         "DIR"
     );
 
-    const std::map<std::string, TestScene> scene_map{
-        {get_scene_name(TestScene::Brainstem), TestScene::Brainstem},
-        {get_scene_name(TestScene::Whirlwind), TestScene::Whirlwind},
-        {get_scene_name(TestScene::SpaceStation), TestScene::SpaceStation},
-        {get_scene_name(TestScene::Monsters), TestScene::Monsters}
-    };
+    const std::vector<TestScene> scene_values = {
+        TestScene::Brainstem,
+        TestScene::Whirlwind,
+        TestScene::SpaceStation,
+        TestScene::Monsters,
+    };  
+
+    std::vector<std::string> scene_str_values{};
+
+    for(const auto val : scene_values) {
+        scene_str_values.push_back(get_scene_name(val));
+    }
 
 
-    app.add_option("-s, --scene", scene, "The test scene to be loaded")
-        ->transform(CLI::CheckedTransformer(scene_map))
+    auto scene_callback = [=](const std::string& scene_str) {
+        for(uint32_t i = 0; i < scene_values.size(); i++) {
+            if(scene_str_values[i] == scene_str) {
+                scene = scene_values[i];
+                return;
+            }
+        }
+        };
+
+
+    app.add_option_function<std::string>("-s, --scene", scene_callback, "The test scene to be loaded")
+        ->check(CLI::IsMember(scene_str_values))
         ->default_str(get_scene_name(scene));
 
     app.add_option("-t,--target-dir", target_dir, "The path to the directory, where the data is stored")
@@ -61,18 +78,11 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->default_str(std::to_string(delta_time))
         ->check(validate_positive_float);
 
-    const std::map<std::string, bool> skinning_map{
-        {"cpu", true},
-        {"gpu", false}
-    };
-
-    app.add_option("--skin-mode", cpu_skinning, "The mode in which models are skinned when animated")
-        ->transform(CLI::CheckedTransformer(skinning_map))
-        ->default_str(cpu_skinning ? "cpu" : "gpu");
+    app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The mode in which models are skinned when animated");
 
     app.add_flag("--store-images", store_images, "Store the rendered frames as PNG images");
 
-    app.set_version_flag("-v,-V,--version", APP_NAME " 1.0.0");
+    app.set_version_flag("-v,-V,--version", utils::AppPath::instance().app_name + " 1.0.0");
 }
 
 void CLIOptions::parse(int argc, char* argv[]) {

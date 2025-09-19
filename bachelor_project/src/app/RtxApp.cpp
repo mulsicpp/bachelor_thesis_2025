@@ -81,21 +81,38 @@ void RtxApp::run()
         skinner.cmd_skin_scene(cmd_buf);
         };
 
-    for (uint32_t i = 0; i < opts.frame_count; i++)
-    {
-        printf("drawing frame: %u\n", i);
-        animation.apply_for(i * opts.delta_time);
-        scene->update_transforms();
-        if(opts.cpu_skinning) {
-            scene->skin_cpu();
-        } else {
-            cmd_buffer_graphics.record(skin_recorder).submit().wait();
-        }
-        scene->rebuild_acceleration_structures();
+    if (opts.store_images) {
+        for (uint32_t i = 0; i < opts.frame_count; i++)
+        {
+            printf("drawing frame: %u\n", i);
+            animation.apply_for(i * opts.delta_time);
+            scene->update_transforms();
+            if (opts.cpu_skinning) {
+                scene->skin_cpu();
+            }
+            else {
+                cmd_buffer_graphics.record(skin_recorder).submit().wait();
+            }
+            scene->rebuild_acceleration_structures();
 
-        cmd_buffer_raytracing.record(draw_recorder).submit().wait();
-        if(opts.store_images) {
+            cmd_buffer_raytracing.record(draw_recorder).submit().wait();
             image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
+        }
+    } else {
+        for (uint32_t i = 0; i < opts.frame_count; i++)
+        {
+            printf("drawing frame: %u\n", i);
+            animation.apply_for(i * opts.delta_time);
+            scene->update_transforms();
+            if (opts.cpu_skinning) {
+                scene->skin_cpu();
+            }
+            else {
+                cmd_buffer_graphics.record(skin_recorder).submit().wait();
+            }
+            scene->rebuild_acceleration_structures();
+
+            cmd_buffer_raytracing.record(draw_recorder).submit().wait();
         }
     }
 

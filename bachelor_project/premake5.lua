@@ -1,4 +1,6 @@
-workspace("bachelor_project_" .. _TARGET_OS)                                                 
+local app_name = "test_rtx"
+
+workspace(app_name .. "_" .. _TARGET_OS)
     language "C++"
     cppdialect "C++20"
     location(".")
@@ -39,7 +41,7 @@ workspace("bachelor_project_" .. _TARGET_OS)
 
     filter {}
 
-    project("bachelor_project_" .. _TARGET_OS)
+    project(app_name .. "_" .. _TARGET_OS)
     
         filter {"configurations:Debug"}
             targetsuffix "_dbg"
