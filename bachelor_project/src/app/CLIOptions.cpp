@@ -27,11 +27,11 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         "POSITIVE"
     );
 
-    auto validate_dir = CLI::Validator(
+    auto validate_file = CLI::Validator(
         [](const std::string& s) {
             return std::string{};
         },
-        "DIR"
+        "FILE"
     );
 
     const std::vector<TestScene> scene_values = {
@@ -62,9 +62,9 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->check(CLI::IsMember(scene_str_values))
         ->default_str(get_scene_name(scene));
 
-    app.add_option("-t,--target-dir", target_dir, "The path to the directory, where the data is stored")
-        ->default_str(target_dir)
-        ->check(validate_dir);
+    app.add_option("-o,--output-file", output_file, "The path to the output file, where the data is stored")
+        ->default_str(output_file)
+        ->check(validate_file);
 
     app.add_option("-f,--frames", frame_count, "The number of frames to be generated")
         ->default_str(std::to_string(frame_count))
