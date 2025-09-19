@@ -115,11 +115,13 @@ void RtxApp::run()
             else {
                 cmd_buffer_graphics.record(skin_recorder).submit().wait();
             }
+
+            cmd_buffer_raytracing.record(draw_recorder);
             frame_benchmark.start = FrameBenchmark::now();
             scene->refit_acceleration_structures();
             frame_benchmark.rebuilt_acc = FrameBenchmark::now();
 
-            cmd_buffer_raytracing.record(draw_recorder).submit().wait();
+            cmd_buffer_raytracing.submit().wait();
             frame_benchmark.traced_rays = FrameBenchmark::now();
 
             printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
