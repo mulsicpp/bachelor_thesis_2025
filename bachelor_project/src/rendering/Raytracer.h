@@ -37,15 +37,24 @@ public:
     void draw();
 };
 
+struct RtxPushConstant {
+    alignas(16) glm::vec3 light_direction{0.5, -1.0, 0.5};
+    alignas(16) glm::vec3 light_color{0.8, 0.8, 0.6};
+    alignas(16) glm::vec3 ambient_color{0.2, 0.2, 0.4};
+};
+
 class RaytracerBuilder {
 public:
     using Ref = RaytracerBuilder&;
 
 private:
     // TODO raytracer builder parameters
+    bool _shadows{ false };
 
 public:
     RaytracerBuilder() = default;
+
+    inline Ref shadows(bool shadows) { _shadows = shadows; return *this; }
 
     Raytracer build() const;
 };

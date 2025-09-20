@@ -11,8 +11,8 @@
 #define WINDOW_HEIGHT  720
 
 
-#define IMAGE_WIDTH 640
-#define IMAGE_HEIGHT 480
+#define IMAGE_WIDTH 1280
+#define IMAGE_HEIGHT 720
 
 #define APP_NAME "Raytracing App"
 #define APP_DESCRIPTION "An app to benchmark raytracing in different dynamic scenes"

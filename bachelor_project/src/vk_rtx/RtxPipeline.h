@@ -37,6 +37,8 @@ namespace vk {
 
 		void cmd_bind(ReadyCommandBuffer cmd_buffer) const;
 
+		void cmd_push_constant(ReadyCommandBuffer cmd_buffer, const void* value);
+
 		static void cmd_trace_rays(ReadyCommandBuffer cmd_buffer, const SBT& sbt, const VkExtent2D& image_extent);
     };
 

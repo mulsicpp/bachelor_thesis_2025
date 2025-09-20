@@ -37,7 +37,7 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     image_view = vk::ImageView::create_from(image, image->aspect()).to_shared();
 
-    raytracer = RaytracerBuilder().build();
+    raytracer = RaytracerBuilder().shadows(true).build();
     skinner = SkinnerBuilder().build();
 
     scene = ptr::make_shared<Scene>(Scene::load(get_scene_path(opts.scene)));
