@@ -17,6 +17,8 @@ layout(push_constant) uniform RtxPush {
     uint sample_factor;
 } rtx_push;
 
+layout(set = 0, binding = 0) uniform accelerationStructureEXT tlas;
+
 layout(set = 0, binding = 2) uniform Camera {
     mat4 view;
     mat4 proj;
@@ -42,6 +44,14 @@ hitAttributeEXT vec2 attribs;
 
 const uint OFFSET_VALUE_MASK = 0x7fffffff;
 const uint OFFSET_FLAG_MASK = 0x80000000;
+
+#ifndef SHADOWS
+#define SHADOWS 1
+#endif
+
+#if SHADOWS
+layout(location = 1) rayPayloadEXT bool shadow;
+#endif
 
 void main()
 {
@@ -79,7 +89,41 @@ void main()
 
     vec3 normal = normalize(cross(v1 - v0, v2 - v0));
 
-    float intensity = clamp(dot(normal, -normalize(rtx_push.light_direction)), 0.0f, 1.0f);
+    vec3 light_dir = normalize(rtx_push.light_direction);
 
-    payload = intensity * rtx_push.light_color + rtx_push.ambient_color;
+    float dot_prod = dot(normal, -light_dir);
+
+#if SHADOWS
+
+    shadow = false;
+
+    if(dot_prod > 0.0) {
+
+        shadow = true;
+        vec3  origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT + normal * 0.00001;
+        uint  flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
+
+        traceRayEXT(
+            tlas,                      // acceleration structure
+            flags,                     // ray flags
+            0xFF,                      // cull mask
+            0,                         // sbtRecordOffset
+            0,                         // sbtRecordStride
+            1,                         // missIndex
+            origin,                    // ray origin
+            0.0,                       // minT
+            -light_dir,                // ray direction
+            10000.0,                   // maxT
+            1                          // location of payload
+        );
+    }
+
+    payload = rtx_push.ambient_color;
+
+    if(!shadow) {
+        payload += clamp(dot_prod, 0.0f, 1.0f) * rtx_push.light_color;
+    }
+#else
+    payload = rtx_push.ambient_color + clamp(dot_prod, 0.0f, 1.0f) * rtx_push.light_color;
+#endif
 }

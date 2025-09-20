@@ -83,68 +83,37 @@ Raytracer RaytracerBuilder::build() const {
                 .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
             .build())
         .push_constant(vk::PushConstant()
-			.add_stage_flag(VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+            .add_stage_flag(VK_SHADER_STAGE_RAYGEN_BIT_KHR)
             .add_stage_flag(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
-			.set_size(sizeof(RtxPushConstant)))
+            .set_size(sizeof(RtxPushConstant)))
         .build().to_shared();
 
     auto ray_gen_shader = vk::ShaderBuilder().raygen_stage().load_spirv(app_path.get_path("assets/shaders/rtx/ray_gen.spv").string()).build().to_shared();
     auto miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("assets/shaders/rtx/miss.spv").string()).build().to_shared();
+    auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/rtx/closest_hit.spv").string()).build().to_shared();
+    auto shadow_miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("assets/shaders/rtx/shadow_miss.spv").string()).build().to_shared();
 
     vk::ShaderGroup ray_gen_group = vk::ShaderGroup::create_general(ray_gen_shader);
     vk::ShaderGroup miss_group = vk::ShaderGroup::create_general(miss_shader);
-
-    if (_shadows) {
-        auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/rtx_shadow/closest_hit.spv").string()).build().to_shared();
-
-        auto shadow_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/rtx_shadow/shadow_hit.spv").string()).build().to_shared();
-        auto shadow_miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("assets/shaders/rtx_shadow/shadow_miss.spv").string()).build().to_shared();
-
-        vk::ShaderGroup hit_group = vk::ShaderGroup::create_hit_closest(closest_hit_shader);
-
-        vk::ShaderGroup shadow_miss_group = vk::ShaderGroup::create_general(shadow_miss_shader);
-        vk::ShaderGroup shadow_hit_group = vk::ShaderGroup::create_hit_closest(shadow_hit_shader);
+    vk::ShaderGroup hit_group = vk::ShaderGroup::create_hit_closest(closest_hit_shader);
+    vk::ShaderGroup shadow_miss_group = vk::ShaderGroup::create_general(shadow_miss_shader);
 
 
 
-        // TODO build raytracer
-        raytracer.pipeline = vk::RtxPipelineBuilder()
-            .add_shader_group(ray_gen_group)
-            .add_shader_group(miss_group)
-            .add_shader_group(shadow_miss_group)
-            .add_shader_group(hit_group)
-            .add_shader_group(shadow_hit_group)
-            .layout(raytracer.pipeline_layout)
-            .max_ray_recursion_depth(2)
-            .build();
+    // TODO build raytracer
+    raytracer.pipeline = vk::RtxPipelineBuilder()
+        .add_shader_group(ray_gen_group)
+        .add_shader_group(miss_group)
+        .add_shader_group(shadow_miss_group)
+        .add_shader_group(hit_group)
+        .layout(raytracer.pipeline_layout)
+        .max_ray_recursion_depth(2)
+        .build();
 
-        raytracer.sbt = raytracer.pipeline.build_sbt(vk::SBTInfo()
-            .ray_gen_group(ray_gen_group)
-            .miss_groups({ miss_group, shadow_miss_group })
-            .hit_groups({ hit_group, shadow_hit_group }));
-
-    }
-    else {
-        auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/rtx/closest_hit.spv").string()).build().to_shared();
-
-        vk::ShaderGroup hit_group = vk::ShaderGroup::create_hit_closest(closest_hit_shader);
-
-
-
-        // TODO build raytracer
-        raytracer.pipeline = vk::RtxPipelineBuilder()
-            .add_shader_group(ray_gen_group)
-            .add_shader_group(miss_group)
-            .add_shader_group(hit_group)
-            .layout(raytracer.pipeline_layout)
-            .max_ray_recursion_depth(1)
-            .build();
-
-        raytracer.sbt = raytracer.pipeline.build_sbt(vk::SBTInfo()
-            .ray_gen_group(ray_gen_group)
-            .miss_groups({ miss_group })
-            .hit_groups({ hit_group }));
-    }
+    raytracer.sbt = raytracer.pipeline.build_sbt(vk::SBTInfo()
+        .ray_gen_group(ray_gen_group)
+        .miss_groups({ miss_group, shadow_miss_group })
+        .hit_groups({ hit_group }));
 
     raytracer.camera_uniform_buffer = vk::BufferBuilder()
         .usage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
