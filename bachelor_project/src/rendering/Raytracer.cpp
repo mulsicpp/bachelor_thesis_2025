@@ -83,7 +83,8 @@ Raytracer RaytracerBuilder::build() const {
                 .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
             .build())
         .push_constant(vk::PushConstant()
-			.add_stage_flag(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+			.add_stage_flag(VK_SHADER_STAGE_RAYGEN_BIT_KHR)
+            .add_stage_flag(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
 			.set_size(sizeof(RtxPushConstant)))
         .build().to_shared();
 

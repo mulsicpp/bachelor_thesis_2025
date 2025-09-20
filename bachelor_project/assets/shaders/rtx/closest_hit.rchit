@@ -13,6 +13,8 @@ layout(push_constant) uniform RtxPush {
     vec3 light_direction;
     vec3 light_color;
     vec3 ambient_color;
+
+    uint sample_factor;
 } rtx_push;
 
 layout(set = 0, binding = 2) uniform Camera {

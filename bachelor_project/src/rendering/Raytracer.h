@@ -41,6 +41,8 @@ struct RtxPushConstant {
     alignas(16) glm::vec3 light_direction{0.5, -1.0, 0.5};
     alignas(16) glm::vec3 light_color{0.8, 0.8, 0.6};
     alignas(16) glm::vec3 ambient_color{0.2, 0.2, 0.4};
+
+    uint32_t sample_factor{4};
 };
 
 class RaytracerBuilder {
