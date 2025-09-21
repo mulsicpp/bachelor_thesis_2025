@@ -46,7 +46,7 @@ const uint OFFSET_VALUE_MASK = 0x7fffffff;
 const uint OFFSET_FLAG_MASK = 0x80000000;
 
 #ifndef SHADOWS
-#define SHADOWS 1
+#define SHADOWS 0
 #endif
 
 #if SHADOWS
@@ -100,7 +100,7 @@ void main()
     if(dot_prod > 0.0) {
 
         shadow = true;
-        vec3  origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT + normal * 0.00001;
+        vec3  origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT + normal * 0.00001 * gl_HitTEXT;
         uint  flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
 
         traceRayEXT(

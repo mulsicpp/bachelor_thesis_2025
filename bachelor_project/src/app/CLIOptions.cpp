@@ -5,6 +5,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
     auto validate_positive_int = CLI::Validator(
@@ -34,27 +35,46 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         "FILE"
     );
 
+    auto validate_square_number = CLI::Validator(
+        [](const std::string& s) {
+            int64_t val = std::stoll(s);
+
+            if (val <= 0) return s + " is not a square number";
+
+            auto root = std::llround(std::sqrt(val));
+
+            if (root * root != val) return s + " is not a square number";
+            return std::string{};
+        },
+        "SQUARE NUMBER"
+    );
+
     const std::vector<TestScene> scene_values = {
         TestScene::Brainstem,
         TestScene::Whirlwind,
         TestScene::SpaceStation,
         TestScene::Monsters,
-    };  
+    };
 
     std::vector<std::string> scene_str_values{};
 
-    for(const auto val : scene_values) {
+    for (const auto val : scene_values) {
         scene_str_values.push_back(get_scene_name(val));
     }
 
 
-    auto scene_callback = [=](const std::string& scene_str) {
-        for(uint32_t i = 0; i < scene_values.size(); i++) {
-            if(scene_str_values[i] == scene_str) {
+    auto scene_callback = [this, scene_str_values, scene_values](const std::string& scene_str) {
+        for (uint32_t i = 0; i < scene_values.size(); i++) {
+            if (scene_str_values[i] == scene_str) {
                 scene = scene_values[i];
                 return;
             }
         }
+        };
+
+    auto spp_callback = [this](const uint32_t& spp) {
+        auto root = std::llround(std::sqrt(spp));
+        sample_factor = root;
         };
 
 
@@ -78,9 +98,15 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->default_str(std::to_string(delta_time))
         ->check(validate_positive_float);
 
+    app.add_option_function<uint32_t>("--spp", spp_callback, "Samples per pixel aka. the number of primary rays cast per pixel")
+        ->default_str(std::to_string(sample_factor * sample_factor))
+        ->check(validate_square_number);
+
     app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The mode in which models are skinned when animated");
 
     app.add_flag("--store-images", store_images, "Store the rendered frames as PNG images");
+
+    app.add_flag("--shadows,!--no-shadows", shadows, "Enable shadow testing");
 
     app.set_version_flag("-v,-V,--version", utils::AppPath::instance().app_name + " 1.0.0");
 }

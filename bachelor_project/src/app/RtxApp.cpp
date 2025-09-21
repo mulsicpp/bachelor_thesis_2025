@@ -37,7 +37,7 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     image_view = vk::ImageView::create_from(image, image->aspect()).to_shared();
 
-    raytracer = RaytracerBuilder().shadows(false).build();
+    raytracer = RaytracerBuilder().shadows(opts.shadows).build();
     skinner = SkinnerBuilder().build();
 
     scene = ptr::make_shared<Scene>(Scene::load(get_scene_path(opts.scene)));
@@ -73,15 +73,21 @@ void RtxApp::run()
 {
     auto& animation = scene->get_animation(0);
 
+    RtxPushConstant rtx_push{};
+
+    rtx_push.light_direction = get_scene_light_dir(opts.scene);
+    rtx_push.sample_factor = opts.sample_factor;
+
     auto draw_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
         image->cmd_transition(cmd_buf, vk::ImageState::Undefined, vk::ImageState::RtxOutput);
-        raytracer.cmd_draw(cmd_buf);
+        raytracer.cmd_draw(cmd_buf, rtx_push);
         image->cmd_transition(cmd_buf, vk::ImageState::RtxOutput, vk::ImageState::TransferSrc);
         };
 
     auto skin_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
         skinner.cmd_skin_scene(cmd_buf);
         };
+
 
     if (opts.store_images) {
         for (uint32_t i = 0; i < opts.frame_count; i++)

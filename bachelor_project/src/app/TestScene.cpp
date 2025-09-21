@@ -33,7 +33,7 @@ AppCamera get_scene_camera(TestScene test_scene) {
         camera.distance = 3;
         break;
     case TestScene::Whirlwind:
-        camera.theta = glm::pi<float>() * 0.75f;
+        camera.theta = glm::pi<float>() * 1.0f;
         camera.phi = 0.0f;
         camera.center = glm::vec3{ 0.0f, -400.0f, 0.0f };
         camera.distance = 1500;
@@ -53,4 +53,13 @@ AppCamera get_scene_camera(TestScene test_scene) {
     }
 
     return camera;
+}
+
+glm::vec3 get_scene_light_dir(TestScene test_scene) {
+    switch (test_scene) {
+    case TestScene::Brainstem: return glm::vec3{0.2, -1.0, -0.7};
+    case TestScene::Whirlwind: return glm::vec3{-0.2, -1.0, -0.7};
+    case TestScene::SpaceStation: return glm::vec3{0.5, -1.0, 0.5};
+    default: return glm::vec3{0.2, 0.0, -1.0};
+    }
 }

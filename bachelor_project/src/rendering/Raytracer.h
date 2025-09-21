@@ -11,6 +11,15 @@
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 
+struct RtxPushConstant {
+    alignas(16) glm::vec3 light_direction{0.5, -1.0, 0.5};
+    alignas(16) glm::vec3 light_color{0.9, 0.9, 0.8};
+    alignas(16) glm::vec3 ambient_color{0.1, 0.1, 0.2};
+
+    uint32_t sample_factor{1};
+};
+
+
 class RaytracerBuilder;
 
 class Raytracer : public utils::Move, public ptr::ToShared<Raytracer> {
@@ -33,17 +42,10 @@ public:
 	void bind_scene(const ptr::Shared<Scene>& scene);
     void bind_image(const ptr::Shared<vk::ImageView>& image_view);
 
-	void cmd_draw(vk::ReadyCommandBuffer cmd_buf);
-    void draw();
+	void cmd_draw(vk::ReadyCommandBuffer cmd_buf, const RtxPushConstant& rtx_push = {});
+    void draw(const RtxPushConstant& rtx_push = {});
 };
 
-struct RtxPushConstant {
-    alignas(16) glm::vec3 light_direction{0.5, -1.0, 0.5};
-    alignas(16) glm::vec3 light_color{0.8, 0.8, 0.6};
-    alignas(16) glm::vec3 ambient_color{0.2, 0.2, 0.4};
-
-    uint32_t sample_factor{4};
-};
 
 class RaytracerBuilder {
 public:
