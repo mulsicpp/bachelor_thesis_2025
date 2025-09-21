@@ -16,15 +16,15 @@ struct FrameBenchmark {
         return std::chrono::duration<double, std::chrono::milliseconds::period>(end - start).count();
     }
 
-    inline double total_time() {
+    inline double total_time() const {
         return duration(start, traced_rays);
     }
 
-    inline double rebuild_acc_time() {
+    inline double rebuild_acc_time() const {
         return duration(start, rebuilt_acc);
     }
 
-    inline double trace_rays_time() {
+    inline double trace_rays_time() const {
         return duration(rebuilt_acc, traced_rays);
     }
 };

@@ -7,6 +7,7 @@
 #include "vk_core/format.h"
 
 #include "scene/Scene.h"
+#include "scene/SceneUpdateStrat.h"
 
 #include "stb_image_write.h"
 
@@ -88,7 +89,9 @@ void RtxApp::run()
         skinner.cmd_skin_scene(cmd_buf);
         };
 
+    auto update_strats = SceneUpdateStrat::strats();
 
+    
     if (opts.store_images) {
         for (uint32_t i = 0; i < opts.frame_count; i++)
         {
@@ -102,38 +105,66 @@ void RtxApp::run()
                 cmd_buffer_graphics.record(skin_recorder).submit().wait();
             }
             scene->rebuild_acceleration_structures();
-
+            
             cmd_buffer_raytracing.record(draw_recorder).submit().wait();
             image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
         }
-    } else {
+    }
+    else {
+        FILE* output_file = fopen(opts.output_file.c_str(), "w");
+        
+        for (const auto& strat : update_strats) {
 
-        std::vector<FrameBenchmark> frame_benchmarks{}; 
-        for (uint32_t i = 0; i < opts.frame_count; i++)
-        {
-            FrameBenchmark frame_benchmark{};
-            printf("drawing frame: %u\n", i);
-            animation.apply_for(i * opts.delta_time);
-            scene->update_transforms();
-            if (opts.cpu_skinning) {
-                scene->skin_cpu();
+
+            std::vector<FrameBenchmark> frame_benchmarks{};
+            for (uint32_t i = 0; i < opts.frame_count; i++)
+            {
+                FrameBenchmark frame_benchmark{};
+                printf("drawing frame: %u\n", i);
+                animation.apply_for(i * opts.delta_time);
+                scene->update_transforms();
+                if (opts.cpu_skinning) {
+                    scene->skin_cpu();
+                }
+                else {
+                    cmd_buffer_graphics.record(skin_recorder).submit().wait();
+                }
+
+                cmd_buffer_raytracing.record(draw_recorder);
+                frame_benchmark.start = FrameBenchmark::now();
+                if(strat.rebuild_at(i)) {
+                    scene->rebuild_acceleration_structures();
+                } else {
+                    scene->refit_acceleration_structures();
+                }
+                frame_benchmark.rebuilt_acc = FrameBenchmark::now();
+
+                cmd_buffer_raytracing.submit().wait();
+                frame_benchmark.traced_rays = FrameBenchmark::now();
+
+                printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
+                printf("trace time: %lf ms\n", frame_benchmark.trace_rays_time());
+                printf("total time: %lf ms\n\n", frame_benchmark.total_time());
+
+                frame_benchmarks.push_back(frame_benchmark);
             }
-            else {
-                cmd_buffer_graphics.record(skin_recorder).submit().wait();
+
+            fprintf(output_file, "%s\n", strat.name.c_str());
+
+            fprintf(output_file, "rebuild;");
+            for(const auto& benchmark : frame_benchmarks) {
+                fprintf(output_file, "%lf;", benchmark.rebuild_acc_time());
             }
+            fprintf(output_file, "\n");
 
-            cmd_buffer_raytracing.record(draw_recorder);
-            frame_benchmark.start = FrameBenchmark::now();
-            scene->refit_acceleration_structures();
-            frame_benchmark.rebuilt_acc = FrameBenchmark::now();
-
-            cmd_buffer_raytracing.submit().wait();
-            frame_benchmark.traced_rays = FrameBenchmark::now();
-
-            printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
-            printf("trace time: %lf ms\n", frame_benchmark.trace_rays_time());
-            printf("total time: %lf ms\n\n", frame_benchmark.total_time());
+            fprintf(output_file, "trace;");
+            for(const auto& benchmark : frame_benchmarks) {
+                fprintf(output_file, "%lf;", benchmark.trace_rays_time());
+            }
+            fprintf(output_file, "\n\n");
         }
+
+        fclose(output_file);
     }
 
     vk::Context::get()->wait_device_idle();
