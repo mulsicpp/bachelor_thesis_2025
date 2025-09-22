@@ -5,6 +5,12 @@
 
 \usepackage{lmodern}
 
+\usepackage{xcolor}
+\usepackage{soul}
+
+\usepackage[most]{tcolorbox} % powerful box package
+\tcbset{highlight math style={enhanced}}
+
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -148,6 +154,15 @@ ex-am-ple
 % for error handling of intended behavior in your latex documents.
 
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+% \newcommand{\code}[1]{\colorbox{lightgray}{\texttt{#1}}}
+
+\newtcbox{\code}{on line,
+  boxsep=0pt, left=2pt, right=2pt, top=2pt, bottom=1pt,
+  colback=lightgray!30, colframe=lightgray!50!black,
+  boxrule=0pt, arc=2pt, % <-- arc = corner radius
+  fontupper=\ttfamily
+}
 
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}} % for horizontal alignment with limited column width
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}} % for horizontal and vertical alignment with limited column width

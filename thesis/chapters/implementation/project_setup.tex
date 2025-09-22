@@ -1,0 +1,40 @@
+
+\section{Project Setup}
+
+The projects as well as this thesis' source code are avaibable in the following Github repository:
+
+\url{https://github.com/mulsicpp/bachelor_thesis_2025.git}
+
+The project is organized in the following directories:
+
+\begin{itemize}
+    \item "assets": This folder contains the projects' assets. It is further divided into scenes, which contains the glTF test scenes, and "shaders", which contains the shaders, that are used in the different pipelines.
+    \item "external": This folder contains all of the "complex""" external libraries. "Complex" in this context means, that the library has multiple header or source files or it is in binary form.
+    \item "premake": This folder contains the premake executables for both windows and linux.
+    \item "src": This folder contains all of our source files for the project. It is described in more detail in the next chapter.
+\end{itemize}
+
+Additionally, there are some scripts, that are used to build the project.
+
+\subsection{Source Code Organization}
+
+In this section we will specifically look at how the "src" folder is organised.
+
+Directly in the "src" folder we find "main.cpp", which contains our entry point of the application.
+The "external" folder once again contains external libraries, but this time the libraries, which are in the form of a single header file. These usually need to be included in a C/C++ file and need to be compiled. That's why it makes sense to keep these libraries with our other source files.
+The "utils" folder contains utilities, that may be useful all throughout the project. It includes functionalities like debug logging, move semantics and file loading.
+All the folders with a "vk\_" prefix contain code, which abstracts the low-level Vulkan API code. The goal of these abstractions is, that the low-level code should only ever be used in these folders. The rest of the project should only use the abstracted API. Each of the folders focuses on a different area of Vulkan:
+
+\begin{itemize}
+    \item "vk\_core": The most important class in this folder is the \texttt{Context} class. It is designed as a singleton, which contains the \texttt{VkInstance}, \texttt{VkPhysicalDevice}, \texttt{VkDevice}, \texttt{VkQueues} and \texttt{VmaAllocator}. After the context gets created it can be accessed anywhere. The folder also contains the \texttt{Handle<T>} class, which ensures that a handle only has one owner, the \texttt{CommandBuffer} abstraction and functionality to deals with \texttt{VkFormat}.
+    \item "vk\_resources": This folder contains Vulkans resource objects like \texttt{Buffer} and \texttt{Image}, as well as \texttt{ImageView} and \texttt{SubBuffer}.
+    \item "vk\_pipeline": This folder contains Vulkan objects, that are related to the setup of a pipeline. This includes \texttt{Pipeline}, \texttt{PipelineLayout}, \texttt{Shader}, \texttt{RenderPass}, \texttt{Framebuffer} and \texttt{DescriptorPool}.
+    \item "vk\_sync": Contains the vulkan synchronization objects \texttt{Fence} and \texttt{Semaphore}.
+    \item "scene": This folder contains the \texttt{Scene} class, which describes a dynamic scene with a scene graph. All the other classes used by or contained in the scene, like \texttt{Mesh}, \texttt{Node}, \texttt{Camera} and \texttt{Animation}, can also be found in this folder.
+    \item "rendering": This folder contains 3 different renderers:
+    \begin{itemize}
+        \item \texttt{Rasterizer}: Render a scene from the viewpoint of a camera into a framebuffer using traditional rasterisation.
+        \item \texttt{Raytracer}: Render a scene from the viewpoint of a camera into an image using modern hardware-accelerated raytracing.
+        \item \texttt{Skinner}: Calculates the skinned positions of a mesh during an animation.
+    \end{itemize}
+\end{itemize}
