@@ -1,12 +1,12 @@
 # Fdb version 4
-["biber main"] 1758311166.5141 "main.bcf" "main.bbl" "main" 1758549902.76438 0
+["biber main"] 1758311166.5141 "main.bcf" "main.bbl" "main" 1758578729.67207 0
   "bibliography.bib" 1758311165 1233 fb5c20018dce51a7b27b5b8e08c8f4ea ""
-  "main.bcf" 1758549902 108803 ec5b0735a5da00d625a6a3f71ba854fd "pdflatex"
+  "main.bcf" 1758578729 108803 ec5b0735a5da00d625a6a3f71ba854fd "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1758549897.721 "c:/Users/chris/projects/c++/bachelor_thesis_2025/thesis/main.tex" "main.pdf" "main" 1758549902.76526 0
+["pdflatex"] 1758578724.02606 "c:/Users/chris/projects/c++/bachelor_thesis_2025/thesis/main.tex" "main.pdf" "main" 1758578729.67284 0
   "c:/Users/chris/projects/c++/bachelor_thesis_2025/thesis/main.tex" 1758543040 2341 c81ceb53d1d32de1be11b78b7ebb7509 ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc" 1757969054 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1757970902 2375 baa924870cfb487815765f9094cf3728 ""
@@ -388,24 +388,24 @@
   "chapters/implementation.tex" 1758542411 312 c1a891479a6fcfcae927af3f1a38a87b ""
   "chapters/implementation/project_setup.tex" 1758542040 3850 28ff9b2f618a21c1d9434b85ee1ec1ad ""
   "chapters/implementation/scene_graph.tex" 1758542488 25 6171c146a1f0a3ea19c44f7cc23e8015 ""
-  "chapters/implementation/vulkan_abstraction.tex" 1758549896 21334 5754bcccb8810c281aa4e6af112ae2f9 ""
+  "chapters/implementation/vulkan_abstraction.tex" 1758578717 23298 ccb48aa319c72cd4a9faf44fff3d98a0 ""
   "chapters/introduction.tex" 1758150220 24 c998134ff426b228470ad7c70ccda94f ""
   "chapters/related_work.tex" 1758150062 28 2617787d571c050cc9fc10f43ee7a064 ""
   "chapters/results.tex" 1758150487 19 303c5cfa3cc9d237170a4cc0f8e1cf17 ""
-  "chapters/technologies.tex" 1758312723 5223 7fa58d08641b559dc448f261bffaffe5 ""
+  "chapters/technologies.tex" 1758575579 5226 81c4f1b5c4c0c4cb845e6fad28cbc5e3 ""
   "figures/queue_setup_example_1.png" 1758233743 73655 364f311c926c9f2a9311dc4d77e6009a ""
   "figures/queue_setup_example_2.png" 1758233726 72787 3a1e0a754b0d8953ed86836144c389fb ""
   "logos/faculty.png" 1757969522 18171 14758e48e87ff52f429bc358ed03f643 ""
   "logos/tum.pdf" 1757969522 230879 25cf2ecf41206a4d9a085f5dc8a7da88 ""
   "main.acr" 0 -1 0 ""
-  "main.aux" 1758549902 19685 1a01768e172a61f790d8e741203044c0 "pdflatex"
+  "main.aux" 1758578729 19879 1bd5a946723db22280a75f507fd503cb "pdflatex"
   "main.bbl" 1758311168 4378 101ecadaf2e20894515a6e000a9a37d4 "biber main"
   "main.gls" 0 -1 0 ""
-  "main.lof" 1758549902 882 405f51cb2bea9af20e9092d1fd5520b4 "pdflatex"
-  "main.lot" 1758549902 377 04ce838c9cf4b30898bbe422e101cd6e "pdflatex"
-  "main.run.xml" 1758549902 2374 2162dc4641ebad6002bc7e97d533582b "pdflatex"
+  "main.lof" 1758578729 882 405f51cb2bea9af20e9092d1fd5520b4 "pdflatex"
+  "main.lot" 1758578729 377 04ce838c9cf4b30898bbe422e101cd6e "pdflatex"
+  "main.run.xml" 1758578729 2374 2162dc4641ebad6002bc7e97d533582b "pdflatex"
   "main.tex" 1758543040 2341 c81ceb53d1d32de1be11b78b7ebb7509 ""
-  "main.toc" 1758549902 3371 663926972c5d60d11d2effc04ce53d2b "pdflatex"
+  "main.toc" 1758578729 3371 663926972c5d60d11d2effc04ce53d2b "pdflatex"
   "pages/abstract.tex" 1757977923 40 2424a7bb21fa2f9ef04387e09dfe886f ""
   "pages/acknowledgements.tex" 1758134232 691 89f0c3e3a15fe6efc30380f6c586997e ""
   "pages/appendix.tex" 1757969522 341 03dcd74b3adbe6bc8668d4ab260f8ef5 ""
