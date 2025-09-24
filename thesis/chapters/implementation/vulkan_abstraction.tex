@@ -213,7 +213,7 @@ cmd_buf.record(recorder).submit().wait();
 \caption{An example of how to use command buffers in your code.}\label{fig:command-buffer}
 \end{figure}
 
-\section{Resource Objects}\label{subsec:resource-objects}
+\subsection{Resource Objects}\label{subsec:resource-objects}
 \textbf{Resource objects} are used to store data on the GPU, which can then be read and written to in shaders. In Vulkan we distinguish two types of resource objects:
 
 \begin{itemize}
@@ -244,7 +244,15 @@ We represent these two objects by the \code{Buffer} class and \code{Image} class
 
 When creating a resource object, they are not actually backed by memory immediately, but you need to allocate a block of device memory and bind that memory to the resource. When allocating the memory, you need to specify a memory type, which corresponds to a certain memory heap and can have a set of properties, which impact the visibility of your memory aswell as performance. It is also important to mention, that too many allocations are not just bad for the performance of your application, but there is also a limit of allocations, that cannot be superceeded.
 
-To make our lives a little bit easier, we use VMA (Vulkan Memory Allocator) (see \autoref{subsec:vma}). 
+To make our lives a little bit easier, we use VMA (Vulkan Memory Allocator) (see \autoref{subsec:vma}).
+
+The most important parameter we need, when using VMA is the \code{VmaMemoryUsage}, which describes the properties of the memory allocation. We use three of them in our project:
+
+\begin{itemize}
+    \item \code{\textbf{VMA\_MEMORY\_USAGE\_CPU\_ONLY}}:
+    \item \code{\textbf{VMA\_MEMORY\_USAGE\_GPU\_ONLY}}:
+    \item \code{\textbf{VMA\_MEMORY\_USAGE\_CPU\_TO\_GPU}}:
+\end{itemize}
 
 \subsection{Synchronization Objects}\label{subsec:sync-objects}
 
@@ -275,3 +283,43 @@ The \code{Fence} class encapsualtes a fence. While still being a very simple cla
 \end{itemize}
 
 Eventhough \code{VkFenceCreateInfo} has one member variable, we use the static method \code{Fence::create} instead of a builder to create a fence. This method has the argument of type \code{VkFenceCreateFlags}. The \code{VkFenceCreateFlags} enum only contains the flag \code{VK\_FENCE\_CREATE\_SIGNALED\_BIT}. When setting this flag the fence will be created in the "signaled" state, otherwise the fence will be created in the "unsignaled" state. This is useful for our command buffer implementation (see \autoref{subsec:command-buffers}).
+
+\subsection{Pipeline-related Objects}\label{subsec:pipeline-objects}
+
+In this section we will talk about all the different \getVkObjects{} that are related to creating and using a pipeline. We will focus on the classical rasterization pipeline, which we also use for skinning in our application, but a lot of these objects are also used in the raytracing pipeline (see \autoref{subsec:raytracing-objects}).
+
+\subsubsection{Shaders}
+
+A \code{Shader} stores the code of a shader in Spir-V as well as the shader stage, that it is used in. The code can either be given directly in binary or be loaded from a specified file.
+
+\subsubsection{Vertex Input}
+
+The \code{VertexInput} struct describes the data, that gets passed to the vertex buffer. It has an array of \code{VertexBindingInfo}s and an array of \code{VertexAttributeInfo}s. Every binding info has a unique \code{binding} index, a \code{stride}, which is the distance between two elements in bytes, and an \code{input\_rate}, which specifies if an element should be read for every vertex or for every instance. Each attribute info is part of a specific \code{binding} (referenced by the binding index) and has a unique \code{location} index, an \code{offset} and a \code{format}. In order to access an attribute in the vertex shader, we need to specify its location (e.g. \code{layout(location = 0) in vec3 positions;}).
+
+\subsubsection{Render Pass}
+
+A \code{Renderpass} stores a set of \code{Attachment}s, that the shaders in a pipeline can output to. Each of these attachments holds information about their type (e.g. color, depth, stencil), format as well as load and store operations. Note that our implementation does not support stencil attachments, since they are never used in our project. Our appciation also does not allow sub-passes, or rather exactly one sub-pass per render pass.
+
+\subsubsection{Framebuffer}
+
+Just like an object is an instance of a class, a framebuffer can be seen as an instance of a render pass. It holds a set of image views, that are used as render targets. Each image views format and aspect needs to match their respective attachment in the render pass.
+
+\subsubsection{Pipeline}
+
+A pipeline describes the whole rendering process. It contains the render pass and the different shaders, vertex input and pipeline layout, as well as information for:
+
+\begin{itemize}
+    \item input topology
+    \item rasterization
+    \item depth testing
+    \item color blending
+    \item dynamic states
+\end{itemize}
+
+Most of this information is hard coded, since we dont need to change it in our application (depth testing, color blending, dynamic states). We can however change the input topology and disable rasterization (later used for GPU skinning).
+
+\subsubsection{Pipeline layout and descriptor pool}
+
+In order to be able to use data in a shader, that is not vertex data (e.g. uniform buffers, storage buffers, samplers, acceleration structures, ...), we need to describe the data using descriptor sets. These descriptor 
+
+\subsection{Raytracing-related Objects}\label{subsec:raytracing-objects}

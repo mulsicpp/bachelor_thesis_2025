@@ -19,6 +19,124 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global/global}
+    \entry{linear-blend-skinning}{article}{}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=61c18324253c178526bee4239b577e2f}{%
+           family={Jacobson},
+           familyi={J\bibinitperiod},
+           given={Alec},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=39fc21f113565afe716445a8ffc64d71}{%
+           family={Baran},
+           familyi={B\bibinitperiod},
+           given={Ilya},
+           giveni={I\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=1fee18b64c8c593e50c87c0c959dd749}{%
+           family={Kavan},
+           familyi={K\bibinitperiod},
+           given={Ladislav},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=020ff11ea5ee7b7fa434220832a008e1}{%
+           family={Popović},
+           familyi={P\bibinitperiod},
+           given={Jovan},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=b165e4f6b8dc08ce48f08c32433c2aaa}{%
+           family={Sorkine},
+           familyi={S\bibinitperiod},
+           given={Olga},
+           giveni={O\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{f7672e6ab186856841b8b439368c2ad1}
+      \strng{fullhash}{7528d71cb01b38ad109c59934bb6abf8}
+      \strng{fullhashraw}{7528d71cb01b38ad109c59934bb6abf8}
+      \strng{bibnamehash}{7528d71cb01b38ad109c59934bb6abf8}
+      \strng{authorbibnamehash}{7528d71cb01b38ad109c59934bb6abf8}
+      \strng{authornamehash}{f7672e6ab186856841b8b439368c2ad1}
+      \strng{authorfullhash}{7528d71cb01b38ad109c59934bb6abf8}
+      \strng{authorfullhashraw}{7528d71cb01b38ad109c59934bb6abf8}
+      \field{labelalpha}{Jac+12}
+      \field{sortinit}{J}
+      \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{ACM Transactions on Graphics (proceedings of ACM SIGGRAPH)}
+      \field{number}{4}
+      \field{title}{Fast Automatic Skinning Transformations}
+      \field{volume}{31}
+      \field{year}{2012}
+      \field{pages}{77:1\bibrangedash 77:10}
+      \range{pages}{-1}
+    \endentry
+    \entry{vulkan-spec}{manual}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=364378d45b69f33fd50d5d62ae518626}{%
+           family={{Khronos Group}},
+           familyi={K\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {The Khronos Group Inc.}%
+      }
+      \strng{namehash}{364378d45b69f33fd50d5d62ae518626}
+      \strng{fullhash}{364378d45b69f33fd50d5d62ae518626}
+      \strng{fullhashraw}{364378d45b69f33fd50d5d62ae518626}
+      \strng{bibnamehash}{364378d45b69f33fd50d5d62ae518626}
+      \strng{authorbibnamehash}{364378d45b69f33fd50d5d62ae518626}
+      \strng{authornamehash}{364378d45b69f33fd50d5d62ae518626}
+      \strng{authorfullhash}{364378d45b69f33fd50d5d62ae518626}
+      \strng{authorfullhashraw}{364378d45b69f33fd50d5d62ae518626}
+      \field{labelalpha}{Khr25}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Accessed: 2025-09-19}
+      \field{title}{Vulkan{®} 1.4.327 - A Specification (with all registered Vulkan extensions)}
+      \field{year}{2025}
+      \verb{urlraw}
+      \verb https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html
+      \endverb
+      \verb{url}
+      \verb https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html
+      \endverb
+    \endentry
+    \entry{vk-bootstrap}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=c66cc57f55002e191b011441db7e846b}{%
+           family={Lunarg},
+           familyi={L\bibinitperiod},
+           given={Charles},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{c66cc57f55002e191b011441db7e846b}
+      \strng{fullhash}{c66cc57f55002e191b011441db7e846b}
+      \strng{fullhashraw}{c66cc57f55002e191b011441db7e846b}
+      \strng{bibnamehash}{c66cc57f55002e191b011441db7e846b}
+      \strng{authorbibnamehash}{c66cc57f55002e191b011441db7e846b}
+      \strng{authornamehash}{c66cc57f55002e191b011441db7e846b}
+      \strng{authorfullhash}{c66cc57f55002e191b011441db7e846b}
+      \strng{authorfullhashraw}{c66cc57f55002e191b011441db7e846b}
+      \field{labelalpha}{Lun25}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{accessed: 2025-09-19}
+      \field{title}{vk-bootstrap: Vulkan Bootstrapping Library}
+      \field{year}{2025}
+      \verb{urlraw}
+      \verb https://github.com/charles-lunarg/vk-bootstrap
+      \endverb
+      \verb{url}
+      \verb https://github.com/charles-lunarg/vk-bootstrap
+      \endverb
+    \endentry
     \entry{premake}{misc}{}{}
       \name{author}{1}{}{%
         {{un=0,uniquepart=base,hash=42d45ab7de95c116385dd938a0b3fe30}{%

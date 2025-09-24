@@ -26,9 +26,13 @@ As the graphics API for our project we chose \textbf{Vulkan 1.2}. Vulkan is a mo
 
 At the start of the project Rust was considered as the projects programming language. Rust is a new, memory-safe, low-level programming language and a modern alternative to languages like C and C++. While Rust does have a lot of advantages over C++, we chose \textbf{C++} in the end. The main reason for this is that the Vulkan API was designed for C/C++. There are a lot of great Vulkan-libraries for Rust, like the popular "Ash" create, which is generated from "vk.xml". However, way you use the API does differ from the classic C API. This could be problematic, considering that nearly all the few resources relating to raytracing in Vulkan use C/C++. This could have made it difficult to translate the raytracing code into Rust later down the line, so C++ was the safer choice.
 
-\section{3D Scene File Format}
+\section{File Formats}
+
+\subsection{glTF}\label{subsec:gltf}
 
 The dynamic 3D scenes, that the project uses, are stored in the \textbf{glTF-2.0} file format. It stores its models in a scene graph and supports skeletal animation as well as morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary in BIN files and textures are stored in image files (PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
+
+\subsection{CSV}
 
 \section{Libraries}
 

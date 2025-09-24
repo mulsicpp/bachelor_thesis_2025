@@ -1,0 +1,200 @@
+
+\section{Scene}
+
+In order to understand, why we structured our scenes the way we did, we first need to take a look at the glTF file format, that stores our scenes. As already mentioned (see \autoref{subsec:gltf}).
+
+\subsection{glTF Structure}
+
+A glTF stores its data in the JSON format. There different types of objects if glTF, each of them is stored in an array. An objects often references an other object by its index in the respective array. The objects we are interested in are:
+
+\begin{itemize}
+    \item \textbf{Buffer, Buffer view and Accessor}
+    
+    These three objects work together closely. A buffer stores a block of binary, usually contained in a separate BIN file. A buffer view describes a certain part of a buffer. It references a certain buffer and contains an offset, length and optional stride. A buffer view sees the data as just raw data. To associate some kind of meaning to the data we use an accessor. It references a buffer view with a certain offset and also contains the number of elements, as well as the type (e.g. scalar, vec3, mat4, ...) and component type (e.g. float, unsigned int, ...). Accessors are later used for things like vertex attributes and joint matrices.
+
+    \item \textbf{Mesh}
+    
+    A mesh stores a static 3D model. It contains a material and an array of primitives. Each primitive has a mode (e.g. points, lines, triangles), and optional accessor for indices and a set of accessors used for the different vertex attributes (e.g. positions, normals, uv coordiantes, vertex colors, joint weights).
+
+    \item \textbf{Skin}
+    
+    A skin is used for skeletal animation of a mesh. It contains an array of nodes, that are used as the skeletons joints, and an accessor for the inverse bind matrices of the joints.
+
+    \item \textbf{Node}
+    
+    This represents a node in the scene graph. A node always has a transform, which is either represented by a 4x4 matrix or a scale(vec3), rotation(quaternion) and translation(vec3). A node can have an array of child nodes, which inherit the transform of the parent node. In other words, a nodes transform is applied in the parent nodes coordinate system.
+    
+    A node can optionally also contain a mesh, which is gonna be transformed by the nodes transform. If a mesh is present, the can also contain a skin. The nodes skin will deform the nodes mesh during an animation.
+
+    \item \textbf{Scene}
+    
+    A scene contains an array of root nodes. These nodes as well as all of their children are part of that scene.
+
+    \item \textbf{Animation}
+    
+    An animation has an array of channels and an array of samplers. A channel describes, which property is being sampled during the animation. It contains the effected node and a path the effected property of the node (e.g. "transform", "scale", "rotation"). It also holds a reference to one of the animations samplers. 
+    
+    A sampler is used to calculate the value of a property at a certain point in time from a set of key frames. It contains two accessors, one for the time of the key frames and one for the value of the keyframes. Additionally, a sampler contains the type of interpolation, that should be used to sample a value.
+    
+
+\end{itemize}
+
+There are also some other objects (e.g. materials, textures and cameras), but since we dont use them for our project, we don't explain them here.
+
+\subsection{Scene Structure}
+
+We will now take a look at the structure of our scene implementation. For this we will look at the different C++ classes we used.
+
+\subsubsection{Buffers and Sub-Buffers}
+
+
+
+\subsubsection{The \code{Scene} class}
+
+The \code{Scene} class represents a scene that can be loaded from a glTF file. It contains an array of nodes, an array of animations and an array of skins. Additionally, it stores the TLAS, that is used for the ray traversal through the scene, and the different buffers used by the scene in a \code{SceneBuffers} struct.
+
+A scene can be loaded using the static method \code{Scene::load}, with the path to the glTF file as parameter. A scene also contains the member function \code{Scene::iter}, which returns a node iterator for all of the nodes contained in the scene. The rest of the scenes functions are explained in the next subsection about updating a scene (see \autoref{subsec:updating-a-scene}).
+
+\subsubsection{The \code{Node} class}
+
+The \code{Node} class directly represents a node in glTF. As we mentioned previously the transform of a node can either be stored as a matrix or separated into a translation, rotation and scale. To model that in our application, we added the struct \code{RawTransform}, which contains the transform, rotation and scale. We also have the struct \code{NodeTransform}, which stores the local transform of a node and looks like this:
+
+\begin{lstlisting}[language=C++]
+
+struct NodeTransform {
+    bool raw;
+    union {
+        glm::mat4 matrix;
+        RawTransform raw;
+    } transform;
+}
+
+\end{lstlisting}
+
+The union \code{transform} is used to store either a \code{glm::mat4} or a \code{RawTransform}. The boolean \code{raw} is used to determine, how the union should be interpreted, i.e. if \code{raw} is \code{true}, the union contains a raw transform, otherwise it contains a matrix. The node also stores the global position as a 4x4 matrix, but it is only valid after calling \code{Node::update\_global\_transform}.
+
+A node also stores an array of child nodes and it can also contain a mesh. If a mesh is present, it also stores a BLAS and the node must generate a TLAS instance that references the nodes BLAS when building the acceleration structure. After building the acceleration structure for the first time, the node also stores the index of the TLAS instance, which is necessary when updating the TLAS instance later. If the node does not have a skin, the node's BLAS is the the same as the one inside the mesh.
+
+If the node does however contain a skin, it stores an array of sub-buffers for dynamic positions. For every primitive of the node's mesh, a sub-buffer for dynamic positions needs to be present in the array. Each sub-buffer needs to have the same size as the sub-buffer for the static positions of the respective primitive. These dynamic positions are used to store the vertex positions of a mesh after skinning. If a skin is present, the BLAS is not simply just a reference the meshes' BLAS, but it is a separate, dynamic BLAS (meaning it can be updated).
+
+\subsection{Updating a Scene}\label{subsec:updating-a-scene}
+
+Since our scenes are dynamic, we need a way to update them. We need update our scene after calling \code{Animation::apply\_for} from an animation in our scene. A scene is updated in three steps:
+
+\begin{enumerate}
+    \item updating the global transform for every node
+    \item skinning all animated models
+    \item updating the acceleration structure
+\end{enumerate}
+
+When we want to update our scene we need to perform all of the above steps in the exact order. We keep the steps separate however, because we can use different implementations for some steps. For example, we can skin our models on the CPU or on the GPU and we can update our acceleration structure by either rebuilding it or refitting it.
+
+\subsubsection{Updating Global Transform}
+
+Using the member function \code{Node::update\_global\_transform} we can update the global transform of a node. This function takes in a \code{glm::mat4} as argument, which represents the parents transform. This argument is optional and gets set to the identity matrix by default. The following pseudo code shows the functions behaviour:
+
+\begin{algorithm}[H]
+
+\caption{Pseudo code for updating the global transform}\label{alg:global-transform}
+    
+\begin{algorithmic}[1]
+    \Function{update\_global\_transform}{node, parent\_transform}
+        \State node.global\_transform $\gets$ parent\_transform $\times$ node.transform
+        \ForAll{child in node.children}
+            \State update\_global\_transform(child, global\_transform)
+        \EndFor
+    \EndFunction
+\end{algorithmic}
+
+\end{algorithm}
+
+The global transform is calculated by pre-multiplying the parents transform with the local transform of the node. We then call \code{Node::update\_global\_transform} recursively for every child node, with the new global transform of the current node as a parameter.
+
+\subsubsection{Skinning}
+
+Skinning describes the process of applying the deformation of a skeleton to a certain model. To do that we first need to calculate the joint matrices:
+
+\begin{algorithm}[H]
+
+\caption{Calculating joint matrices}\label{alg:joint-matrices}
+
+\begin{algorithmic}[1]
+    \For{$i \gets 0$ to joints.count  - $1$}
+        \State joint\_matrices[$i$] =  $inverse$(node.global\_transform)
+        
+        $\times$ joints[$i$].global\_transform
+        
+        $\times$ inverse\_bind\_matrices[$i$]
+    \EndFor
+\end{algorithmic}
+
+\end{algorithm}
+
+After having calculated the joint matrices, we can skin the model:
+
+\begin{algorithm}[H]
+
+\caption{Skinning a model}\label{alg:skinning}
+
+\begin{algorithmic}[1]
+    \For{$j \gets 0$ to (positions.count $-1$)}
+        \State matrix $\gets$ $0_{4 \times 4}$
+        \ForAll{joint\_weight in joint\_weights[$i$]}
+            \State matrix $\gets$ matrix + joint\_weight.weight $\times$ joint\_matrices[joint\_weight.index]
+        \EndFor
+
+        \State position $\gets$ matrix $\times$ position
+        \State dynamic\_positions[$i$] $\gets$ matrix $\times$ positions[i]
+    \EndFor
+\end{algorithmic}
+
+\end{algorithm}
+
+This algorithm uses \textbf{Linear Blend Skinning}, which is the standard skinning technique que to its simplicity and efficiency~\parencite{linear-blend-skinning}. We basically create a weighted sum of all the joint matrices used by the certain vertex and then multiply the resulting matric with the vertex position to get the skinned position.
+
+We have two implementations of the above skinning algorithm:
+
+\begin{itemize}
+    \item \textbf{CPU skinning}
+    
+    This implementation read all the vertex positions from the sub-buffer, runs the algorithm for each of them and stores the results in the respective sub-buffer for dynamic positions.
+
+    \item \textbf{GPU skinning}
+    
+    This implementation uses a vertex shader to run the algorithm for every vertex position and stores the resulting dynamic positions in a storage buffer. The pipeline that contains the vertex shader also disables rasterization, because no fragments should be generated during drawing and the pipeline should stop after running the vertex shader.
+    
+    We could have also used a compute shader, which may perform better, but then we would need to implement a compute pipeline. With the approach we chose, we can simply repurpose the rasterization pipeline, which was already implemented.
+\end{itemize}
+
+\subsubsection{Updating the acceleration structure}
+
+\begin{algorithm}[H]
+
+\caption{Updating acceleration structure}\label{alg:acceleration-structure-update}
+
+\begin{algorithmic}[1]
+    \Function{update\_acceleration\_structure}{scene}
+        \State node\_iterator = get\_node\_iterator(scene)
+        \State tlas\_instances = get\_instances(scene.tlas)
+        \ForAll{node in node\_iterator}
+            \If{has\_blas(node)}
+                \If{is\_dynamic(node.blas)}
+                    \State update(node.blas)
+                \EndIf
+                \State update\_tlas\_instance(tlas, node)
+            \EndIf
+        \EndFor
+        \State update(scene.tlas)
+    \EndFunction
+\end{algorithmic}
+
+\end{algorithm}
+
+There is no \code{Scene::update\_acceleration\_structures} function, that you can call to update your acceleration structures. Instead, there are two slightly different member functions you can choose:
+
+\begin{itemize}
+    \item \code{Scene::rebuild\_acceleration\_structures}
+    \item \code{Scene::refit\_acceleration\_structures}
+\end{itemize}
+
+They both run more or less the same algorithm, the only difference is, that one uses "rebuilding" to update its acceleration structures and the other one uses "refitting".
