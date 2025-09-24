@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <map>
+
 CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
     auto validate_positive_int = CLI::Validator(
         [](const std::string& s) {
@@ -77,6 +79,18 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         sample_factor = root;
         };
 
+    std::vector<std::string> trace_type_strs = { "normal", "basic", "shadow" };
+    std::vector<RaytraceType> trace_type_vals = { RaytraceType::Normal, RaytraceType::Basic, RaytraceType::Shadow };
+
+    auto trace_type_callback = [this, trace_type_strs, trace_type_vals](const std::string& str) {
+        for (uint32_t i = 0; i < trace_type_vals.size(); i++) {
+            if (trace_type_strs[i] == str) {
+                trace_type = trace_type_vals[i];
+                return;
+            }
+        }
+        };
+
 
     app.add_option_function<std::string>("-s, --scene", scene_callback, "The test scene to be loaded")
         ->check(CLI::IsMember(scene_str_values))
@@ -102,11 +116,13 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->default_str(std::to_string(sample_factor * sample_factor))
         ->check(validate_square_number);
 
+    app.add_option_function<std::string>("-t, --trace-type", trace_type_callback, "The type of raytracing pipeline to be used")
+        ->check(CLI::IsMember(trace_type_strs))
+        ->default_str(trace_type_strs[(int)trace_type]);
+
     app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The mode in which models are skinned when animated");
 
     app.add_flag("--store-images", store_images, "Store the rendered frames as PNG images");
-
-    app.add_flag("--shadows,!--no-shadows", shadows, "Enable shadow testing");
 
     app.set_version_flag("-v,-V,--version", utils::AppPath::instance().app_name + " 1.0.0");
 }
