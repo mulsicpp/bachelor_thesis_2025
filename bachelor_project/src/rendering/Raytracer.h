@@ -19,7 +19,7 @@ struct RtxPushConstant {
     uint32_t sample_factor{ 1 };
 };
 
-enum class RaytraceType {
+enum class RtxPipelineType {
     Normal,
     Basic,
     Shadow
@@ -54,8 +54,8 @@ public:
     void bind_scene(const ptr::Shared<Scene>& scene);
     void bind_image(const ptr::Shared<vk::ImageView>& image_view);
 
-    void cmd_trace(vk::ReadyCommandBuffer cmd_buf, RaytraceType type, const RtxPushConstant& rtx_push = {});
-    void trace(RaytraceType type, const RtxPushConstant& rtx_push = {});
+    void cmd_trace(vk::ReadyCommandBuffer cmd_buf, RtxPipelineType type, const RtxPushConstant& rtx_push = {});
+    void trace(RtxPipelineType type, const RtxPushConstant& rtx_push = {});
 };
 
 

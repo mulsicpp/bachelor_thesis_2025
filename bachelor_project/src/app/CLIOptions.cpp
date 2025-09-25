@@ -37,6 +37,13 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         "FILE"
     );
 
+    auto validate_dir = CLI::Validator(
+        [](const std::string& s) {
+            return std::string{};
+        },
+        "DIR"
+    );
+
     auto validate_square_number = CLI::Validator(
         [](const std::string& s) {
             int64_t val = std::stoll(s);
@@ -79,13 +86,13 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         sample_factor = root;
         };
 
-    std::vector<std::string> trace_type_strs = { "normal", "basic", "shadow" };
-    std::vector<RaytraceType> trace_type_vals = { RaytraceType::Normal, RaytraceType::Basic, RaytraceType::Shadow };
+    std::vector<std::string> pipeline_strs = { "normal", "basic", "shadow" };
+    std::vector<RtxPipelineType> pipeline_vals = { RtxPipelineType::Normal, RtxPipelineType::Basic, RtxPipelineType::Shadow };
 
-    auto trace_type_callback = [this, trace_type_strs, trace_type_vals](const std::string& str) {
-        for (uint32_t i = 0; i < trace_type_vals.size(); i++) {
-            if (trace_type_strs[i] == str) {
-                trace_type = trace_type_vals[i];
+    auto trace_type_callback = [this, pipeline_strs, pipeline_vals](const std::string& str) {
+        for (uint32_t i = 0; i < pipeline_vals.size(); i++) {
+            if (pipeline_strs[i] == str) {
+                pipeline = pipeline_vals[i];
                 return;
             }
         }
@@ -116,13 +123,21 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->default_str(std::to_string(sample_factor * sample_factor))
         ->check(validate_square_number);
 
-    app.add_option_function<std::string>("-t, --trace-type", trace_type_callback, "The type of raytracing pipeline to be used")
-        ->check(CLI::IsMember(trace_type_strs))
-        ->default_str(trace_type_strs[(int)trace_type]);
+    app.add_option_function<std::string>("-p, --pipeline", trace_type_callback, "The type of raytracing pipeline to be used")
+        ->check(CLI::IsMember(pipeline_strs))
+        ->default_str(pipeline_strs[(int)pipeline]);
+
+    app.add_option("--rebuild", rebuild_frequency, "The number of frames, after which a rebuild occurs. By setting it to 0, the scene is never rebuilt.")
+        ->transform([](const std::string& str) { if(str == "never") return std::string("0"); return str; })
+        ->default_str(std::to_string(rebuild_frequency));
+
+    app.add_option("--store-images", store_images, "Store the rendered frames as PNG images")
+        ->check(validate_file);
+
 
     app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The mode in which models are skinned when animated");
+    app.add_flag("--fast-build,!--no-fast-build", fast_build, "Prefers fast build over fast trace");
 
-    app.add_flag("--store-images", store_images, "Store the rendered frames as PNG images");
 
     app.set_version_flag("-v,-V,--version", utils::AppPath::instance().app_name + " 1.0.0");
 }

@@ -144,10 +144,10 @@ void Scene::skin_cpu() {
 	}
 }
 
-void Scene::build_acceleration_structures() {
+void Scene::build_acceleration_structures(bool fast_build) {
 	NodeIterator it = iter();
 
-	auto tlas_builder = vk::TlasBuilder().dynamic(true);
+	auto tlas_builder = vk::TlasBuilder().dynamic(true).fast_build(fast_build);
 
 	int32_t next_instance_idx = 0;
 
@@ -155,7 +155,7 @@ void Scene::build_acceleration_structures() {
 		const auto node = it.next();
 
 		if (node->mesh) {
-			node->build_blas();
+			node->build_blas(fast_build);
 
 			node->instance_index = next_instance_idx++;
 

@@ -3,6 +3,7 @@
 #include "utils/defines.h"
 
 #include <algorithm>
+#include <filesystem>
 
 #include "vk_core/format.h"
 
@@ -44,7 +45,7 @@ RtxApp::RtxApp(int argc, char* argv[])
     scene = ptr::make_shared<Scene>(Scene::load(get_scene_path(opts.scene)));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
     scene->update_transforms();
-    scene->build_acceleration_structures();
+    scene->build_acceleration_structures(opts.fast_build);
 
     camera = ptr::make_shared<AppCamera>(get_scene_camera(opts.scene));
 
@@ -81,7 +82,7 @@ void RtxApp::run()
 
     auto draw_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
         image->cmd_transition(cmd_buf, vk::ImageState::Undefined, vk::ImageState::RtxOutput);
-        raytracer.cmd_trace(cmd_buf, opts.trace_type, rtx_push);
+        raytracer.cmd_trace(cmd_buf, opts.pipeline, rtx_push);
         image->cmd_transition(cmd_buf, vk::ImageState::RtxOutput, vk::ImageState::TransferSrc);
         };
 
@@ -91,81 +92,90 @@ void RtxApp::run()
 
     auto update_strats = SceneUpdateStrat::strats();
 
-    
-    if (opts.store_images) {
-        for (uint32_t i = 0; i < opts.frame_count; i++)
-        {
-            printf("drawing frame: %u\n", i);
-            animation.apply_for(i * opts.delta_time);
-            scene->update_transforms();
-            if (opts.cpu_skinning) {
-                scene->skin_cpu();
-            }
-            else {
-                cmd_buffer_graphics.record(skin_recorder).submit().wait();
-            }
+    std::filesystem::create_directories(std::filesystem::path(opts.output_file).parent_path());
+    if (!opts.store_images.empty()) {
+        std::filesystem::create_directories(std::filesystem::path(opts.store_images));
+    }
+
+    std::vector<FrameBenchmark> frame_benchmarks{};
+
+    for (uint32_t i = 0; i < opts.frame_count; i++)
+    {
+        FrameBenchmark frame_benchmark{};
+        printf("drawing frame: %u\n", i);
+        animation.apply_for(i * opts.delta_time);
+        scene->update_transforms();
+        if (opts.cpu_skinning) {
+            scene->skin_cpu();
+        }
+        else {
+            cmd_buffer_graphics.record(skin_recorder).submit().wait();
+        }
+
+        cmd_buffer_raytracing.record(draw_recorder);
+        frame_benchmark.start = FrameBenchmark::now();
+
+        if (opts.rebuild_frequency != 0 && (i % opts.rebuild_frequency) == 0) {
             scene->rebuild_acceleration_structures();
-            
-            cmd_buffer_raytracing.record(draw_recorder).submit().wait();
-            image->store_in_file("raytrace_result_" + std::to_string(i) + ".png");
+        }
+        else {
+            scene->refit_acceleration_structures();
+        }
+        frame_benchmark.rebuilt_acc = FrameBenchmark::now();
+
+        cmd_buffer_raytracing.submit().wait();
+        frame_benchmark.traced_rays = FrameBenchmark::now();
+
+        printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
+        printf("trace time: %lf ms\n", frame_benchmark.trace_rays_time());
+        printf("total time: %lf ms\n\n", frame_benchmark.total_time());
+
+        frame_benchmarks.push_back(frame_benchmark);
+
+        if (!opts.store_images.empty()) {
+            image->store_in_file((std::filesystem::path(opts.store_images) / ("raytrace_result_" + std::to_string(i) + ".png")).string());
         }
     }
-    else {
-        FILE* output_file = fopen(opts.output_file.c_str(), "w");
-        
-        for (const auto& strat : update_strats) {
 
 
-            std::vector<FrameBenchmark> frame_benchmarks{};
-            for (uint32_t i = 0; i < opts.frame_count; i++)
-            {
-                FrameBenchmark frame_benchmark{};
-                printf("drawing frame: %u\n", i);
-                animation.apply_for(i * opts.delta_time);
-                scene->update_transforms();
-                if (opts.cpu_skinning) {
-                    scene->skin_cpu();
-                }
-                else {
-                    cmd_buffer_graphics.record(skin_recorder).submit().wait();
-                }
+    FILE* output_file = fopen(opts.output_file.c_str(), "w");
 
-                cmd_buffer_raytracing.record(draw_recorder);
-                frame_benchmark.start = FrameBenchmark::now();
-                if(strat.rebuild_at(i)) {
-                    scene->rebuild_acceleration_structures();
-                } else {
-                    scene->refit_acceleration_structures();
-                }
-                frame_benchmark.rebuilt_acc = FrameBenchmark::now();
+    auto scene_name = get_scene_name(opts.scene);
+    fprintf(output_file, "scene;%s\n", scene_name.c_str());
 
-                cmd_buffer_raytracing.submit().wait();
-                frame_benchmark.traced_rays = FrameBenchmark::now();
-
-                printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
-                printf("trace time: %lf ms\n", frame_benchmark.trace_rays_time());
-                printf("total time: %lf ms\n\n", frame_benchmark.total_time());
-
-                frame_benchmarks.push_back(frame_benchmark);
-            }
-
-            fprintf(output_file, "%s\n", strat.name.c_str());
-
-            fprintf(output_file, "rebuild;");
-            for(const auto& benchmark : frame_benchmarks) {
-                fprintf(output_file, "%lf;", benchmark.rebuild_acc_time());
-            }
-            fprintf(output_file, "\n");
-
-            fprintf(output_file, "trace;");
-            for(const auto& benchmark : frame_benchmarks) {
-                fprintf(output_file, "%lf;", benchmark.trace_rays_time());
-            }
-            fprintf(output_file, "\n\n");
-        }
-
-        fclose(output_file);
+    switch (opts.rebuild_frequency) {
+    case 0:
+        fprintf(output_file, "rebuild;never\n");
+        break;
+    case 1:
+        fprintf(output_file, "rebuild;always\n");
+        break;
+    default:
+        fprintf(output_file, "rebuild;every %u frames\n", opts.rebuild_frequency);
+        break;
     }
+
+    fprintf(output_file, "delta time;%f\n", opts.delta_time);
+
+    fprintf(output_file, "pipeline;%s\n", opts.pipeline == RtxPipelineType::Normal ? "normal" : opts.pipeline == RtxPipelineType::Basic ? "basic" : "shadow");
+
+    const auto& [image_width, image_height] = opts.resolution;
+    fprintf(output_file, "resolution;%u * %u\n", image_width, image_height);
+    fprintf(output_file, "spp;%u\n\n", opts.sample_factor * opts.sample_factor);
+
+    fprintf(output_file, "update;");
+    for (const auto& benchmark : frame_benchmarks) {
+        fprintf(output_file, "%lf;", benchmark.rebuild_acc_time());
+    }
+    fprintf(output_file, "\n");
+
+    fprintf(output_file, "trace;");
+    for (const auto& benchmark : frame_benchmarks) {
+        fprintf(output_file, "%lf;", benchmark.trace_rays_time());
+    }
+    fprintf(output_file, "\n");
+
+    fclose(output_file);
 
     vk::Context::get()->wait_device_idle();
 }

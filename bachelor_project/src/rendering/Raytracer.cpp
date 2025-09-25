@@ -27,16 +27,16 @@ void Raytracer::bind_image(const ptr::Shared<vk::ImageView>& image_view) {
     descriptor_pool.update_set_binding(0, 1, vk::ImageDescriptorInfo(image_view));
 }
 
-void Raytracer::cmd_trace(vk::ReadyCommandBuffer cmd_buf, RaytraceType type, const RtxPushConstant& rtx_push) {
+void Raytracer::cmd_trace(vk::ReadyCommandBuffer cmd_buf, RtxPipelineType type, const RtxPushConstant& rtx_push) {
     vk::RtxPipeline* selected_pipeline = &pipeline;
     vk::SBT* selected_sbt = &sbt;
 
     switch(type) {
-    case RaytraceType::Basic:
+    case RtxPipelineType::Basic:
         selected_pipeline = &basic_pipeline;
         selected_sbt = &basic_sbt;
         break;
-    case RaytraceType::Shadow:
+    case RtxPipelineType::Shadow:
         selected_pipeline = &shadow_pipeline;
         selected_sbt = &shadow_sbt;
         break;
@@ -51,7 +51,7 @@ void Raytracer::cmd_trace(vk::ReadyCommandBuffer cmd_buf, RaytraceType type, con
     vk::RtxPipeline::cmd_trace_rays(cmd_buf, *selected_sbt, image_view->image()->extent());
 }
 
-void Raytracer::trace(RaytraceType type, const RtxPushConstant& rtx_push) {
+void Raytracer::trace(RtxPipelineType type, const RtxPushConstant& rtx_push) {
     vk::CommandBuffer::single_time_submit(vk::QueueType::Compute, [&](vk::ReadyCommandBuffer cmd_buffer)
         { this->cmd_trace(cmd_buffer, type, rtx_push); });
 }

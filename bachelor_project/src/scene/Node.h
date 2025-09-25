@@ -55,7 +55,7 @@ struct Node {
 
 	std::vector<vk::BlasGeometry> get_dynamic_blas_geometries() const;
 
-	void build_blas();
+	void build_blas(bool fast_build);
 	void rebuild_blas();
 	void refit_blas();
 };

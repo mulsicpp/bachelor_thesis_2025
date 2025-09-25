@@ -24,7 +24,7 @@ std::vector<vk::BlasGeometry> Node::get_dynamic_blas_geometries() const {
 	return geometries;
 }
 
-void Node::build_blas() {
+void Node::build_blas(bool fast_build) {
 	if(!mesh) {
 		return;
 	}
@@ -33,6 +33,7 @@ void Node::build_blas() {
 		blas = vk::BlasBuilder()
 			.geometries(mesh->get_blas_geometries())
 			.dynamic(true)
+			.fast_build(fast_build)
 			.build().to_shared();
 	}
 	else {
