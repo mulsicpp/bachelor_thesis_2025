@@ -1,2 +1,24 @@
 
 \chapter{Introduction}
+
+For a long time, \textbf{rasterization} has been the standard for rendering 3D scenes in real-time (e.g. in video games). The basic steps of rasterization are as follows:
+
+\begin{enumerate}
+    \item Every vertex of a 3D object gets transformed in the vertex shader.
+
+    \item The transformed triangles are projected onto a 2D pixel grid. For every pixel that the triangle covers, a fragment is generated.
+
+    \item The fragment shader runs for every generated fragment. It uses the data of the fragment as well as some global data (e.g. light sources) to determine the final color of the pixel.
+\end{enumerate}
+
+Rasterization is very fast and efficient, but it does have its downsides aswell. When determining the color of a pixel, we only have access to the data in the current fragment and some global data. The fragment is not aware of other objects in the scene. This makes effects like shadows and reflections very difficult and they require a workaround like shadow-mapping and screen-space-reflections. In recent years, a new way to do real-time rendering slowly emerged, which of course is \textbf{ray tracing}.
+
+Ray tracing works by casting a rays through the pixels of your screen into the 3D scene, to determine the surface to be displayed. When you hit a surface, you can cast secondary rays such as shadow rays, reflection rays or refraction rays. This is much closer to real life, where light rays bounce between objects until they reach our eyes or a camera lense and because of that it is much easier to generate realistic looking images. However, it was never suitable for real-time applications in the past due to enormous amount of processing necessary. 
+
+Even though ray tracing is relatively new in the realm of real-time graphics, the concept of ray tracing is almost as old as rasterization. In 1968 Arthur Appel explores the idea of casting a ray through a pixel to determine, which surface is visible, and also the idea of casting a ray from a surface point to the light source to check, if the the light reaches the surfaces unobstructed~\parencite{appel-1968}. Later in 1980 Turner Whitted introduces the well-known ray tracing model known as "Whitted-Raytracing"~\parencite{whitted-1980}. If a surface is hit by a ray, additional rays are cast for reflection, refraction and shadow. In the 1990s ray tracing started to be used in visual effects for movies like "Terminator 2: Judgment Day" (1991) or "Jurassic Park" (1993). In the 2010s animation studios like Pixar move to fully path traced rendering~\parencite{renderman}, which uses ray tracing to trace the whole path from a light source to the camera in order to generate photorealistic images. An example for this is Pixar's animated movie "Finding Dory" (2016)~\parencite{finding-dory}.
+
+In 2018 Nvidia paved the way for ray tracing in real-time applications by introducing the RTX-Series. These graphics cards used the "Turing architecture", which introduced hardware-accelerated ray tracing with the new RT Cores. RT Cores traverse the BVH (Bounding Volume Hierarchy) autonomously, and by accelerating traversal and ray/triangle intersection tests, they offload the SM (Streaming Multiprocessor), allowing it to handle other vertex, pixel, and compute shading work~\parencite{turing-arch}.
+
+Having to test every ray against every triangle for intersection is not feasible at all and takes way to much processing power, even for non-real-time applications. A much smarter way to find the triangles, that are hit by a ray, is using a bounding volume hierarchy (BVH). It is a tree structure of volumes (usually AABBs), which devide the scene into smaller and smaller subsections as we go down the tree. We can prune a branch as soon as we realize, that the section does not intersect with the ray and therefore avoid a lot of ray/triangle intersections.
+
+In this thesis we will explore the topic of ray tracing in dynamic environments. We are going to look at objects, that move through a scene, but also at objects that deform their mesh using skeletal animation. Specifically, we are going to use the Vulkan API and look at how it implements ray tracing support. We are going to learn how to create the raytracing pipeline, setup our shader binding table and build our acceleration structures as well as the different ways we can update them later during an animation. We are then going to test how different scenes perform using different approaches and compare them to each other.

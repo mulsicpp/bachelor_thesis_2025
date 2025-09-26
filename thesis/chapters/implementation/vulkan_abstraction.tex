@@ -219,7 +219,7 @@ cmd_buf.record(recorder).submit().wait();
 \begin{itemize}
     \item \textbf{Buffer:}
     
-    Buffers represent linear arrays of data which are used for various purposes by binding them to a graphics or compute pipeline via descriptor sets or certain commands, or by directly specifying them as parameters to certain commands~\parencite[see Section~12.1]{vulkan-spec}. The data is raw and not associated with any format, layout or dimensionality, therefore very flexible.
+    Buffers represent linear arrays of data which are used for various purposes by binding them to a graphics or compute pipeline via descriptor sets or certain commands, or by directly specifying them as parameters to certain commands~\parencite{vulkan-spec-resources}. The data is raw and not associated with any format, layout or dimensionality, therefore very flexible.
 
     Common usages:
     \begin{itemize}
@@ -231,7 +231,7 @@ cmd_buf.record(recorder).submit().wait();
 
     \item \textbf{Image:}
 
-    Images are specialized resources that have multi-dimensional access rather than the typical linear access to memory~\parencite[see Section~13]{vulkan-spec}. They can also be multi-dimensional and are associated with a format and layout.
+    Images are specialized resources that have multi-dimensional access rather than the typical linear access to memory~\parencite{vulkan-spec-images}. They can also be multi-dimensional and are associated with a format and layout.
     
     Common usages:
     \begin{itemize}

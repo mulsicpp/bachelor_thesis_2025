@@ -3,9 +3,13 @@
 
 \chapter{Technologies}\label{chapter:technologies}
 
-\section{Operating System}
+\section{System Information}
 
-Ubuntu 24.04.2 LTS
+\begin{itemize}
+    \item \textbf{Operating System:} Ubuntu 24.04.2 LTS
+    \item \textbf{CPU:} Ubuntu 24.04.2 LTS
+    \item \textbf{GPU:} Nvidia 
+\end{itemize}
 
 \section{Build Tools}
 
@@ -61,8 +65,8 @@ This library simplifies the tedious process of:
 
 \subsection{cgltf}
 
-To load a glTF file in the project, cgltf is used. cgltf parses the glTF file, which is stored in JSON. It would also have been possible to read the JSON directly, but cgltf takes care of validating the file, loads the required buffers from their BIN-files into memory and creates a C-structure, which is a lot more comfortable to use. Our project does not this structure directly, but rather used to generate a \texttt{Scene} object.
+To load a glTF file in the project, cgltf is used. cgltf parses the glTF file, which is stored in JSON. It would also have been possible to read the JSON directly, but cgltf takes care of validating the file, loads the required buffers from their BIN-files into memory and creates a C-structure, which is a lot more comfortable to use. Our project does use not this structure directly, but rather used to generate a \texttt{Scene} object.
 
 \subsection{CLI11}
 
-CLI11 is a header-only library written in modern C++, that is designed to parse the command-line options of your application.It is simple, feature-rich and safe. CLI11 allows you to define flags, options, commands and subcommands. Your can also add certain restrictions to your parameters, like only allowing positive numbers or that a parameter is an existing path.
+CLI11 is a header-only library written in modern C++, that is designed to parse the command-line options of your application.It is simple, feature-rich and safe. CLI11 allows you to define flags, options, commands and subcommands. You can also add certain restrictions to your parameters, like only allowing positive numbers or that a parameter is an existing path.

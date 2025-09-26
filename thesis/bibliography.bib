@@ -1,8 +1,64 @@
-@book{latex,
-  title = {LaTeX : A Documentation Preparation System User's Guide and Reference Manual},
-  publisher = {Addison-Wesley Professional},
-  year = {1994},
-  author = {Leslie Lamport}
+% introduction
+
+@inproceedings{appel-1968,
+  author = {Appel, Arthur},
+  title = {Some techniques for shading machine renderings of solids},
+  year = {1968},
+  isbn = {9781450378970},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1468075.1468082},
+  doi = {10.1145/1468075.1468082},
+  abstract = {Some applications of computer graphics require a vivid illusion of reality. These include the spatial organization of machine parts, conceptual architectural design, simulation of mechanisms, and industrial design. There has been moderate success in the automatic generation of wire frame, cardboard model, polyhedra, and quadric surface line drawings. The capability of the machine to generate vivid sterographic pictures has been demonstrated. There are, however considerable reasons for developing techniques by which line drawings of solids can be shaded, especially the enhancement of the sense of solidity and depth. Figures 1 and 2 illustrate the value of shading and shadow casting in spatial description. In the line drawing there is no clue as to the relative position of the flat plane and the sheet metal console. When shadows are rendered, it is clear that the plane is below and to the rear of the console, and the hollow nature of the sheet metal assembly is emphasized. Shading can specify the tone or color of a surface and the amount of light falling upon that surface from one or more light sources. Shadows when sharply defined tend to suggest another viewpoint and improves surface definition. When controlled, shading can also emphasize particular parts of the drawing. If techniques for the automatic determination of chiaroscuro with good resolution should prove to be competitive with line drawings, and this is a possibility, machine generated photographs might replace line drawings as the principal mode of graphical communication in engineering and architecture.},
+  booktitle = {Proceedings of the April 30--May 2, 1968, Spring Joint Computer Conference},
+  pages = {37-45},
+  numpages = {9},
+  location = {Atlantic City, New Jersey},
+  series = {AFIPS '68 (Spring)}
+}
+
+@article{whitted-1980,
+  author = {Whitted, Turner},
+  title = {An improved illumination model for shaded display},
+  year = {1980},
+  issue_date = {June 1980},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {23},
+  number = {6},
+  issn = {0001-0782},
+  url = {https://doi.org/10.1145/358876.358882},
+  doi = {10.1145/358876.358882},
+  abstract = {To accurately render a two-dimensional image of a three-dimensional scene, global illumination information that affects the intensity of each pixel of the image must be known at the time the intensity is calculated. In a simplified form, this information is stored in a tree of “rays” extending from the viewer to the first surface encountered and from there to other surfaces and to the light sources. A visible surface algorithm creates this tree for each pixel of the display and passes it to the shader. The shader then traverses the tree to determine the intensity of the light received by the viewer. Consideration of all of these factors allows the shader to accurately simulate true reflection, shadows, and refraction, as well as the effects simulated by conventional shaders. Anti-aliasing is included as an integral part of the visibility calculations. Surfaces displayed include curved as well as polygonal surfaces.},
+  journal = {Commun. ACM},
+  month = jun,
+  pages = {343-349},
+  numpages = {7},
+  keywords = {visible surface algorithms, shading, raster displays, computer graphics, computer animation}
+}
+
+@techreport{finding-dory,
+  author = {Christophe Hery and Ryusuke Villemin and Florian Hecht},
+  title = {Towards Bidirectional Path Tracing at Pixar},
+  year = {2016},
+  url = {https://graphics.pixar.com/library/BiDir/paper.pdf},
+}
+
+@inproceedings{renderman,
+  author       = {Per Christensen and Julian Fong and Jonathan Shade and Wayne Wooten and Brenden Schubert and Andrew Kensler and Stephen Friedman and Charlie Kilpatrick and Cliff Ramshaw and Marc Bannister and Brenton Rayner and Jonathan Brouillat and Max Liani},
+  title        = {An Advanced Path Tracing Architecture for Movie Rendering},
+  booktitle    = {ACM Transactions on Graphics},
+  year         = {2018},
+  volume       = {37},
+  number       = {3},
+  url          = {https://docslib.org/doc/639313/an-advanced-path-tracing-architecture-for-movie-rendering},
+}
+
+@techreport{turing-arch,
+  title        = {Turing Architecture White Paper},
+  author       = {NVIDIA Corporation},
+  year         = {2018},
+  institution  = {NVIDIA Corporation},
 }
 
 % technologies
@@ -31,13 +87,24 @@
   note         = {accessed: 2025-09-19}
 }
 
-@manual{vulkan-spec,
+@manual{vulkan-spec-resources,
   title        = {Vulkan{\textregistered} 1.4.327 - A Specification (with all registered Vulkan extensions)},
   author       = {{Khronos Group}},
   year         = {2025},
   organization = {The Khronos Group Inc.},
-  url          = {https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html},
-  note         = {Accessed: 2025-09-19}
+  url          = {https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html#resources},
+  note         = {Accessed: 2025-09-19},
+  chapter      = {{12 Resources}},
+}
+
+@manual{vulkan-spec-images,
+  title        = {Vulkan{\textregistered} 1.4.327 - A Specification (with all registered Vulkan extensions)},
+  author       = {{Khronos Group}},
+  year         = {2025},
+  organization = {The Khronos Group Inc.},
+  url          = {https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html#images},
+  note         = {Accessed: 2025-09-19},
+  chapter      = {{13 Images}},
 }
 
 

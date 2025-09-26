@@ -45,9 +45,6 @@ There are also some other objects (e.g. materials, textures and cameras), but si
 
 We will now take a look at the structure of our scene implementation. For this we will look at the different C++ classes we used.
 
-\subsubsection{Buffers and Sub-Buffers}
-
-
 
 \subsubsection{The \code{Scene} class}
 
@@ -76,6 +73,10 @@ The union \code{transform} is used to store either a \code{glm::mat4} or a \code
 A node also stores an array of child nodes and it can also contain a mesh. If a mesh is present, it also stores a BLAS and the node must generate a TLAS instance that references the nodes BLAS when building the acceleration structure. After building the acceleration structure for the first time, the node also stores the index of the TLAS instance, which is necessary when updating the TLAS instance later. If the node does not have a skin, the node's BLAS is the the same as the one inside the mesh.
 
 If the node does however contain a skin, it stores an array of sub-buffers for dynamic positions. For every primitive of the node's mesh, a sub-buffer for dynamic positions needs to be present in the array. Each sub-buffer needs to have the same size as the sub-buffer for the static positions of the respective primitive. These dynamic positions are used to store the vertex positions of a mesh after skinning. If a skin is present, the BLAS is not simply just a reference the meshes' BLAS, but it is a separate, dynamic BLAS (meaning it can be updated).
+
+\subsubsection{Buffers and Sub-Buffers}
+
+glTF uses buffers, buffer views and accessors. We dont use the data in the glTF buffers directly, but we read the data and lay it out in a more convenient way. A glTF accessor may access data, that is interleaved with other data, or sparse data. Additionally, the accessor's component type may not match our component type. However, we want to have our data lined up in memory sequentially and of a fixed type. Luckily, the cgltf library offers the function \code{cgltf\_accessor\_unpack\_floats}. This function reads all the values of the accessor, converts the components of the values to \code{float} and stores the values sequentially in a target buffer. The function \code{cgltf\_accessor\_unpack\_indices} does the equivalent for \code{unsigned int}s. We create one buffer for each usage type of our data. We have one buffer for the vertex indices, one for static vertex position and one for dynamic vertex positions.
 
 \subsection{Updating a Scene}\label{subsec:updating-a-scene}
 
@@ -150,7 +151,7 @@ After having calculated the joint matrices, we can skin the model:
 
 \end{algorithm}
 
-This algorithm uses \textbf{Linear Blend Skinning}, which is the standard skinning technique que to its simplicity and efficiency~\parencite{linear-blend-skinning}. We basically create a weighted sum of all the joint matrices used by the certain vertex and then multiply the resulting matric with the vertex position to get the skinned position.
+This algorithm uses \textbf{Linear Blend Skinning}, which is the standard skinning technique to its simplicity and efficiency~\parencite{linear-blend-skinning}. We basically create a weighted sum of all the joint matrices used by the certain vertex and then multiply the resulting matrix with the vertex position to get the skinned position.
 
 We have two implementations of the above skinning algorithm:
 
