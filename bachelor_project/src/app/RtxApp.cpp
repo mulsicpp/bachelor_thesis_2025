@@ -154,26 +154,48 @@ void RtxApp::run()
         fprintf(output_file, "rebuild;every %u frames\n", opts.rebuild_frequency);
         break;
     }
+    fprintf(output_file, "fast %s\n", opts.fast_build ? "build" : "trace");
 
     fprintf(output_file, "delta time;%f\n", opts.delta_time);
 
     fprintf(output_file, "pipeline;%s\n", opts.pipeline == RtxPipelineType::Normal ? "normal" : opts.pipeline == RtxPipelineType::Basic ? "basic" : "shadow");
 
     const auto& [image_width, image_height] = opts.resolution;
-    fprintf(output_file, "resolution;%u * %u\n", image_width, image_height);
+    fprintf(output_file, "resolution;%ux%u\n", image_width, image_height);
     fprintf(output_file, "spp;%u\n\n", opts.sample_factor * opts.sample_factor);
 
-    fprintf(output_file, "update;");
+    double avg_update_time = 0.0;
+    double avg_trace_time = 0.0;
+    double avg_total_time = 0.0;
+
+    fprintf(output_file, "update\n");
     for (const auto& benchmark : frame_benchmarks) {
         fprintf(output_file, "%lf;", benchmark.rebuild_acc_time());
+        avg_update_time += benchmark.rebuild_acc_time();
     }
     fprintf(output_file, "\n");
 
-    fprintf(output_file, "trace;");
+    fprintf(output_file, "trace\n");
     for (const auto& benchmark : frame_benchmarks) {
         fprintf(output_file, "%lf;", benchmark.trace_rays_time());
+        avg_trace_time += benchmark.trace_rays_time();
     }
     fprintf(output_file, "\n");
+
+    fprintf(output_file, "total\n");
+    for (const auto& benchmark : frame_benchmarks) {
+        fprintf(output_file, "%lf;", benchmark.total_time());
+        avg_total_time += benchmark.total_time();
+    }
+    fprintf(output_file, "\n\n");
+
+    avg_update_time /= frame_benchmarks.size();
+    avg_trace_time /= frame_benchmarks.size();
+    avg_total_time /= frame_benchmarks.size();
+
+    fprintf(output_file, "avg. update;%lf\n", avg_update_time);
+    fprintf(output_file, "avg. trace;%lf\n", avg_trace_time);
+    fprintf(output_file, "avg. total;%lf\n", avg_total_time);
 
     fclose(output_file);
 

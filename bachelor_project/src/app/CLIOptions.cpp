@@ -135,8 +135,8 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->check(validate_file);
 
 
-    app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The mode in which models are skinned when animated");
-    app.add_flag("--fast-build,!--no-fast-build", fast_build, "Prefers fast build over fast trace");
+    app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The skinning is performed on the CPU instead of the GPU");
+    app.add_flag("--fast-build,!--fast-trace", fast_build, "Prefers fast build over fast trace");
 
 
     app.set_version_flag("-v,-V,--version", utils::AppPath::instance().app_name + " 1.0.0");
