@@ -50,7 +50,7 @@ We will now take a look at the structure of our scene implementation. For this w
 
 The \code{Scene} class represents a scene that can be loaded from a glTF file. It contains an array of nodes, an array of animations and an array of skins. Additionally, it stores the TLAS, that is used for the ray traversal through the scene, and the different buffers used by the scene in a \code{SceneBuffers} struct.
 
-A scene can be loaded using the static method \code{Scene::load}, with the path to the glTF file as parameter. A scene also contains the member function \code{Scene::iter}, which returns a node iterator for all of the nodes contained in the scene. The rest of the scenes functions are explained in the next subsection about updating a scene (see \autoref{subsec:updating-a-scene}).
+A scene can be loaded using the static method \code{Scene::load}, with the path to the glTF file as parameter. A scene also contains the member function \code{Scene::iter}, which returns a node iterator for all of the nodes contained in the scene. There also is the function \code{Scene::build\_acceleration\_structures}, which we need to call on a scene to build all of the necessary acceleration structures so we can use ray tracing. The rest of the scenes functions are explained in the next subsection about updating a scene (see \autoref{subsec:updating-a-scene}).
 
 \subsubsection{The \code{Node} class}
 
@@ -68,15 +68,59 @@ struct NodeTransform {
 
 \end{lstlisting}
 
-The union \code{transform} is used to store either a \code{glm::mat4} or a \code{RawTransform}. The boolean \code{raw} is used to determine, how the union should be interpreted, i.e. if \code{raw} is \code{true}, the union contains a raw transform, otherwise it contains a matrix. The node also stores the global position as a 4x4 matrix, but it is only valid after calling \code{Node::update\_global\_transform}.
+The union \code{transform} is used to store either a \code{glm::mat4} or a \code{RawTransform}. The boolean \code{raw} is used to determine, how the union should be interpreted, i.e. if \code{raw} is \code{true}, the union contains a raw transform, otherwise it contains a matrix. The node also stores the global transform as a 4x4 matrix, but it is only valid after calling \code{Node::update\_global\_transform}.
 
 A node also stores an array of child nodes and it can also contain a mesh. If a mesh is present, it also stores a BLAS and the node must generate a TLAS instance that references the nodes BLAS when building the acceleration structure. After building the acceleration structure for the first time, the node also stores the index of the TLAS instance, which is necessary when updating the TLAS instance later. If the node does not have a skin, the node's BLAS is the the same as the one inside the mesh.
 
-If the node does however contain a skin, it stores an array of sub-buffers for dynamic positions. For every primitive of the node's mesh, a sub-buffer for dynamic positions needs to be present in the array. Each sub-buffer needs to have the same size as the sub-buffer for the static positions of the respective primitive. These dynamic positions are used to store the vertex positions of a mesh after skinning. If a skin is present, the BLAS is not simply just a reference the meshes' BLAS, but it is a separate, dynamic BLAS (meaning it can be updated).
+If the node does however contain a skin, it stores an array of sub-buffers for dynamic positions. For every primitive of the node's mesh, a sub-buffer for dynamic positions needs to be present in the array. Each sub-buffer needs to have the same size as the sub-buffer for the static positions of the respective primitive. These dynamic positions are used to store the vertex positions of a mesh after skinning. If a skin is present, the BLAS is not simply just a reference the meshes' BLAS, but it is a separate, dynamic BLAS, which can be updated.
+
+\subsubsection{The \code{Mesh} class}
+
+The \code{Mesh} class represents a glTF mesh. It stores an array of \code{Primitive}s. Each primitive stores three sub-buffers: \code{positions} for the vertex positions, \code{indices} for the vertex indices and \code{joint\_weights} for the joint weights used for skinning the mesh. The positions and indices are pretty straight forward and just store a sequence of \code{vec3}s and \code{unsigned int}s respectively. The joint weights are a bit more complex, because they are stored in a 2D array of \code{JointWeight} structs. A \code{JointWeight} contains the index of the node in the skeleton of the skin and its weight. All the arrays of joint weights for a vertex are stored in sequence like shown in this figure:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/joint_weights.png}
+    \caption{Joint weight layout}
+    \label{fig:joint-weights}
+\end{figure}
+
+Additionally, each primitive also contains the member variables \code{positions\_cpu} and \code{joint\_weights\_cpu}, which store the same data as \code{positions} and \code{joint\_weights}, but this time inside \code{std::vector}s for easier access in CPU skinning.
+
+Finally, a mesh can also contain a BLAS, which is created for the static mesh. It is only created if a mesh is used statically by a node, i.e. a node that uses the mesh without a skin.
+
+\subsubsection{The \code{Skin} class}
+
+The \code{Skin} class is relatively simple and matches the glTF skin object almost exactly. It simply stores an array of \code{Node}s, which represent the joints in the skeleton and an array for the inverse bind matrices, with one entry for each joint.
+
+\subsubsection{The \code{Animation} class}
+
+The \code{Animation} class represents a glTF animation. It contains an array of \code{AnimationSampler}s, which contain a reference to the node, that they modify during animation, and also the virtual function \code{AnimationSampler::apply\_for}. This function samples a value at the specified point in time and applies it to a certain property of the nodes transform. There are three sub-classes of \code{AnimationSampler}, which override the \code{apply\_for} function:
+
+\begin{itemize}
+    \item \code{TranslationSampler}: samples a 3D vector and sets it as the nodes translation.
+    \item \code{RotationSampler}: samples a quaternion and sets it as the nodes rotation.
+    \item \code{ScaleSampler}: samples a 3D vector and sets it as the nodes scale.
+\end{itemize}
+
+The animation itself also has an \code{apply\_for} function, which iterates over all animation channels and applies them for the given point in time.
 
 \subsubsection{Buffers and Sub-Buffers}
 
-glTF uses buffers, buffer views and accessors. We dont use the data in the glTF buffers directly, but we read the data and lay it out in a more convenient way. A glTF accessor may access data, that is interleaved with other data, or sparse data. Additionally, the accessor's component type may not match our component type. However, we want to have our data lined up in memory sequentially and of a fixed type. Luckily, the cgltf library offers the function \code{cgltf\_accessor\_unpack\_floats}. This function reads all the values of the accessor, converts the components of the values to \code{float} and stores the values sequentially in a target buffer. The function \code{cgltf\_accessor\_unpack\_indices} does the equivalent for \code{unsigned int}s. We create one buffer for each usage type of our data. We have one buffer for the vertex indices, one for static vertex position and one for dynamic vertex positions.
+glTF uses buffers, buffer views and accessors. We dont use the data in the glTF buffers directly, but we read the data and lay it out in a more convenient way. A glTF accessor may access data, that is interleaved with other data, or sparse data. Additionally, the accessor's component type may not match our component type. However, we want to have our data lined up in memory sequentially and of a fixed type. Luckily, the cgltf library offers the function \code{cgltf\_accessor\_unpack\_floats}. This function reads all the values of the accessor, converts the components of the values to \code{float} and stores the values sequentially in a target buffer. The function \code{cgltf\_accessor\_unpack\_indices} does the equivalent for \code{unsigned int}s.
+
+We create one buffer for each usage type of our data. We have one buffer for the vertex indices, one for static vertex positions of the mesh and one for dynamic vertex positions, that may be different for each mesh. An attribute can then reference a sub-subsection into one of these buffers using a sub-buffer. A sub-buffer has a reference to the buffer of intrest using a \code{ptr::Shared<vk::Buffer>}, as well as an offset and a length. We do not need to store the type of the elements in the sub-buffer, since the type is fixed and can be determined by the variable. We know that the sub-buffers \code{positions} in \code{Mesh} and \code{dynamic\_positions} in \code{Node} store a sequence of \code{vec3}s, while the sub-buffer \code{indices} in \code{Mesh} stores a sequence of \code{unsigned int}s.
+
+The following figure gives a little bit more insight, of how these sub-buffers are used.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/scene_buffers.png}
+    \caption{Usage of sub-buffers in a scene}
+    \label{fig:scene-buffers}
+\end{figure}
+
+In this graphic we can see, how both nodes \code{Node 0} and \code{Node 1} reference the same mesh \code{Mesh 0}. This means, that they use the same sets of static positions and indices. But because two nodes with the same mesh can use different skins, each node needs to store their own set of dynamic positions. We can also see how the size of every \code{dynamic\_positions} sub-buffer matches the size of the respective sub-buffer in \code{positions}.
 
 \subsection{Updating a Scene}\label{subsec:updating-a-scene}
 

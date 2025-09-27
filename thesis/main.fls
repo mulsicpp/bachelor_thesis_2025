@@ -833,6 +833,16 @@ INPUT ./chapters/implementation/scene.tex
 INPUT ./chapters/implementation/scene.tex
 INPUT ./chapters/implementation/scene.tex
 INPUT chapters/implementation/scene.tex
+INPUT ./figures/joint_weights.png
+INPUT ./figures/joint_weights.png
+INPUT ./figures/joint_weights.png
+INPUT ./figures/joint_weights.png
+INPUT ./figures/joint_weights.png
+INPUT ./figures/scene_buffers.png
+INPUT ./figures/scene_buffers.png
+INPUT ./figures/scene_buffers.png
+INPUT ./figures/scene_buffers.png
+INPUT ./figures/scene_buffers.png
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr9e.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplrc9e.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplr9e.vf
