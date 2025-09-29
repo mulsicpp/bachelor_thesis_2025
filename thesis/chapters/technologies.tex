@@ -3,24 +3,29 @@
 
 \chapter{Technologies}\label{chapter:technologies}
 
-\section{System Information}
+\section{System Specifications}
 
-\begin{itemize}
-    \item \textbf{Operating System:} Ubuntu 24.04.2 LTS
-    \item \textbf{CPU:} Ubuntu 24.04.2 LTS
-    \item \textbf{GPU:} Nvidia 
-\end{itemize}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Operating System} & Ubuntu 24.04.2 LTS \\ \hline
+\textbf{CPU}              & Intel(R) Xeon(R) W-2235 CPU @ 3.80GHz \\ \hline
+\textbf{GPU}              & NVIDIA GeForce RTX 3090 \\ \hline
+\end{tabular}
+\caption{System Specifications}
+\end{table}
 
 \section{Build Tools}
 
 \begin{itemize}
     \item Premake 5
     \item GNU Make 4.3
-    \item Visual Studio 2022
 \end{itemize}
 
-The project uses Premake 5, which does not build the project directly, but it is a command line utility which reads a scripted definition of a software project and, most commonly, uses it to generate project files for toolsets like Visual Studio, Xcode, or GNU Make ~\parencite{premake}. It is a simpler alternative to CMake.
-On Linux we use it to create “Makefiles”, which then ultimately build our project. On windows we create Solution- and Project-files for Visual Studio 2022 and we can build and run the project inside Visual Studio. 
+The project uses Premake 5, which does not build the project directly, but it is a command line utility which reads a scripted definition of a software project and uses it to generate project files for toolsets like Visual Studio, Xcode, or GNU Make. It is a simpler alternative to CMake.
+
+We use Premake to create Makefiles, which then ultimately compile our project.
 
 \section{Graphics API}
 
@@ -37,6 +42,8 @@ At the start of the project Rust was considered as the projects programming lang
 The dynamic 3D scenes, that the project uses, are stored in the \textbf{glTF-2.0} file format. It stores its models in a scene graph and supports skeletal animation as well as morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary in BIN files and textures are stored in image files (PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
 
 \subsection{CSV}
+
+CSV stands for Comma Separated Values and is used to store tabular data. It is a text-based format and therefore very easy to use. Each line of text inside a CSV file represents a row and the values of that row are separated by commas. We use it to store our benchmarks in our projects. We can later import a CSV file in an application like Excel to create graphs and analyse our gathered data.
 
 \section{Libraries}
 

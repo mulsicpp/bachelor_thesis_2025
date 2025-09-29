@@ -19,6 +19,231 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global/global}
+    \entry{appel-1968}{inproceedings}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=9ba0629bbbf7f6d89f200f0e7c2c459c}{%
+           family={Appel},
+           familyi={A\bibinitperiod},
+           given={Arthur},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Atlantic City, New Jersey}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{fullhash}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{fullhashraw}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{bibnamehash}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{authorbibnamehash}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{authornamehash}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{authorfullhash}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \strng{authorfullhashraw}{9ba0629bbbf7f6d89f200f0e7c2c459c}
+      \field{labelalpha}{App68}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Some applications of computer graphics require a vivid illusion of reality. These include the spatial organization of machine parts, conceptual architectural design, simulation of mechanisms, and industrial design. There has been moderate success in the automatic generation of wire frame, cardboard model, polyhedra, and quadric surface line drawings. The capability of the machine to generate vivid sterographic pictures has been demonstrated. There are, however considerable reasons for developing techniques by which line drawings of solids can be shaded, especially the enhancement of the sense of solidity and depth. Figures 1 and 2 illustrate the value of shading and shadow casting in spatial description. In the line drawing there is no clue as to the relative position of the flat plane and the sheet metal console. When shadows are rendered, it is clear that the plane is below and to the rear of the console, and the hollow nature of the sheet metal assembly is emphasized. Shading can specify the tone or color of a surface and the amount of light falling upon that surface from one or more light sources. Shadows when sharply defined tend to suggest another viewpoint and improves surface definition. When controlled, shading can also emphasize particular parts of the drawing. If techniques for the automatic determination of chiaroscuro with good resolution should prove to be competitive with line drawings, and this is a possibility, machine generated photographs might replace line drawings as the principal mode of graphical communication in engineering and architecture.}
+      \field{booktitle}{Proceedings of the April 30--May 2, 1968, Spring Joint Computer Conference}
+      \field{isbn}{9781450378970}
+      \field{series}{AFIPS '68 (Spring)}
+      \field{title}{Some techniques for shading machine renderings of solids}
+      \field{year}{1968}
+      \field{pages}{37\bibrangedash 45}
+      \range{pages}{9}
+      \verb{doi}
+      \verb 10.1145/1468075.1468082
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/1468075.1468082
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/1468075.1468082
+      \endverb
+    \endentry
+    \entry{renderman}{inproceedings}{}{}
+      \name{author}{13}{}{%
+        {{un=0,uniquepart=base,hash=7cd56ac0c78984bd176529db4d9894c5}{%
+           family={Christensen},
+           familyi={C\bibinitperiod},
+           given={Per},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9b28c1797bf3709164114bf09f9bdcc5}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Julian},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=257c16d540d15a5c54f1f7e1483c3f53}{%
+           family={Shade},
+           familyi={S\bibinitperiod},
+           given={Jonathan},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=0f5ea25388e230b6de2fbad0ec422e20}{%
+           family={Wooten},
+           familyi={W\bibinitperiod},
+           given={Wayne},
+           giveni={W\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=0e9cad420633c7c641102196331eb3ba}{%
+           family={Schubert},
+           familyi={S\bibinitperiod},
+           given={Brenden},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=67ab85a17baf7fec2809d184d51df67a}{%
+           family={Kensler},
+           familyi={K\bibinitperiod},
+           given={Andrew},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=d9fde0f42fe10f33531d5db228eb0ddf}{%
+           family={Friedman},
+           familyi={F\bibinitperiod},
+           given={Stephen},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9da174b4a1ec7d564fa1bf4dafc3432c}{%
+           family={Kilpatrick},
+           familyi={K\bibinitperiod},
+           given={Charlie},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=0d2a349ab35c43d6e0705243350d6a7e}{%
+           family={Ramshaw},
+           familyi={R\bibinitperiod},
+           given={Cliff},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=d08dca24fea43eab56f529fdb8e5afb3}{%
+           family={Bannister},
+           familyi={B\bibinitperiod},
+           given={Marc},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=4cb4aa6ac735c514f6136e0cc578cabd}{%
+           family={Rayner},
+           familyi={R\bibinitperiod},
+           given={Brenton},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=18980d4258acf901b1a111c82269758b}{%
+           family={Brouillat},
+           familyi={B\bibinitperiod},
+           given={Jonathan},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ad95ff692271376fe551c5dc18468d6b}{%
+           family={Liani},
+           familyi={L\bibinitperiod},
+           given={Max},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{9ff165524f89c2d4307c0d45c5c64c78}
+      \strng{fullhash}{b576110ccd84473d77f71ceb66242571}
+      \strng{fullhashraw}{b576110ccd84473d77f71ceb66242571}
+      \strng{bibnamehash}{b576110ccd84473d77f71ceb66242571}
+      \strng{authorbibnamehash}{b576110ccd84473d77f71ceb66242571}
+      \strng{authornamehash}{9ff165524f89c2d4307c0d45c5c64c78}
+      \strng{authorfullhash}{b576110ccd84473d77f71ceb66242571}
+      \strng{authorfullhashraw}{b576110ccd84473d77f71ceb66242571}
+      \field{labelalpha}{Chr+18}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{ACM Transactions on Graphics}
+      \field{number}{3}
+      \field{title}{An Advanced Path Tracing Architecture for Movie Rendering}
+      \field{volume}{37}
+      \field{year}{2018}
+      \verb{urlraw}
+      \verb https://docslib.org/doc/639313/an-advanced-path-tracing-architecture-for-movie-rendering
+      \endverb
+      \verb{url}
+      \verb https://docslib.org/doc/639313/an-advanced-path-tracing-architecture-for-movie-rendering
+      \endverb
+    \endentry
+    \entry{turing-arch}{report}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=61a23953300b78e83f381e02ca45c5e4}{%
+           family={Corporation},
+           familyi={C\bibinitperiod},
+           given={NVIDIA},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{institution}{1}{%
+        {NVIDIA Corporation}%
+      }
+      \strng{namehash}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{fullhash}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{fullhashraw}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{bibnamehash}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{authorbibnamehash}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{authornamehash}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{authorfullhash}{61a23953300b78e83f381e02ca45c5e4}
+      \strng{authorfullhashraw}{61a23953300b78e83f381e02ca45c5e4}
+      \field{labelalpha}{Cor18}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Turing Architecture White Paper}
+      \field{type}{techreport}
+      \field{year}{2018}
+    \endentry
+    \entry{finding-dory}{report}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=ba95dd3425268564c880523395925aea}{%
+           family={Hery},
+           familyi={H\bibinitperiod},
+           given={Christophe},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=7c32d2c273aaa3102b6adb387a0f3423}{%
+           family={Villemin},
+           familyi={V\bibinitperiod},
+           given={Ryusuke},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c8f8027bd3884c68b10c119520ced66f}{%
+           family={Hecht},
+           familyi={H\bibinitperiod},
+           given={Florian},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{fullhash}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{fullhashraw}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{bibnamehash}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{authorbibnamehash}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{authornamehash}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{authorfullhash}{70c8a935be5d8829698f15c273dc5d2d}
+      \strng{authorfullhashraw}{70c8a935be5d8829698f15c273dc5d2d}
+      \field{labelalpha}{HVH16}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Towards Bidirectional Path Tracing at Pixar}
+      \field{type}{techreport}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://graphics.pixar.com/library/BiDir/paper.pdf
+      \endverb
+      \verb{url}
+      \verb https://graphics.pixar.com/library/BiDir/paper.pdf
+      \endverb
+    \endentry
     \entry{linear-blend-skinning}{article}{}{}
       \name{author}{5}{}{%
         {{un=0,uniquepart=base,hash=61c18324253c178526bee4239b577e2f}{%
@@ -73,94 +298,57 @@
       \field{pages}{77:1\bibrangedash 77:10}
       \range{pages}{-1}
     \endentry
-    \entry{vulkan-spec}{manual}{}{}
+    \entry{whitted-1980}{article}{}{}
       \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=364378d45b69f33fd50d5d62ae518626}{%
-           family={{Khronos Group}},
-           familyi={K\bibinitperiod}}}%
-      }
-      \list{organization}{1}{%
-        {The Khronos Group Inc.}%
-      }
-      \strng{namehash}{364378d45b69f33fd50d5d62ae518626}
-      \strng{fullhash}{364378d45b69f33fd50d5d62ae518626}
-      \strng{fullhashraw}{364378d45b69f33fd50d5d62ae518626}
-      \strng{bibnamehash}{364378d45b69f33fd50d5d62ae518626}
-      \strng{authorbibnamehash}{364378d45b69f33fd50d5d62ae518626}
-      \strng{authornamehash}{364378d45b69f33fd50d5d62ae518626}
-      \strng{authorfullhash}{364378d45b69f33fd50d5d62ae518626}
-      \strng{authorfullhashraw}{364378d45b69f33fd50d5d62ae518626}
-      \field{labelalpha}{Khr25}
-      \field{sortinit}{K}
-      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{note}{Accessed: 2025-09-19}
-      \field{title}{Vulkan{®} 1.4.327 - A Specification (with all registered Vulkan extensions)}
-      \field{year}{2025}
-      \verb{urlraw}
-      \verb https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html
-      \endverb
-      \verb{url}
-      \verb https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html
-      \endverb
-    \endentry
-    \entry{vk-bootstrap}{online}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=c66cc57f55002e191b011441db7e846b}{%
-           family={Lunarg},
-           familyi={L\bibinitperiod},
-           given={Charles},
-           giveni={C\bibinitperiod},
+        {{un=0,uniquepart=base,hash=78cdabb19cc323abf6bcccc7d2322dba}{%
+           family={Whitted},
+           familyi={W\bibinitperiod},
+           given={Turner},
+           giveni={T\bibinitperiod},
            givenun=0}}%
       }
-      \strng{namehash}{c66cc57f55002e191b011441db7e846b}
-      \strng{fullhash}{c66cc57f55002e191b011441db7e846b}
-      \strng{fullhashraw}{c66cc57f55002e191b011441db7e846b}
-      \strng{bibnamehash}{c66cc57f55002e191b011441db7e846b}
-      \strng{authorbibnamehash}{c66cc57f55002e191b011441db7e846b}
-      \strng{authornamehash}{c66cc57f55002e191b011441db7e846b}
-      \strng{authorfullhash}{c66cc57f55002e191b011441db7e846b}
-      \strng{authorfullhashraw}{c66cc57f55002e191b011441db7e846b}
-      \field{labelalpha}{Lun25}
-      \field{sortinit}{L}
-      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{fullhash}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{fullhashraw}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{bibnamehash}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{authorbibnamehash}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{authornamehash}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{authorfullhash}{78cdabb19cc323abf6bcccc7d2322dba}
+      \strng{authorfullhashraw}{78cdabb19cc323abf6bcccc7d2322dba}
+      \field{labelalpha}{Whi80}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{note}{accessed: 2025-09-19}
-      \field{title}{vk-bootstrap: Vulkan Bootstrapping Library}
-      \field{year}{2025}
+      \field{abstract}{To accurately render a two-dimensional image of a three-dimensional scene, global illumination information that affects the intensity of each pixel of the image must be known at the time the intensity is calculated. In a simplified form, this information is stored in a tree of “rays” extending from the viewer to the first surface encountered and from there to other surfaces and to the light sources. A visible surface algorithm creates this tree for each pixel of the display and passes it to the shader. The shader then traverses the tree to determine the intensity of the light received by the viewer. Consideration of all of these factors allows the shader to accurately simulate true reflection, shadows, and refraction, as well as the effects simulated by conventional shaders. Anti-aliasing is included as an integral part of the visibility calculations. Surfaces displayed include curved as well as polygonal surfaces.}
+      \field{issn}{0001-0782}
+      \field{journaltitle}{Commun. ACM}
+      \field{month}{6}
+      \field{number}{6}
+      \field{title}{An improved illumination model for shaded display}
+      \field{volume}{23}
+      \field{year}{1980}
+      \field{pages}{343\bibrangedash 349}
+      \range{pages}{7}
+      \verb{doi}
+      \verb 10.1145/358876.358882
+      \endverb
       \verb{urlraw}
-      \verb https://github.com/charles-lunarg/vk-bootstrap
+      \verb https://doi.org/10.1145/358876.358882
       \endverb
       \verb{url}
-      \verb https://github.com/charles-lunarg/vk-bootstrap
+      \verb https://doi.org/10.1145/358876.358882
       \endverb
-    \endentry
-    \entry{premake}{misc}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=42d45ab7de95c116385dd938a0b3fe30}{%
-           family={ricecookie},
-           familyi={r\bibinitperiod}}}%
-      }
-      \strng{namehash}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{fullhash}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{fullhashraw}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{bibnamehash}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{authorbibnamehash}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{authornamehash}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{authorfullhash}{42d45ab7de95c116385dd938a0b3fe30}
-      \strng{authorfullhashraw}{42d45ab7de95c116385dd938a0b3fe30}
-      \field{labelalpha}{ric23}
-      \field{sortinit}{r}
-      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{howpublished}{boh}
-      \field{title}{What is Premake?}
-      \field{year}{2023}
+      \keyw{visible surface algorithms,shading,raster displays,computer graphics,computer animation}
     \endentry
   \enddatalist
+  \missing{vk-bootstrap}
 \endrefsection
 \endinput
 
