@@ -44,18 +44,21 @@ void Node::build_blas(bool fast_build) {
 	}
 }
 
-void Node::rebuild_blas() {
+void Node::rebuild_blas(double* update_time) {
 	if(!mesh || !skin || dynamic_positions.empty() || !blas) {
 		return;
 	}
 
-	blas->rebuild(get_dynamic_blas_geometries());
+	if(update_time) {
+		*update_time += blas->rebuild(get_dynamic_blas_geometries());
+	}
 }
 
-void Node::refit_blas() {
+void Node::refit_blas(double* update_time) {
 	if(!mesh || !skin || dynamic_positions.empty() || !blas) {
 		return;
 	}
-
-	blas->refit(get_dynamic_blas_geometries());
+	if(update_time) {
+		*update_time += blas->refit(get_dynamic_blas_geometries());
+	}
 }
