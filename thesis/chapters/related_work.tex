@@ -1,10 +1,28 @@
 
 \chapter{Related Work}\label{chap:related_work}
 
-\section{Real-Time Ray Tracing on GPUs}
+\section{Ray Tracing}
 
-\section{Dynamic Scene Ray Tracing}
+As mentioned in the introduction \textcite{appel-1968} and \textcite{whitted-1980} laid the foundations for ray tracing. For a long time, GPUs were not feasible for ray tracing, and because of that, efficient ray tracing algorithms were developed for the CPU. \textcite{ray-triangle-intersection} present a clean algorithm for determining whether a ray intersects a triangle. One advantage of this method is that the plane equation need not be computed on the fly nor be stored, which can amount to significant memory savings for triangle meshes. Similarly, another paper presents and efficient and robust algorithm for intersections between rays and AABBs \parencite{ray-box-intersection}, which is very useful for the bounding volume hierarchies used for acceleration structures. \textcite{embree} describe Embree, an open source ray tracing framework for x86 CPUs, which is explicitly designed to achieve high performance in professional rendering environments in which complex geometry and incoherent ray distributions are common.
 
-\section{Acceleration Structures and Memory Management}
+Later Nvidia introduced the Turing Architecture, which allows for hardware-accelerated raytracing. Using new hardware-based accelerators and a Hybrid Rendering approach, Turing fuses rasterization, real-time ray tracing, AI, and simulation to enable incredible realism in PC games, amazing new effects powered by neural networks, cinematic-quality interactive experiences, and fluid interactivity when creating or navigating complex 3D models \parencite{turing-arch}. \textcite{gpu-analysis} analyse these modern GPU architectures by reverse engineering modern NVIDIA GPU cores, unveiling many key aspects of their design.
+
+\section{Acceleration Structures}
+
+There has been a lot of research done on ray tracing acceleration structures. Many of these papers propose new ways of constructing a BVH and discuss the advantages and disadvangtages. One of these methods is KD-tree construction. \textcite{parallel-kd-tree} presents a highly parallel, linearly scalable technique of kd-tree construction for ray tracing of dynamic geometry. Another paper proposes modifications to previous kd-tree construction algorithms that significantly increase the coherence of memory accesses during construction of the kd-tree \parencite{kd-tree-streaming}. These and other optimizations are then applied to a SAH (Surface Area Heuristic)-based BVH instead of a KD-tree by \textcite{fast-sah-bvh}. SAH tries to minimize the surface area of the bounding volumes when splitting a parent volume.
+
+Another type of construction is LBVH (Linear Bounding Volume Hierarchy), which uses spatial Morton codes to reduce the BVH construction problem to a simple sorting problem \parencite{lbvh}. There is also another variant of the algorithm called HLBVH (Hierarchical LBVH). It is a novel hierarchical algorithm that reduces substantially both the amount of computations and the memory traffic required to build a Linear Bounding Volume Hierarchy (LBVH), while still exposing a data-parallel structure \parencite{hlbvh}. \textcite{parallel-high-quality-bvh} propose a new massively parallel algorithm for constructing high-quality bounding volume hierarchies (BVHs) for ray tracing, which is based on modifying an existing BVH to improve its quality, and executes in linear time.
+
+A big topic in dynamic environments is updating the acceleration structure. \textcite{bvh-refitting} present three algorithmic changes to the typical BVH algorithm to benefit dynamic scenes. First, the BVH is built using a variant of the surface area heuristic conventionally used to build kd-trees. Second, the topology of the BVH is not changed over time so that only the bounding volumes need to be refit from frame-to-frame. Third, and most importantly, packets of rays are traced together through the BVH using a novel integrated packet-frustum traversal scheme. \textcite{fast-bvh-updates} present a method to efficiently extend refitting for animated scenes with tree rotations, a technique previously proposed for off-line improvement of BVH quality for static scenes.
+
+\section{Skinning Techniques}
+
+Since our application uses skeletal animation, we also need to consider different skinning methods. In our application, we use LBS (Linear Blend Skinning), which is a very popular skinning technique due to its simplicity and efficiency. However, LBS does have some issues (e.g., collapsing-joint artifacts), and some research addresses these issues and proposes better alternatives.
+
+\textcite{sbs} introduce a new method called SBS (Spherical Blend Skinning). It uses quaternions to interpolate rotations instead of linearly blending transformed vertex positions. A significant advantage of this method is that the input data for this algorithm is the same as for LBS. Another paper presents a novel GPU-friendly skinning algorithm based on dual quaternions \parencite{dual-quaternions}. This approach also solves the artifacts of linear blend skinning at minimal additional cost.
 
 \section{Summary and Research Gap}
+
+We have now reviewed a lot of research regarding ray tracing in dynamic environments. However, the presented research on acceleration structures does not include scenes that use a scene graph or skeletal animation. The test scenes in these papers usually use a single acceleration structure for the whole scene, which gets updated every frame.
+
+Vulkan uses a two-level hierarchy for its acceleration structure, which allows us only to update parts of the scene's acceleration structure. With this thesis, we want to explore real-time raytracing in dynamic scenes using a scene graph and skeletal animation, not only because we want to see how a scene graph takes advantage of a two-level acceleration structure, but also because a similar structure is used in most real-time applications, like video games.

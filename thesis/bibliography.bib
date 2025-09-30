@@ -8,8 +8,6 @@
   publisher = {Association for Computing Machinery},
   address = {New York, NY, USA},
   url = {https://doi.org/10.1145/1468075.1468082},
-  doi = {10.1145/1468075.1468082},
-  abstract = {Some applications of computer graphics require a vivid illusion of reality. These include the spatial organization of machine parts, conceptual architectural design, simulation of mechanisms, and industrial design. There has been moderate success in the automatic generation of wire frame, cardboard model, polyhedra, and quadric surface line drawings. The capability of the machine to generate vivid sterographic pictures has been demonstrated. There are, however considerable reasons for developing techniques by which line drawings of solids can be shaded, especially the enhancement of the sense of solidity and depth. Figures 1 and 2 illustrate the value of shading and shadow casting in spatial description. In the line drawing there is no clue as to the relative position of the flat plane and the sheet metal console. When shadows are rendered, it is clear that the plane is below and to the rear of the console, and the hollow nature of the sheet metal assembly is emphasized. Shading can specify the tone or color of a surface and the amount of light falling upon that surface from one or more light sources. Shadows when sharply defined tend to suggest another viewpoint and improves surface definition. When controlled, shading can also emphasize particular parts of the drawing. If techniques for the automatic determination of chiaroscuro with good resolution should prove to be competitive with line drawings, and this is a possibility, machine generated photographs might replace line drawings as the principal mode of graphical communication in engineering and architecture.},
   booktitle = {Proceedings of the April 30--May 2, 1968, Spring Joint Computer Conference},
   pages = {37-45},
   numpages = {9},
@@ -29,7 +27,6 @@
   issn = {0001-0782},
   url = {https://doi.org/10.1145/358876.358882},
   doi = {10.1145/358876.358882},
-  abstract = {To accurately render a two-dimensional image of a three-dimensional scene, global illumination information that affects the intensity of each pixel of the image must be known at the time the intensity is calculated. In a simplified form, this information is stored in a tree of “rays” extending from the viewer to the first surface encountered and from there to other surfaces and to the light sources. A visible surface algorithm creates this tree for each pixel of the display and passes it to the shader. The shader then traverses the tree to determine the intensity of the light received by the viewer. Consideration of all of these factors allows the shader to accurately simulate true reflection, shadows, and refraction, as well as the effects simulated by conventional shaders. Anti-aliasing is included as an integral part of the visibility calculations. Surfaces displayed include curved as well as polygonal surfaces.},
   journal = {Commun. ACM},
   month = jun,
   pages = {343-349},
@@ -59,6 +56,210 @@
   author       = {NVIDIA Corporation},
   year         = {2018},
   institution  = {NVIDIA Corporation},
+}
+
+% related work
+
+@inproceedings{ray-triangle-intersection,
+  author = {M\"{o}ller, Tomas and Trumbore, Ben},
+  title = {Fast, minimum storage ray/triangle intersection},
+  year = {2005},
+  isbn = {9781450378338},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1198555.1198746},
+  doi = {10.1145/1198555.1198746},
+  booktitle = {ACM SIGGRAPH 2005 Courses},
+  pages = {7-es},
+  keywords = {ray/triangle-intersection, ray tracing, intersection, base transformation},
+  location = {Los Angeles, California},
+  series = {SIGGRAPH '05}
+}
+
+@inproceedings{ray-box-intersection,
+  author = {Williams, Amy and Barrus, Steve and Morley, R. Keith and Shirley, Peter},
+  title = {An efficient and robust ray-box intersection algorithm},
+  year = {2005},
+  isbn = {9781450378338},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1198555.1198748},
+  doi = {10.1145/1198555.1198748},
+  booktitle = {ACM SIGGRAPH 2005 Courses},
+  pages = {9-es},
+  location = {Los Angeles, California},
+  series = {SIGGRAPH '05}
+}
+
+@article{embree,
+  author = {Wald, Ingo and Woop, Sven and Benthin, Carsten and Johnson, Gregory S. and Ernst, Manfred},
+  title = {Embree: a kernel framework for efficient CPU ray tracing},
+  year = {2014},
+  issue_date = {July 2014},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {33},
+  number = {4},
+  issn = {0730-0301},
+  url = {https://doi.org/10.1145/2601097.2601199},
+  month = jul,
+  articleno = {143},
+  numpages = {8},
+  keywords = {CPU, SIMD, SPMD, coprocessor, ray tracing}
+}
+
+@misc{gpu-analysis,
+  title={Analyzing Modern NVIDIA GPU cores}, 
+  author={Rodrigo Huerta and Mojtaba Abaie Shoushtary and José-Lorenzo Cruz and Antonio González},
+  year={2025},
+  eprint={2503.20481},
+  archivePrefix={arXiv},
+  primaryClass={cs.AR},
+  url={https://arxiv.org/abs/2503.20481}, 
+}
+
+@article{parallel-kd-tree,
+  author = {Soupikov, Alexei and Kapustin, Alexander},
+  year = {2007},
+  month = {09},
+  pages = {395-404},
+  title = {Highly Parallel Fast KD-tree Construction for Interactive Ray Tracing of Dynamic Scenes},
+  volume = {26},
+  journal = {Comput. Graph. Forum},
+  doi = {10.1111/j.1467-8659.2007.01062.x}
+}
+
+@inproceedings{kd-tree-streaming,
+  author={Popov, Stefan and Gunther, Johannes and Seidel, Hans-peter and Slusallek, Philipp},
+  booktitle={2006 IEEE Symposium on Interactive Ray Tracing}, 
+  title={Experiences with Streaming Construction of SAH KD-Trees}, 
+  year={2006},
+  volume={},
+  number={},
+  pages={89-94},
+  keywords={Ray tracing;Acceleration;Layout;Cost function;Computer graphics;Data structures;Image generation;Hardware;Buildings;Piecewise linear approximation;Kd-tree construction;streaming memory access;parallelization;bounded variation function},
+  doi={10.1109/RT.2006.280219}}
+
+@inproceedings{fast-sah-bvh,
+  author={Wald, Ingo},
+  booktitle={2007 IEEE Symposium on Interactive Ray Tracing}, 
+  title={On fast Construction of SAH-based Bounding Volume Hierarchies}, 
+  year={2007},
+  volume={},
+  number={},
+  pages={33-40},
+  keywords={Ray tracing;Layout;Data structures;Animation;Geometry;Displays;Costs;Graphics;Buildings;Fuzzy sets},
+  doi={10.1109/RT.2007.4342588}
+}
+
+@article{lbvh,
+  author = {Lauterbach, Christian and Garland, Michael and Sengupta,  Shubhabrata and Luebke, David and Manocha, Dinesh},
+  year = {2009},
+  month = {04},
+  pages = {375 - 384},
+  title = {Fast BVH construction on gpus},
+  volume = {28},
+  journal = {Computer Graphics Forum},
+  doi = {10.1111/j.1467-8659.2009.01377.x}
+}
+
+@inproceedings{hlbvh,
+  author = {Pantaleoni, J. and Luebke, D.},
+  title = {HLBVH: hierarchical LBVH construction for real-time ray  tracing of dynamic geometry},
+  year = {2010},
+  publisher = {Eurographics Association},
+  address = {Goslar, DEU},
+  booktitle = {Proceedings of the Conference on High Performance  Graphics},
+  pages = {87-95},
+  numpages = {9},
+  location = {Saarbrucken, Germany},
+  series = {HPG '10}
+}
+
+@inproceedings{parallel-high-quality-bvh,
+  author = {Karras, Tero and Aila, Timo},
+  title = {Fast parallel construction of high-quality bounding volume hierarchies},
+  year = {2013},
+  isbn = {9781450321358},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/2492045.2492055},
+  doi = {10.1145/2492045.2492055},
+  booktitle = {Proceedings of the 5th High-Performance Graphics Conference},
+  pages = {89-99},
+  numpages = {11},
+  keywords = {ray tracing, bounding volume hierarchies},
+  location = {Anaheim, California},
+  series = {HPG '13}
+}
+
+@article{bvh-refitting,
+  author = {Wald, Ingo and Boulos, Solomon and Shirley, Peter},
+  title = {Ray tracing deformable scenes using dynamic bounding volume hierarchies},
+  year = {2007},
+  issue_date = {January 2007},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {26},
+  number = {1},
+  issn = {0730-0301},
+  url = {https://doi.org/10.1145/1189762.1206075},
+  doi = {10.1145/1189762.1206075},
+  journal = {ACM Trans. Graph.},
+  month = jan,
+  pages = {6-es},
+  numpages = {18}
+}
+
+@inproceedings{fast-bvh-updates,
+  author = {Kopta, Daniel and Ize, Thiago and Spjut, Josef and Brunvand, Erik and Davis, Al and Kensler, Andrew},
+  title = {Fast, effective BVH updates for animated scenes},
+  year = {2012},
+  isbn = {9781450311946},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/2159616.2159649},
+  doi = {10.1145/2159616.2159649},
+  booktitle = {Proceedings of the ACM SIGGRAPH Symposium on Interactive 3D Graphics and Games},
+  pages = {197-204},
+  numpages = {8},
+  keywords = {tree rotations, ray tracing, parallel update, dynamic scenes, bounding volume hierarchies, acceleration structures},
+  location = {Costa Mesa, California},
+  series = {I3D '12}
+}
+
+@inproceedings{sbs,
+  author = {Kavan, Ladislav and \v{Z}\'{a}ra, Ji\v{r}\'{\i}},
+  title = {Spherical blend skinning: a real-time deformation of articulated models},
+  year = {2005},
+  isbn = {1595930132},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1053427.1053429},
+  doi = {10.1145/1053427.1053429},
+  booktitle = {Proceedings of the 2005 Symposium on Interactive 3D Graphics and Games},
+  pages = {9-16},
+  numpages = {8},
+  keywords = {deformation, skeletal animation, skinning},
+  location = {Washington, District of Columbia},
+  series = {I3D '05}
+}
+
+@inproceedings{dual-quaternions,
+  author = {Kavan, Ladislav and Collins, Steven and \v{Z}\'{a}ra, Ji\v{r}\'{\i} and O'Sullivan, Carol},
+  title = {Skinning with dual quaternions},
+  year = {2007},
+  isbn = {9781595936288},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1230100.1230107},
+  doi = {10.1145/1230100.1230107},
+  booktitle = {Proceedings of the 2007 Symposium on Interactive 3D Graphics and Games},
+  pages = {39-46},
+  numpages = {8},
+  keywords = {blending, dual quaternions, linear combinations, rigid transformations, skinning},
+  location = {Seattle, Washington},
+  series = {I3D '07}
 }
 
 % technologies

@@ -765,14 +765,14 @@ INPUT ./chapters/related_work.tex
 INPUT ./chapters/related_work.tex
 INPUT chapters/related_work.tex
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplb9e.tfm
+INPUT c:/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplb9e.vf
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplb8r.tfm
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmb.tfm
 INPUT ./chapters/technologies.tex
 INPUT ./chapters/technologies.tex
 INPUT ./chapters/technologies.tex
 INPUT ./chapters/technologies.tex
 INPUT chapters/technologies.tex
-INPUT c:/texlive/2025/texmf-dist/fonts/vf/adobe/palatino/pplb9e.vf
-INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplb8r.tfm
-INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmb.tfm
 INPUT c:/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pplx.fd
 INPUT c:/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pplx.fd
 INPUT c:/texlive/2025/texmf-dist/tex/latex/psnfss/ts1pplx.fd
@@ -873,11 +873,6 @@ INPUT ./chapters/conclusion.tex
 INPUT ./chapters/conclusion.tex
 INPUT ./chapters/conclusion.tex
 INPUT chapters/conclusion.tex
-INPUT ./pages/appendix.tex
-INPUT ./pages/appendix.tex
-INPUT ./pages/appendix.tex
-INPUT ./pages/appendix.tex
-INPUT pages/appendix.tex
 INPUT ./main.lof
 INPUT ./main.lof
 INPUT main.lof
@@ -901,4 +896,3 @@ INPUT c:/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtti10.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb
 INPUT c:/texlive/2025/texmf-dist/fonts/type1/urw/palatino/uplri8a.pfb
-INPUT c:/texlive/2025/texmf-dist/fonts/type1/urw/zapfding/uzdr.pfb
