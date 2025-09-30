@@ -91,8 +91,11 @@ void RtxApp::run()
         };
 
     auto update_strats = SceneUpdateStrat::strats();
-
-    std::filesystem::create_directories(std::filesystem::path(opts.output_file).parent_path());
+    
+    if(std::filesystem::path(opts.output_file).has_parent_path()) {
+        std::filesystem::create_directories(std::filesystem::path(opts.output_file).parent_path());
+    }
+    
     if (!opts.store_images.empty()) {
         std::filesystem::create_directories(std::filesystem::path(opts.store_images));
     }

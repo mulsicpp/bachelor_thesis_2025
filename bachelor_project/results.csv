@@ -1,0 +1,18 @@
+scene;eternal-valley
+rebuild;always
+fast trace
+delta time;0.100000
+pipeline;normal
+resolution;1280x720
+spp;64
+
+update
+64.066156;
+trace
+15.087318;
+total
+79.153474;
+
+avg. update;64.066156
+avg. trace;15.087318
+avg. total;79.153474

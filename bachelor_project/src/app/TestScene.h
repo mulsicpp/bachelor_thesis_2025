@@ -10,7 +10,8 @@ enum class TestScene {
     Brainstem,
     Whirlwind,
     SpaceStation,
-    Monsters
+    Monsters,
+    EternalValley
 };
 
 std::string get_scene_name(TestScene test_scene);

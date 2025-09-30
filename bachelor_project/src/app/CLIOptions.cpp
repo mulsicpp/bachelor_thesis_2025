@@ -63,6 +63,7 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         TestScene::Whirlwind,
         TestScene::SpaceStation,
         TestScene::Monsters,
+        TestScene::EternalValley
     };
 
     std::vector<std::string> scene_str_values{};

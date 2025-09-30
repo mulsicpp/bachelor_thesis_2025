@@ -5,6 +5,7 @@ obj/
 test_rtx_linux
 test_rtx_linux_dbg
 
+EternalValleyFPS_1.1.glb
 
 Makefile
 *.make
