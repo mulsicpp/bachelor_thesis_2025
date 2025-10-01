@@ -2,6 +2,7 @@
 #include "vk_core/Context.h"
 
 #include "utils/align_up.h"
+#include "utils/FrameBenchmark.h"
 
 namespace vk {
 
@@ -33,15 +34,15 @@ namespace vk {
     }
 
 
-    void Tlas::refit(const std::vector<TlasInstance>& instances) {
-        build(ASBuildMode::Refit, instances);
+    double Tlas::refit(const std::vector<TlasInstance>& instances) {
+        return build(ASBuildMode::Refit, instances);
     }
 
-    void Tlas::rebuild(const std::vector<TlasInstance>& instances) {
-        build(ASBuildMode::Rebuild, instances);
+    double Tlas::rebuild(const std::vector<TlasInstance>& instances) {
+        return build(ASBuildMode::Rebuild, instances);
     }
 
-    void Tlas::build(ASBuildMode mode, const std::vector<TlasInstance>& instances) {
+    double Tlas::build(ASBuildMode mode, const std::vector<TlasInstance>& instances) {
         const auto& acceleration_structure_props = Context::get()->get_acceleration_structure_props();
         const auto scratch_alignment = acceleration_structure_props.minAccelerationStructureScratchOffsetAlignment;
 
@@ -190,7 +191,13 @@ namespace vk {
             );
             };
 
-        CommandBuffer::single_time_submit(QueueType::Compute, recorder);
+        auto cmd_buf = CommandBufferBuilder().queue_type(QueueType::Graphics).single_use(true).build();
+
+        cmd_buf.record(recorder);
+
+        auto start_time = utils::FrameBenchmark::now();
+        cmd_buf.submit().wait();
+        return utils::FrameBenchmark::duration(start_time, utils::FrameBenchmark::now());
     }
 
 

@@ -56,8 +56,8 @@ struct Node {
 	std::vector<vk::BlasGeometry> get_dynamic_blas_geometries() const;
 
 	void build_blas(bool fast_build);
-	void rebuild_blas();
-	void refit_blas();
+	void rebuild_blas(double* update_time = nullptr);
+	void refit_blas(double* update_time = nullptr);
 };
 
 class NodeIterator {

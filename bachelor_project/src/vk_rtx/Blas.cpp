@@ -2,6 +2,7 @@
 
 #include "vk_core/Context.h"
 #include "utils/align_up.h"
+#include "utils/FrameBenchmark.h"
 
 #include <string>
 
@@ -72,15 +73,15 @@ namespace vk
         return vkGetAccelerationStructureDeviceAddressKHR(Context::get()->get_device(), &addr_info);
     }
 
-    void Blas::refit(const std::vector<BlasGeometry>& geometries) {
-        build(ASBuildMode::Refit, geometries);
+    double Blas::refit(const std::vector<BlasGeometry>& geometries) {
+        return build(ASBuildMode::Refit, geometries);
     }
 
-    void Blas::rebuild(const std::vector<BlasGeometry>& geometries) {
-        build(ASBuildMode::Rebuild, geometries);
+    double Blas::rebuild(const std::vector<BlasGeometry>& geometries) {
+        return build(ASBuildMode::Rebuild, geometries);
     }
 
-    void Blas::build(ASBuildMode mode, const std::vector<BlasGeometry>& geometries) {
+    double Blas::build(ASBuildMode mode, const std::vector<BlasGeometry>& geometries) {
         const auto& acceleration_structure_props = Context::get()->get_acceleration_structure_props();
         const auto scratch_alignment = acceleration_structure_props.minAccelerationStructureScratchOffsetAlignment;
 
@@ -217,8 +218,13 @@ namespace vk
                 0, nullptr
             );
             };
+        auto cmd_buf = CommandBufferBuilder().queue_type(QueueType::Graphics).single_use(true).build();
 
-        CommandBuffer::single_time_submit(QueueType::Compute, recorder);
+        cmd_buf.record(recorder);
+
+        auto start_time = utils::FrameBenchmark::now();
+        cmd_buf.submit().wait();
+        return utils::FrameBenchmark::duration(start_time, utils::FrameBenchmark::now());
     }
 
 

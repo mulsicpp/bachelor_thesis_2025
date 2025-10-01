@@ -53,10 +53,10 @@ namespace vk {
 
         VkDeviceAddress device_address() const;
 
-        void refit(const std::vector<TlasInstance>& instances = {});
-        void rebuild(const std::vector<TlasInstance>& instances = {});
+        double refit(const std::vector<TlasInstance>& instances = {});
+        double rebuild(const std::vector<TlasInstance>& instances = {});
     private:
-        void build(ASBuildMode mode, const std::vector<TlasInstance>& instances = {});
+        double build(ASBuildMode mode, const std::vector<TlasInstance>& instances = {});
     };
 
     class TlasBuilder

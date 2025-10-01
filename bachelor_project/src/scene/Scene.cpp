@@ -174,7 +174,7 @@ void Scene::build_acceleration_structures(bool fast_build) {
 	tlas = tlas_builder.build().to_shared();
 }
 
-void Scene::rebuild_acceleration_structures() {
+void Scene::rebuild_acceleration_structures(double* update_time) {
 	NodeIterator it = iter();
 
 	auto& tlas_instances = tlas->instances();
@@ -186,7 +186,7 @@ void Scene::rebuild_acceleration_structures() {
 			continue;
 		}
 
-		node->rebuild_blas();
+		node->rebuild_blas(update_time);
 
 		auto& tlas_instance = tlas_instances[node->instance_index];
 		tlas_instance.blas = node->blas;
@@ -194,10 +194,12 @@ void Scene::rebuild_acceleration_structures() {
 		tlas_instance.custom_index = node->skin ? node->dyn_primitive_offset_start : node->mesh->primitive_offset_start;
 	}
 
-	tlas->rebuild();
+	if (update_time) {
+		*update_time += tlas->rebuild();
+	}
 }
 
-void Scene::refit_acceleration_structures() {
+void Scene::refit_acceleration_structures(double* update_time) {
 	NodeIterator it = iter();
 
 	auto& tlas_instances = tlas->instances();
@@ -209,7 +211,7 @@ void Scene::refit_acceleration_structures() {
 			continue;
 		}
 
-		node->refit_blas();
+		node->refit_blas(update_time);
 
 		auto& tlas_instance = tlas_instances[node->instance_index];
 		tlas_instance.blas = node->blas;
@@ -217,7 +219,9 @@ void Scene::refit_acceleration_structures() {
 		tlas_instance.custom_index = node->skin ? node->dyn_primitive_offset_start : node->mesh->primitive_offset_start;
 	}
 
-	tlas->refit();
+	if (update_time) {
+		*update_time += tlas->refit();
+	}
 }
 
 

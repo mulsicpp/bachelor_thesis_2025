@@ -37,6 +37,6 @@ public:
 	void skin_cpu();
 
 	void build_acceleration_structures(bool fast_build);
-	void rebuild_acceleration_structures();
-	void refit_acceleration_structures();
+	void rebuild_acceleration_structures(double* update_time = nullptr);
+	void refit_acceleration_structures(double* update_time = nullptr);
 };

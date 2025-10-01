@@ -12,7 +12,7 @@
 
 #include "stb_image_write.h"
 
-#include "app/FrameBenchmark.h"
+#include "utils/FrameBenchmark.h"
 
 RtxApp::RtxApp(int argc, char* argv[])
 {
@@ -91,17 +91,20 @@ void RtxApp::run()
         };
 
     auto update_strats = SceneUpdateStrat::strats();
-
-    std::filesystem::create_directories(std::filesystem::path(opts.output_file).parent_path());
+    
+    if(std::filesystem::path(opts.output_file).has_parent_path()) {
+        std::filesystem::create_directories(std::filesystem::path(opts.output_file).parent_path());
+    }
+    
     if (!opts.store_images.empty()) {
         std::filesystem::create_directories(std::filesystem::path(opts.store_images));
     }
 
-    std::vector<FrameBenchmark> frame_benchmarks{};
+    std::vector<utils::FrameBenchmark> frame_benchmarks{};
 
     for (uint32_t i = 0; i < opts.frame_count; i++)
     {
-        FrameBenchmark frame_benchmark{};
+        utils::FrameBenchmark frame_benchmark{};
         printf("drawing frame: %u\n", i);
         animation.apply_for(i * opts.delta_time);
         scene->update_transforms();
@@ -113,22 +116,21 @@ void RtxApp::run()
         }
 
         cmd_buffer_raytracing.record(draw_recorder);
-        frame_benchmark.start = FrameBenchmark::now();
 
         if (opts.rebuild_frequency != 0 && (i % opts.rebuild_frequency) == 0) {
-            scene->rebuild_acceleration_structures();
+            scene->rebuild_acceleration_structures(&frame_benchmark.update);
         }
         else {
-            scene->refit_acceleration_structures();
+            scene->refit_acceleration_structures(&frame_benchmark.update);
         }
-        frame_benchmark.rebuilt_acc = FrameBenchmark::now();
 
+        auto start_time = utils::FrameBenchmark::now();
         cmd_buffer_raytracing.submit().wait();
-        frame_benchmark.traced_rays = FrameBenchmark::now();
+        frame_benchmark.trace = utils::FrameBenchmark::duration(start_time, utils::FrameBenchmark::now());
 
-        printf("rebuild time: %lf ms\n", frame_benchmark.rebuild_acc_time());
-        printf("trace time: %lf ms\n", frame_benchmark.trace_rays_time());
-        printf("total time: %lf ms\n\n", frame_benchmark.total_time());
+        printf("rebuild time: %lf ms\n", frame_benchmark.update);
+        printf("trace time: %lf ms\n", frame_benchmark.trace);
+        printf("total time: %lf ms\n\n", frame_benchmark.total());
 
         frame_benchmarks.push_back(frame_benchmark);
 
@@ -170,22 +172,22 @@ void RtxApp::run()
 
     fprintf(output_file, "update\n");
     for (const auto& benchmark : frame_benchmarks) {
-        fprintf(output_file, "%lf;", benchmark.rebuild_acc_time());
-        avg_update_time += benchmark.rebuild_acc_time();
+        fprintf(output_file, "%lf;", benchmark.update);
+        avg_update_time += benchmark.update;
     }
     fprintf(output_file, "\n");
 
     fprintf(output_file, "trace\n");
     for (const auto& benchmark : frame_benchmarks) {
-        fprintf(output_file, "%lf;", benchmark.trace_rays_time());
-        avg_trace_time += benchmark.trace_rays_time();
+        fprintf(output_file, "%lf;", benchmark.trace);
+        avg_trace_time += benchmark.trace;
     }
     fprintf(output_file, "\n");
 
     fprintf(output_file, "total\n");
     for (const auto& benchmark : frame_benchmarks) {
-        fprintf(output_file, "%lf;", benchmark.total_time());
-        avg_total_time += benchmark.total_time();
+        fprintf(output_file, "%lf;", benchmark.total());
+        avg_total_time += benchmark.total();
     }
     fprintf(output_file, "\n\n");
 
