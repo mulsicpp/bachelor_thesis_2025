@@ -3,8 +3,207 @@
 
 \section{Pipelines}
 
+\subsection{Output}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/brainstem_normal.png}
+    \caption{Standard pipeline}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/brainstem_shadow.png}
+    \caption{Shadow pipeline}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/brainstem_basic.png}
+    \caption{Basic pipeline}
+  \end{subfigure}
+
+  \caption{Output images using different pipelines for the scene "BrainStem"}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/space_station_normal.png}
+    \caption{Standard pipeline}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/space_station_shadow.png}
+    \caption{Shadow pipeline}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/space_station_basic.png}
+    \caption{Basic pipeline}
+  \end{subfigure}
+
+  \caption{Output images using different pipelines for the scene "Space Station"}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/eternal_valley_normal.png}
+    \caption{Standard pipeline}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{figures/eternal_valley_shadow.png}
+    \caption{Shadow pipeline}
+  \end{subfigure}
+
+  \caption{Output images using different pipelines for the scene "Eternal Valley"}
+\end{figure}\label{fig:eternal-valley}
+
+\subsection{Performace}
+
+We tested the different pipelines for the scene "Eternal Valley". We generated 64 frames with a resolution of $1280 \times 720$ pixels and 64 samples per pixel. We also rebuilt the acceleration structure every frame and prefered a fast trace for optimal ray tracing durations.
+
+\begin{figure}[H]
+  \centering
+  % Left side: the image
+  \begin{minipage}{0.6\textwidth}
+    \includegraphics[width=\linewidth]{charts/pipeline.png}
+    \caption{Impact of different pipelines on ray tracing duration}
+  \end{minipage}\hfill
+  % Right side: the table
+  \begin{minipage}[t]{0.35\textwidth}
+    \centering
+    \begin{tabular}{|l|r|}
+    \hline
+    \textbf{Pipeline} &  \textbf{Avg. Trace} \\ \hline
+    Basic             &  64.803 ms \\
+    Standard          &  64.802 ms \\
+    Shadow            & 105.898 ms \\ \hline
+    \end{tabular}
+    \captionof{table}{Average trace duration per pipeline}
+  \end{minipage}
+\end{figure}
+
+We can see that the basic pipeline and standard pipeline have basically the same behaviour. This would mean, that our shaders do not have a big impact on the performace of our pipelines and that the large majority of time is spent on the traversal of the acceleration structure.
+
+We can also see that our shadow pipeline takes up a lot more time that the other two. This makes sense, because cast an additional ray for every primary ray that hits a surface. In our test scene, every ray hits a surface (see \autoref{fig:eternal-valley}), which means that every primary ray also produces a shadow ray and the total number of rays in the shadow pipeline is double the number of rays in the other two pipelines. However, the trace duration only increases by about 63\% instead of 100\%. This has probably to do with the way we cast our shadow rays, because we use two flags that are not used for primary rays:
+
+\begin{itemize}
+    \item \code{gl\_RayFlagsSkipClosestHitShaderEXT}
+    
+    This flag prevents the ray from invoking the closest hit shader. We can use it, because our implementation relies entirely on the miss shader. The surface point is assumed to be in shadow (\code{shadow = true}) and the miss shader then sets \code{shadow} to \code{false}.
+
+    \item \code{gl\_RayFlagsTerminateOnFirstHitEXT}
+    
+    This flag terminates the traversal of the acceleration structure as soon as anything is hit. We only use the miss shader, which means that as soon as we hit something, the miss shader will not be invoked and we can safely terminate early.
+\end{itemize}
+
+This could explain why shadow rays are cheaper in our implementation.
+
+Another reason could be that, because we use a directional light source, all shadow rays are parallel to eachother, which makes them more coherent and may also improve performance.
+
 \section{Multi-Sampling}
+
+\subsection{Output}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\linewidth]{figures/spp_1.png}
+    \caption{1 spp}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\linewidth]{figures/spp_4.png}
+    \caption{4 spp}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\linewidth]{figures/spp_16.png}
+    \caption{16 spp}
+  \end{subfigure}
+
+  \caption{Comparison between images using a different number of samples per pixel}
+\end{figure}
+
+\subsection{Performace}
+
+We tested different numbers of samples per pixel for the scene "Space Station" with the shadow pipeline. We generated 100 frames with a resolution of $1280 \times 720$ pixels. We also rebuilt the acceleration structure every frame and prefered a fast trace for optimal ray tracing durations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{charts/multi_sampling.png}
+    \caption{Impact of multi-sampling on ray tracing duration}
+\end{figure}
+
+This chart shows that the duration of tracing the rays scales linearly with the number of samples per pixel. This makes a lot of sence, because if we double the number of samples we also double the number of rays. 
 
 \section{Update Strategies}
 
-\section{Fast Build vs Fast Trace}
+We tested different strategies for updating the acceleration structure for the scene "Eternal Valley" with the standard pipeline. We generated 64 frames with a resolution of $1280 \times 720$ pixels and 64 samples per pixel and prefered a fast trace. We tested three strategies:
+
+\begin{itemize}
+    \item \textbf{Always Rebuild}: The acceleration structure gets completly rebuilt every frame.
+    \item \textbf{Always Rrefit}: After initially building the acceleration we only refit it every frame.
+    \item \textbf{Rebuild Every Eight Frames}: We refit most frames but every eighth frame we do a rebuild.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{charts/always_rebuild.png}
+    \caption{Always rebuild}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{charts/always_refit.png}
+    \caption{Always refit}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.72\textwidth}
+    \includegraphics[width=\linewidth]{charts/rebuild_every_8_frames.png}
+    \caption{Rebuild every eight frames}
+  \end{subfigure}
+
+  \caption{Comparing different strategies for updating the acceleration structure}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{charts/strategy_duration_avg.png}
+    \caption{Comparing the average durations between different update strategies}
+\end{figure}
+
+\subsection{Always Rebuild}
+
+As expected, always rebuilding gives us the shortest ray tracing duration, but it comes at the cost of a lot slower updates to the acceleration structure. The update and trace durations are very consistent and therefore the total duration also stays consistent. However, if we compare this strategy to the other strategies, it has the longest total duration on average.
+
+\subsection{Always Refit}
+
+This strategy results in very consistent and very short update duration. However, tracing the rays through the scenes becomes slower and slower, since the acceleration structure gets increasingly sub-optimal. This causes the stragegy to have a worse total time than always rebuilding towards the end of the animation. We can also notice, that the trace duration starts to suddenly decrease again at the end. This is probalby because the animation is looped and at the end it start to play the beginning again, for which the BVH structure is much better.
+
+\subsection{Rebuild Every Eight Frames}
+
+This strategy is a middle groud between the previous two. The update duration is usually very short, but every eight frames it spikes due to a rebuild occuring, which also causes the trace duration drops at those points. After each rebuild, the trace duration begins to rise again, but consistent rebuilds prevent is from diverging to far from the initial duration. This strategy has good average update and trace durations, which result in the best total duration on average compared to the other strategies. However, in order to get good results in a real-time application, there needs
+
+\subsection{Discussion}
+
+Because of the presented measurements someone might assume that the third strategy is the best one, but our measurements can not be generalized. If, for example, we keep increasing the number of rays, sooner or later the strategy of always rebuilding will become more favorable. Always refitting, however, is almost never a good strategy. Even if you are not tracing that many rays, the BVH will become increasingly sub-optimal in a lot of scenarios, which makes always refitting an unsustainable strategy. Though it might be viable for scenes, that never change to much from their initial state.
+
+\section{Fast Build vs. Fast Trace}
+
+\begin{figure}[H]
+  \centering
+
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{charts/fast_build_build.png}
+    \caption{Build duration}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\linewidth]{charts/fast_build_trace.png}
+    \caption{Trace duration}
+  \end{subfigure}
+
+  \caption{Comparing the build and trace duration of the flag \code{PREFER\_FAST\_BUILD} to the flag \code{PREFER\_FAST\_TRACE}}.
+\end{figure}
+
+We can see the expected outcome of \code{PREFER\_FAST\_BUILD} having shorter build durations, but longer trace durations compared to \code{PREFER\_FAST\_TRACE}. It is important to mention that these flags do not impact refitting. These flags effect the structure of the BVH, which refitting does not touch.
+
+Whether you should use \code{PREFER\_FAST\_BUILD} or \code{PREFER\_FAST\_TRACE} depends on the scenario. If you are tracing a lot of rays and the trace duration is the bottleneck in your application, you should probably use \code{PREFER\_FAST\_BUILD}. On the other hand, if most of your time is spent on rebuilding (not refitting!), \code{PREFER\_FAST\_TRACE} is most likely the better choice.

@@ -1,4 +1,2 @@
 
 \chapter{Conclusion}
-
-In conclusion, when it comes to ray tracing in dynamic environments, there are a lot of variables we need to consider. However in our tests refitting is the clear winner, when it comes to updating our acceleration structures. Even though refitting does not safe as much time as we initially anticipated, it is still considerably faster than rebuilding. Also, in none of our test scenes rebuilding resulted in a significant performace gain in the ray tracing step. This is probably because the animations in our scenes never change the mesh in a super dramatic way. In order for rebuilding to have a more impactful impact on the time spent on traversing the acceleration structure, we would probably need a much more dynamic scene, than any of the scenes we found.

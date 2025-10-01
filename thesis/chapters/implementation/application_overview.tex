@@ -40,11 +40,11 @@ There are three possible pipelines:
 
 Our application also supports multi-sampling, which is a common method to do anti-aliasing. We also use multi-sampling in our application to increase the number of rays in our test scenes without having to use gigantic images.
 
-We use a very simple method, where we devide each pixel into an $n \times n$ grid. This means the the number of samples per pixel needs to be a square number. We then cast one ray through the center of every grid cell and take the average of the samples to determine the pixels final color.
+We use a very simple method, where we devide each pixel into an $n \times n$ grid. This means the number of samples per pixel needs to be a square number. We then cast one ray through the center of every grid cell and take the average of the samples to determine the pixels final color.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/multi_sampling.png}
-    \caption{Multi-Sampling Grid}
+    \caption{Multi-sampling grid}
     \label{fig:multi-sampling}
 \end{figure}
