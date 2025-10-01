@@ -863,6 +863,16 @@ INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/mathpazo/fplmr.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/adobe/palatino/pplr8r.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/vf/public/mathpazo/zplmr7y.vf
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
+INPUT ./chapters/implementation/application_overview.tex
+INPUT ./chapters/implementation/application_overview.tex
+INPUT ./chapters/implementation/application_overview.tex
+INPUT ./chapters/implementation/application_overview.tex
+INPUT chapters/implementation/application_overview.tex
+INPUT ./figures/multi_sampling.png
+INPUT ./figures/multi_sampling.png
+INPUT ./figures/multi_sampling.png
+INPUT ./figures/multi_sampling.png
+INPUT ./figures/multi_sampling.png
 INPUT ./chapters/results_and_discussion.tex
 INPUT ./chapters/results_and_discussion.tex
 INPUT ./chapters/results_and_discussion.tex

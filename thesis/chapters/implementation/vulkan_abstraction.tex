@@ -12,10 +12,13 @@ Since C++11 the language supports so-called smart pointers, which make memory ma
 \subsection{The Builder Pattern}\label{subsec:builder-pattern}
 As mentioned, before we want the creation of \getVkObjects{} to be very explicit. The first method to create objects in C++ you think of are constructors, but they prove to be problematic for a couple of reasons. The first problem is that constructors are often called implicitly (e.g. the default constructor gets called when declaring a variable). Default construction only makes sense for very few \getVkObjects{} (like for example a VkFence) and we do not want a \getVkObject{} to be created when implicitly (or explicitly) calling the default constructor. So, for that reason, the default constructor simply does not create a \getVkObject{} or, in other words, leaves the handle at \code{VK\_NULL\_HANDLE}. Now if a different constructor actually creates an object, the behavior of constructors becomes inconsistent regarding \getVkObject{} creation. In addition to that, \getVkObjects{} are almost always created using a \code{*CreateInfo} struct, which may take a lot of parameters. To solve all of these issues we implemented a \code{Builder} class for most \getVkObjects{}. Some exceptions are \code{Fence} and \code{ImageView}, which are created with \code{Fence::create} and \code{ImageView::create\_from} respectively. This makes it very clear when a \getVkObject{} is created, since it can only be created using a \code{Builder} or a static method (like \code{Fence::create}) and especially it can never be created by a constructor. This is also the reason \getVkObjects{} never have constructor, besides the default constructor.
 
-\begin{lstlisting}[language=C++]
+\begin{figure}[H]
+    \begin{lstlisting}[language=C++]
 
-vk::Buffer buffer; // declare a buffer (handle is VK_NULL_HANDLE)
+// declare the buffer (handle is VK_NULL_HANDLE)
+vk::Buffer buffer;
 
+// creating the buffer
 buffer = vk::BufferBuilder()
     .add_usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT)
     .add_usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
@@ -24,7 +27,10 @@ buffer = vk::BufferBuilder()
     .build();
 
 
-\end{lstlisting}
+    \end{lstlisting}
+    \caption{Builder pattern}
+    \label{fig:builder-pattern}
+\end{figure}
 
 \subsection{Basic Vulkan Object Structure}\label{subsec:basic-vulkan-object}
 

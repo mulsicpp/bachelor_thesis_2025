@@ -1,0 +1,50 @@
+
+\section{Application Overview}
+
+In this section we will take a look at what our application does exactly. We can start our application with some options:
+
+\begin{itemize}
+    \item \textbf{Test Scene}: The scene, from a set of test scenes, that we want to run.
+    \item \textbf{Pipeline}: The pipeline we want to use to render the scene (see \autoref{subsec:pipelines}).
+    \item \textbf{Frame Count}: The number of frames to be rendered.
+    \item \textbf{Resolution}: The resolution of our frames.
+    \item \textbf{SPP (Samples per Pixel)}: Number of rays cast per pixel (see \autoref{subsec:multi-sampling}).
+    \item \textbf{Delta Time}: The amount of time the animation should move between frames.
+    \item \textbf{Rebuild Frequency}: Number of frames, after which a rebuild of the scene is done.
+    \item \textbf{Fast Build vs Fast Trace}: Either prefers fast builds or fast ray tracing.
+\end{itemize}
+
+At the start, the application creates the desired ray tracing pipeline and loads the specified test scenes. It then applies the scenes animation for the current time, updates the nodes global transforms, skins our meshes and updates the scenes acceleration structures. After that, it traces the rays and advances the animation time by the delta time. These steps are repeated for the specified number of frames.
+
+The application tracks the duration of acceleration structure updates, tracing of rays and their combined time for each frame. At the end, the application stores list of tracked times, together with their averages, in a CSV file. 
+
+\subsection{Pipelines}\label{subsec:pipelines}
+
+There are three possible pipelines:
+
+\begin{itemize}
+    \item \textbf{Basic Pipeline}
+    
+    This pipeline is a very basic, which only casts primary rays. If a primary ray hits any object, it returns the color white, otherwise it will returns the color black.
+
+    \item \textbf{Standard Pipeline}
+    
+    This pipeline is an extension of the basic pipeline. Its shaders have access to a directional light source and the scene's geometry. Now when a ray hits, we can use this information to apply some simple shading.
+
+    \item \textbf{Shadow Pipeline}
+    
+    This pipeline is an extension of the standard pipeline, which uses secondary rays. When a primary ray hits a surface, a shadow ray is cast from the surface point towards the light. This ray checks, if the path to the light is unobstructed, before shading the sample.
+\end{itemize}
+
+\subsection{Multi-Sampling}\label{subsec:multi-sampling}
+
+Our application also supports multi-sampling, which is a common method to do anti-aliasing. We also use multi-sampling in our application to increase the number of rays in our test scenes without having to use gigantic images.
+
+We use a very simple method, where we devide each pixel into an $n \times n$ grid. This means the the number of samples per pixel needs to be a square number. We then cast one ray through the center of every grid cell and take the average of the samples to determine the pixels final color.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/multi_sampling.png}
+    \caption{Multi-Sampling Grid}
+    \label{fig:multi-sampling}
+\end{figure}
