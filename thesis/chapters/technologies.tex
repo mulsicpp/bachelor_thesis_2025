@@ -54,20 +54,19 @@ Memory Management in Vulkan is quite tricky. For example, when a buffer or image
 
 Initializing Vulkan involves a lot of boilerplate code, which will be basically the same in every Vulkan application. \textbf{vk-bootstrap} can reduce the amount of boilerplate code in a project.
 
-This library simplifies the tedious process of:
+This library simplifies the process of:
 
 \begin{itemize}
     \item Instance creation
     \item Physical Device selection
     \item Device creation
-    \item Getting queues
+    \item Queue aquisition
     \item Swapchain creation
 \end{itemize}
-~\parencite{vk-bootstrap}
 
 \subsection{cgltf}
 
-\textbf{cgltf} is used to load a GLTF file in the project. It parses the GLTF file, which is stored in JSON. It would also have been possible to read the JSON directly, but cgltf validates the file, loads the required buffers from their BIN files into memory, and creates a \code{cgltf\_data} struct, which is a lot more comfortable to use. Our project does not use this structure directly, but instead uses it to generate a \code{Scene} object.
+\textbf{cgltf} is used to load a glTF file in the project. It parses the glTF file, which is stored in JSON. It would also have been possible to read the JSON directly, but cgltf validates the file, loads the required buffers from their BIN files into memory, and creates a \code{cgltf\_data} struct, which is a lot more comfortable to use. Our project does not use this structure directly, but instead uses it to generate a \code{Scene} object.
 
 \subsection{CLI11}
 

@@ -5,16 +5,16 @@ In this section we are looking at the structure and behaviour of our implementat
 
 \subsection{glTF Structure}
 
-A glTF stores its data in the JSON format. There different types of objects if glTF, each of them is stored in an array. An objects often references an other object by its index in the respective array. The objects we are interested in are:
+A glTF file stores its data in the JSON format. There are different types of objects in glTF and each of them is stored in an array. An objects can reference an other object by its index in the respective array. The objects we are interested in are:
 
 \begin{itemize}
     \item \textbf{Buffer, Buffer view and Accessor}
     
-    These three objects work together closely. A buffer stores a block of binary, usually contained in a separate BIN file. A buffer view describes a certain part of a buffer. It references a certain buffer and contains an offset, length and optional stride. A buffer view sees the data as just raw data. To associate some kind of meaning to the data we use an accessor. It references a buffer view with a certain offset and also contains the number of elements, as well as the type (e.g. scalar, vec3, mat4, ...) and component type (e.g. float, unsigned int, ...). Accessors are later used for things like vertex attributes and joint matrices.
+    These three objects work together closely. A buffer stores a block of binary data, usually contained in a separate BIN file. A buffer view describes a certain part of a buffer. It references a certain buffer and contains an offset, length and optional stride. A buffer view sees the data as just raw bytes. To associate some kind of meaning to the data we use an accessor. It references a buffer view with a certain offset and contains the number of elements, as well as the type (e.g. scalar, vec3, mat4, ...) and component type (e.g. float, unsigned int, ...) of the elements. Accessors can be used for things like vertex attributes and joint matrices.
 
     \item \textbf{Mesh}
     
-    A mesh stores a static 3D model. It contains a material and an array of primitives. Each primitive has a mode (e.g. points, lines, triangles), and optional accessor for indices and a set of accessors used for the different vertex attributes (e.g. positions, normals, uv coordiantes, vertex colors, joint weights).
+    A mesh stores a static 3D model. It contains a material and an array of primitives. Each primitive has a mode (e.g. points, lines, triangles), an optional accessor for indices and a set of accessors used for the different vertex attributes (e.g. positions, normals, uv coordiantes, vertex colors, joint weights).
 
     \item \textbf{Skin}
     
@@ -22,28 +22,28 @@ A glTF stores its data in the JSON format. There different types of objects if g
 
     \item \textbf{Node}
     
-    This represents a node in the scene graph. A node always has a transform, which is either represented by a 4x4 matrix or a scale(vec3), rotation(quaternion) and translation(vec3). A node can have an array of child nodes, which inherit the transform of the parent node. In other words, a nodes transform is applied in the parent nodes coordinate system.
+    This represents a node in the scene graph. A node always has a transform, which is either represented by a 4x4 matrix or a scale (vec3), rotation (quaternion) and translation (vec3). A node can have an array of child nodes, which inherit the transform of the parent node. In other words, a nodes transform is applied in the parent nodes coordinate system.
     
-    A node can optionally also contain a mesh, which is gonna be transformed by the nodes transform. If a mesh is present, the can also contain a skin. The nodes skin will deform the nodes mesh during an animation.
+    A node can optionally also contain a mesh and, if a mesh is present, also a skin. The skin can deform the node's mesh during an animation.
 
     \item \textbf{Scene}
     
-    A scene contains an array of root nodes. These nodes as well as all of their children are part of that scene.
+    A scene contains an array of root nodes. These nodes and all of their children are part of that scene.
 
     \item \textbf{Animation}
     
-    An animation has an array of channels and an array of samplers. A channel describes, which property is being sampled during the animation. It contains the effected node and a path the effected property of the node (e.g. "transform", "scale", "rotation"). It also holds a reference to one of the animations samplers. 
+    An animation has an array of channels and an array of samplers. A channel describes, which property is being sampled during the animation. It contains the effected node and a path for the effected property of the node (e.g. "transform", "scale", "rotation"). It also holds a reference to one of the animations samplers. 
     
     A sampler is used to calculate the value of a property at a certain point in time from a set of key frames. It contains two accessors, one for the time of the key frames and one for the value of the keyframes. Additionally, a sampler contains the type of interpolation, that should be used to sample a value.
     
 
 \end{itemize}
 
-There are also some other objects (e.g. materials, textures and cameras), but since we dont use them for our project, we don't explain them here.
+There are also some other objects (e.g. materials, textures and cameras), but since they are not relevant in our application, we don't explain them here.
 
 \subsection{Scene Structure}
 
-We will now take a look at the structure of our scene implementation. For this we will look at the different C++ classes we used.
+We will now take a look at the structure of our scene implementation. For this we will look at the C++ classes we used to implement the different glTF objects.
 
 
 \subsubsection{The \code{Scene} class}
@@ -109,7 +109,7 @@ The animation itself also has an \code{apply\_for} function, which iterates over
 
 glTF uses buffers, buffer views and accessors. We dont use the data in the glTF buffers directly, but we read the data and lay it out in a more convenient way. A glTF accessor may access data, that is interleaved with other data, or sparse data. Additionally, the accessor's component type may not match our component type. However, we want to have our data lined up in memory sequentially and of a fixed type. Luckily, the cgltf library offers the function \code{cgltf\_accessor\_unpack\_floats}. This function reads all the values of the accessor, converts the components of the values to \code{float} and stores the values sequentially in a target buffer. The function \code{cgltf\_accessor\_unpack\_indices} does the equivalent for \code{unsigned int}s.
 
-We create one buffer for each usage type of our data. We have one buffer for the vertex indices, one for static vertex positions of the mesh and one for dynamic vertex positions, that may be different for each mesh. An attribute can then reference a sub-subsection into one of these buffers using a sub-buffer. A sub-buffer has a reference to the buffer of intrest using a \code{ptr::Shared<vk::Buffer>}, as well as an offset and a length. We do not need to store the type of the elements in the sub-buffer, since the type is fixed and can be determined by the variable. We know that the sub-buffers \code{positions} in \code{Mesh} and \code{dynamic\_positions} in \code{Node} store a sequence of \code{vec3}s, while the sub-buffer \code{indices} in \code{Mesh} stores a sequence of \code{unsigned int}s.
+We create one buffer for each usage type of our data. We have one buffer for the vertex indices, one for static vertex positions of the mesh and one for dynamic vertex positions, that may be different for each mesh. An attribute can then reference a sub-subsection into one of these buffers using a sub-buffer. A sub-buffer has a reference to the buffer of intrest using a \code{ptr::Shared<Buffer>}, as well as an offset and a length. We do not need to store the type of the elements in the sub-buffer, since the type is fixed and can be determined by the variable. We know that the sub-buffers \code{positions} in \code{Mesh} and \code{dynamic\_positions} in \code{Node} store a sequence of \code{vec3}s, while the sub-buffer \code{indices} in \code{Mesh} stores a sequence of \code{unsigned int}s.
 
 The following figure gives a little bit more insight, of how these sub-buffers are used.
 

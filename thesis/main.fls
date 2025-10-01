@@ -868,11 +868,11 @@ INPUT ./figures/multi_sampling.png
 INPUT ./figures/multi_sampling.png
 INPUT ./figures/multi_sampling.png
 INPUT ./figures/multi_sampling.png
-INPUT ./chapters/results_and_discussion.tex
-INPUT ./chapters/results_and_discussion.tex
-INPUT ./chapters/results_and_discussion.tex
-INPUT ./chapters/results_and_discussion.tex
-INPUT chapters/results_and_discussion.tex
+INPUT ./chapters/results.tex
+INPUT ./chapters/results.tex
+INPUT ./chapters/results.tex
+INPUT ./chapters/results.tex
+INPUT chapters/results.tex
 INPUT ./figures/brainstem_normal.png
 INPUT ./figures/brainstem_normal.png
 INPUT ./figures/brainstem_normal.png

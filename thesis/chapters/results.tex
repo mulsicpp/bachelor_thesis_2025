@@ -1,5 +1,5 @@
 
-\chapter{Results and Discussion}
+\chapter{Results}
 
 \section{Pipelines}
 
@@ -188,6 +188,8 @@ This strategy is a middle groud between the previous two. The update duration is
 Because of the presented measurements someone might assume that the third strategy is the best one, but our measurements can not be generalized. If, for example, we keep increasing the number of rays, sooner or later the strategy of always rebuilding will become more favorable. Always refitting, however, is almost never a good strategy. Even if you are not tracing that many rays, the BVH will become increasingly sub-optimal in a lot of scenarios, which makes always refitting an unsustainable strategy. Though it might be viable for scenes, that never change to much from their initial state.
 
 \section{Fast Build vs. Fast Trace}
+
+We tested the flags \code{PREFER\_FAST\_BUILD} and \code{PREFER\_FAST\_TRACE} for the scene "Eternal Valley" with the standard pipeline. We generated 50 frames with a resolution of $1280 \times 720$ pixels and 64 samples per pixel. We also rebuilt the acceleration structure every frame, since these flags have no effect on refitting.
 
 \begin{figure}[H]
   \centering
