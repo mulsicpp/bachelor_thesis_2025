@@ -181,7 +181,7 @@ This strategy results in very consistent and very short update duration. However
 
 \subsection{Rebuild Every Eight Frames}
 
-This strategy is a middle groud between the previous two. The update duration is usually very short, but every eight frames it spikes due to a rebuild occuring, which also causes the trace duration drops at those points. After each rebuild, the trace duration begins to rise again, but consistent rebuilds prevent is from diverging to far from the initial duration. This strategy has good average update and trace durations, which result in the best total duration on average compared to the other strategies. However, in order to get good results in a real-time application, there needs
+This strategy is a middle groud between the previous two. The update duration is usually very short, but every eight frames it spikes due to a rebuild occuring, which also causes the trace duration drops at those points. After each rebuild, the trace duration begins to rise again, but consistent rebuilds prevent is from diverging to far from the initial duration. This strategy has good average update and trace durations, which result in the best total duration on average compared to the other strategies.
 
 \subsection{Discussion}
 
@@ -206,6 +206,6 @@ We tested the flags \code{PREFER\_FAST\_BUILD} and \code{PREFER\_FAST\_TRACE} fo
   \caption{Comparing the build and trace duration of the flag \code{PREFER\_FAST\_BUILD} to the flag \code{PREFER\_FAST\_TRACE}}.
 \end{figure}
 
-We can see the expected outcome of \code{PREFER\_FAST\_BUILD} having shorter build durations, but longer trace durations compared to \code{PREFER\_FAST\_TRACE}. It is important to mention that these flags do not impact refitting. These flags effect the structure of the BVH, which refitting does not touch.
+We can see the expected outcome of \code{PREFER\_FAST\_BUILD} having shorter build durations and longer trace durations compared to \code{PREFER\_FAST\_TRACE}. It is important to mention that these flags do not impact refitting. These flags only effect the structure of the BVH, which refitting does not touch.
 
-Whether you should use \code{PREFER\_FAST\_BUILD} or \code{PREFER\_FAST\_TRACE} depends on the scenario. If you are tracing a lot of rays and the trace duration is the bottleneck in your application, you should probably use \code{PREFER\_FAST\_BUILD}. On the other hand, if most of your time is spent on rebuilding (not refitting!), \code{PREFER\_FAST\_TRACE} is most likely the better choice.
+Whether you should use \code{PREFER\_FAST\_BUILD} or \code{PREFER\_FAST\_TRACE} depends on the specific scenario. If you are tracing a lot of rays and the trace duration is the bottleneck in your application, you should probably use \code{PREFER\_FAST\_BUILD}. On the other hand, if most of your time is spent on rebuilding (not refitting!), \code{PREFER\_FAST\_TRACE} is most likely the better choice.

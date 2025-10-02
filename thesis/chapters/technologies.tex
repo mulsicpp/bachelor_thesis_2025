@@ -34,25 +34,25 @@ At the start of the project, Rust was considered for the project's programming l
 
 \subsection{glTF}\label{subsec:gltf}
 
-The dynamic 3D scenes that the project uses are stored in the \textbf{glTF-2.0} file format. It stores its models in a scene graph and supports skeletal animation and morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary BIN files, while textures are stored in image files (e.g., PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
+The dynamic 3D scenes that the project uses are stored in the \textbf{glTF-2.0} \parencite{gltf-spec} file format. It stores its models in a scene graph and supports skeletal animation and morph animations. By default, it stores the scene data in the popular JSON format. Additionally, buffers are stored in binary BIN files, while textures are stored in image files (e.g., PNG, JPEG, …). Since the file format was developed by Khronos Group, which is also behind Vulkan, the data inside the buffers is laid out in a way that makes it easy to use in Vulkan.
 
 \subsection{CSV}
 
-\textbf{CSV} stands for Comma-Separated Values and is used to store tabular data. It is a text-based format and, therefore, very easy to use. Each line of text inside a CSV file represents a row, and the values of that row are separated by commas. We use it to store our benchmarks in our projects. We can later import a CSV file into an application like Excel to create graphs and analyse our gathered data.
+\textbf{CSV} \parencite{csv} stands for Comma-Separated Values and is used to store tabular data. It is a text-based format and, therefore, very easy to use. Each line of text inside a CSV file represents a row, and the values of that row are separated by commas. We use it to store our benchmarks in our projects. We can later import a CSV file into an application like Excel to create graphs and analyse our gathered data.
 
 \section{Libraries}
 
 \subsection{volk}
 
-\textbf{volk} is a meta-loader for Vulkan. It allows you to dynamically load entry points required to use Vulkan without linking to vulkan-1.dll or statically linking Vulkan loader. Additionally, volk simplifies the use of Vulkan extensions by automatically loading all associated entry points.
+\textbf{volk} \parencite{volk} is a meta-loader for Vulkan. It allows you to dynamically load entry points required to use Vulkan without linking to vulkan-1.dll or statically linking Vulkan loader. Additionally, volk simplifies the use of Vulkan extensions by automatically loading all associated entry points.
 
 \subsection{VMA (Vulkan Memory Allocator)}\label{subsec:vma}
 
-Memory Management in Vulkan is quite tricky. For example, when a buffer or image is created in Vulkan, no memory is associated with it. The programmer must manually allocate a block of memory with a specific type from a particular memory heap. The properties of these memory heaps depend on the underlying physical device and need to be queried first. Additionally, creating a new memory allocation for each resource may be suboptimal, since the number of allocations can be very limited and many allocations may negatively impact performance. \textbf{VMA (Vulkan Memory Allocator)} simplifies, automates, and optimizes memory management in Vulkan.
+Memory Management in Vulkan is quite tricky. For example, when a buffer or image is created in Vulkan, no memory is associated with it. The programmer must manually allocate a block of memory with a specific type from a particular memory heap. The properties of these memory heaps depend on the underlying physical device and need to be queried first. Additionally, creating a new memory allocation for each resource may be suboptimal, since the number of allocations can be very limited and many allocations may negatively impact performance. \textbf{VMA (Vulkan Memory Allocator)} \parencite{vma} simplifies, automates, and optimizes memory management in Vulkan.
 
 \subsection{vk-bootstrap}
 
-Initializing Vulkan involves a lot of boilerplate code, which will be basically the same in every Vulkan application. \textbf{vk-bootstrap} can reduce the amount of boilerplate code in a project.
+Initializing Vulkan involves a lot of boilerplate code, which will be basically the same in every Vulkan application. \textbf{vk-bootstrap} \parencite{vk-bootstrap} can reduce the amount of boilerplate code in a project.
 
 This library simplifies the process of:
 

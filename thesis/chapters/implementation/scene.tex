@@ -75,8 +75,8 @@ The \code{Skin} class is relatively simple and matches the glTF skin object almo
 
 The \code{Node} class directly represents a node in glTF. As we mentioned previously the transform of a node can either be stored as a matrix or separated into a translation, rotation and scale. To model that in our application, we added the struct \code{RawTransform}, which contains the transform, rotation and scale. We also have the struct \code{NodeTransform}, which stores the local transform of a node and looks like this:
 
+\begin{figure}[H]
 \begin{lstlisting}[language=C++]
-
 struct NodeTransform {
     bool raw;
     union {
@@ -84,8 +84,9 @@ struct NodeTransform {
         RawTransform raw;
     } transform;
 }
-
 \end{lstlisting}
+\caption{Structure used to store local transform of a node}
+\end{figure}
 
 The union \code{transform} is used to store either a \code{glm::mat4} or a \code{RawTransform}. The boolean \code{raw} is used to determine, how the union should be interpreted, i.e. if \code{raw} is \code{true}, the union contains a raw transform, otherwise it contains a matrix. The node also stores the global transform as a 4x4 matrix, but it is only valid after calling \code{Node::update\_global\_transform}.
 

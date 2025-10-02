@@ -117,13 +117,14 @@ The \code{ShaderGroup}s used inside the \code{SBTInfo} must be a sub-set of the 
 In the following code sample we can see how to create the ray tracing pipeline and SBT:
 \begin{figure}[H]
 \begin{lstlisting}[language=C++]
-
+// creating shader groups from shaders
 ShaderGroup ray_gen_group = ShaderGroup::create_general(ray_gen_shader);
 ShaderGroup miss_group = ShaderGroup::create_general(miss_shader);
 ...
 ShaderGroup hit_group = ShaderGroup::create_hit_closest(closest_hit_shader);
 ...
 
+//creating the ray tracing pipeline
 RtxPipeline pipeline = RtxPipelineBuilder()
     .add_shader_group(ray_gen_group)
     .add_shader_group(miss_group)
@@ -133,10 +134,11 @@ RtxPipeline pipeline = RtxPipelineBuilder()
     .max_ray_recursion_depth(1)
     .build();
 
+//createing the SBT
 SBT sbt = pipeline.build_sbt(SBTInfo()
-    .ray_gen_group(ray_gen_group)
-    .miss_groups({ miss_group, ... })
-    .hit_groups({ hit_group, ... }));
+    .ray_gen_group(ray_gen_group)     // ray gen row
+    .miss_groups({ miss_group, ... }) // miss row
+    .hit_groups({ hit_group, ... })); // hit row
 
 
 \end{lstlisting}
