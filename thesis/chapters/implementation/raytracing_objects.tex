@@ -9,14 +9,14 @@ We are going to start with the acceleration structures. Acceleration structures 
 \begin{itemize}
     \item \textbf{Bottom Level Acceleration Structure (BLAS)}
     
-    The lower level, the bottom-level acceleration structure, contains the triangles or axis-aligned bounding boxes (AABBs) of custom geometry that make up the scene~\parencite{raytracing-in-vulkan}. This usually corresponds to a mesh, that is used in a scene.
+    The lower level, the bottom-level acceleration structure, contains the triangles or axis-aligned bounding boxes (AABBs) of custom geometry that make up the scene~\parencite{raytracing-in-vulkan}. The BLAS usually corresponds to a mesh that is used in a scene.
 
     \item \textbf{Top Level Acceleration Structure (TLAS)}
     
-    The upper level, the top-level acceleration structure, contains references to a set of bottom-level acceleration structures, each reference including shading and transform information for that reference~\parencite{raytracing-in-vulkan}. This represents a scene filled with objects, that each can have a different transformation and the mesh.
+    The upper level, the top-level acceleration structure, contains references to a set of bottom-level acceleration structures, each reference including shading and transform information for that reference~\parencite{raytracing-in-vulkan}. The TLAS represents a scene filled with objects, each of which can have a different transformation and a mesh.
 \end{itemize}
 
-The relationship between TLAS and BLAS can be seen in this figure:
+The relationship between TLAS and BLAS can be seen in \autoref{fig:acceleration-structure}.
 
 \begin{figure}[H]
     \centering
@@ -25,34 +25,35 @@ The relationship between TLAS and BLAS can be seen in this figure:
     \label{fig:acceleration-structure}
 \end{figure}
 
-Vulkan represents both types of with the \code{VkAccelerationStructureKHR} handle. This is however just a handle with some meta-data and we need a \code{VkBuffer} to store the actual data of the acceleration structure (e.g. the BVH). Before building an acceleration structure we need to reference the data used for building in a \code{VkAccelerationStructureGeometryKHR}. For the BLAS this is usually a list of trianges (even though other primitives are also possible) and for the TLAS it is a list of instances, with transfrom and shading information as well as a handle to a BLAS. Once our \code{VkAccelerationStructureGeometryKHR} is ready we can query for the \code{VkAccelerationStructureBuildSizesInfoKHR}, which contains the variable \code{accelerationStructureSize}, which is the size for the buffer, that stores the acceleration structure, as well as the variables \code{updateScratchSize} and \code{buildScratchSize}, which are the required sizes of a temporary scratch buffer which is only used during building/updating the acceleration structure. Now we can build an acceleration structure using the command \code{vkCmdBuildAccelerationStructuresKHR}.
+Vulkan represents both types using the \code{VkAccelerationStructureKHR} handle. This handle only contains some metadata; the actual data of the acceleration structure (e.g., the BVH) is stored in a \code{VkBuffer}. Before building an acceleration structure, we need to reference the data used for building in a \code{VkAccelerationStructureGeometryKHR}. For a BLAS, this is typically a list of triangles (other primitives are also possible), and for a TLAS, it is a list of instances containing transformation and shading information, as well as a handle to a BLAS. Once the \code{VkAccelerationStructureGeometryKHR} is prepared, we can query \code{VkAccelerationStructureBuildSizesInfoKHR}, which contains \code{accelerationStructureSize} (the buffer size for the acceleration structure) and \code{updateScratchSize} and \code{buildScratchSize} (the sizes of temporary scratch buffers used during building or updating). Finally, we can build the acceleration structure using \code{vkCmdBuildAccelerationStructuresKHR}.
 
-We encapsule a BLAS and TLAS in the classes \code{Blas} and \code{Tlas} respectively. They both have the following member variables:
+We encapsulate a BLAS and TLAS in the classes \code{Blas} and \code{Tlas}, respectively. They both have the following member variables:
 
 \begin{itemize}
     \item \code{blas}/\code{tlas}: The \code{Handle<VkAccelerationStructureKHR>}.
-    \item \code{buffer}: The buffer that stores the data for the acceleration structure.
+    \item \code{buffer}: The buffer that stores the acceleration structure data.
     \item \code{build\_scratch\_buffer}: The scratch buffer used during building.
     \item \code{update\_scratch\_buffer}: The scratch buffer used during updating/refitting.
 \end{itemize}
 
-These classes also have a builder (see \autoref{subsec:builder-pattern} and \autoref{subsec:basic-vulkan-object}), which expects a list of \code{BlasGeometry}s when building a \code{Blas} and a list of \code{TlasInstance}s when building a \code{Tlas}. A \code{BlasGeometry} describes the vertex buffer and optional index buffer used for a triangle mesh. A \code{TlasInstance} on the other hand stores a reference to a BLAS in a \code{ptr::Shared<Blas>} and a transformation. The builder also has the property \code{dynamic}, which needs to be set to \code{true}, if you want to refit the acceleration structure later. It also has the property \code{fast\_build}, which if set to \code{true} will set the flag \code{VK\_BUILD\_ACCELERATION\_STRUCTURE\_PREFER\_FAST\_BUILD\_BIT\_KHR} instead of \code{VK\_BUILD\_ACCELERATION\_STRUCTURE\_PREFER\_FAST\_TRACE\_BIT\_KHR} and prefer a fast build over a fast trace.
+These classes also have a builder (see \autoref{subsec:builder-pattern} and \autoref{subsec:basic-vulkan-object}), which expects a list of \code{BlasGeometry}s when building a \code{Blas} and a list of \code{TlasInstance}s when building a \code{Tlas}. A \code{BlasGeometry} describes the vertex buffer and optional index buffer used for a triangle mesh, while a \code{TlasInstance} stores a reference to a BLAS in a \code{ptr::Shared<Blas>} together with a transformation. The builder has a \code{dynamic} property, which must be set to \code{true} if the acceleration structure will be refitted later. It also has a \code{fast\_build} property, which, if set to \code{true}, will prefer a fast build over fast tracing by setting the flag \code{PREFER\_FAST\_BUILD} instead of \code{PREFER\_FAST\_TRACE}.
 
-When we want to update an acceleration structure, there are two functions we can use:
+There are two ways to update an acceleration structure:
 
 \begin{itemize}
-    \item \code{rebuild}:
+    \item \code{rebuild}
     
-    This function recreates the BVH from scratch. It essentially does the same thing as the \code{build} function in the builder, except that it uses the already created handle and buffers and does not create them again.
+    Recreates the BVH from scratch. It performs the same steps as the builder's \code{build} function, but uses the already created handle and buffers without creating them again.
 
-    \item \code{refit}:
-    
-    This function does not change the structure of the BVH. Instead it only adjusts the bounds of the AABBs in the BVH for the new vertex positions. This is faster than rebuilding from scratch, but can lead to a sub-optimal BVH, which results in higher ray tracing durations.
+    \item \code{refit}
+
+    Adjusts only the bounds of the AABBs in the existing BVH according to new vertex positions, which is faster than rebuilding from scratch but may result in a suboptimal BVH, which can increase ray tracing time.
+
 \end{itemize}
 
 \subsection{Raytracing Pipeline}
 
-In order to issue ray tracing commands we need a ray tracing pipeline. The following figure shows a flow chart of the ray tracing pipeline.
+To issue ray tracing commands, we need a ray tracing pipeline. \autoref{fig:raytracing-pipeline} shows a flow chart of the pipeline.
 
 \begin{figure}[H]
     \centering
@@ -61,24 +62,24 @@ In order to issue ray tracing commands we need a ray tracing pipeline. The follo
     \label{fig:raytracing-pipeline}
 \end{figure}
 
-A raytracing pipeline in Vulkan stores a list of shader groups. A shader group consists of one or more shaders and in our application we are only interested in two types of shader groups:
+A Vulkan raytracing pipeline organizes shaders into shader groups. In our application, we use two types:
 
 \begin{itemize}
     \item \textbf{General Shader Group}
     
-    A general shader group only stores a single "general" shader, which it can call independently of any ray/triangle intersections or hits. We use this type of shader group in the ray generation and miss stage of the pipeline.
+    A general shader group contains a single general shader that can be called independently of any ray/triangle intersection. This type is used in the ray generation and miss stages.
 
     \item \textbf{Triangle Hit Shader Group}
     
-    A triangle hit shader group contains the any-hit shader and the closest-hit shader, which can be called when a ray/triangle intersection occurs. It calls the any-hit shader for every ray/triangle intersection along the ray and the closest-hit shader only for the first intersections, if the ray intersects a triangle at least once.
+    A triangle hit shader group contains an any-hit shader and a closest-hit shader, executed when a ray intersects a triangle. The any-hit shader runs for every intersection along the ray, while the closest-hit shader runs only for the first intersection.
 
 \end{itemize}
 
-The class \code{ShaderGroup} implements shader groups in our application. Each \code{ShaderGroup} contains a unique identifier, which can be accessed using the function \code{id}. It contains either a \code{ShaderGroupGeneral} or a \code{ShaderGroupHit} struct inside a \code{std::variant}. A \code{ShaderGroupGeneral} contains the shader \code{general}, while a \code{ShaderGroupHit} contains the shaders \code{closest\_hit} and \code{any\_hit}.
+The class \code{ShaderGroup} implements shader groups in our application. Each \code{ShaderGroup} has a unique identifier accessible via the function \code{id}. It stores either a \code{ShaderGroupGeneral} or a \code{ShaderGroupHit} struct in a \code{std::variant}. \code{ShaderGroupGeneral} contains the \code{general} shader, while \code{ShaderGroupHit} contains \code{closest\_hit} and \code{any\_hit} shaders.
 
-The raytracing pipeline is contained in the class \code{RtxPipeline}, which is created from a list of \code{ShaderGroup}s. The \code{ShaderGroup} objects are just descriptions of the shader groups. The actual shader groups get allocated by the raytracing pipeline and can be accessed through an array of shader group handles. The \code{RtxPipeline} stores a map from the \code{id} of every \code{ShaderGroup} to the index of the shader group handles, to access the handles easier.
+The raytracing pipeline is encapsulated in the class \code{RtxPipeline}, which is created from a list of \code{ShaderGroup}s. The \code{ShaderGroup} objects are only descriptions; the pipeline allocates the actual shader groups and stores a list of shader group handles. \code{RtxPipeline} also maintains a map from each \code{ShaderGroup} ID to the index of the shader group handle array for easy access.
 
-The raytracing pipeline also needs a pipeline layout, which is stored in a \code{PipelineLayout} object and it needs to set the maximum recursion depth of rays in \code{max\_ray\_recursion\_depth}.
+The pipeline also needs a pipeline layout, given by a \code{PipelineLayout} object, and a maximum recursion depth (\code{max\_ray\_recursion\_depth}) for rays.
 
 \subsection{Shader Binding Table}
 
@@ -91,20 +92,20 @@ Once the ray tracing pipeline is ready we need to create a shader binding table 
     \label{fig:sbt}
 \end{figure}
 
-As we can see it has 4 rows:
+As seen in \autoref{fig:sbt}, the SBT has four rows:
 
 \begin{itemize}
-    \item \textbf{Ray Generation}: Shader group used for ray generation.
-    \item \textbf{Miss}: Shader groups that can be used when a ray misses.
-    \item \textbf{Hit}: Shader groups that can be used when a ray intersects with at least one object.
-    \item \textbf{Callable}: Shader groups, which contain arbitrary shaders that can be called by other shaders and are not tied to a specific ray traversal event. (Not used in our application)
+\item \textbf{Ray Generation}: Shader group used for ray generation.
+\item \textbf{Miss}: Shader groups used when a ray misses.
+\item \textbf{Hit}: Shader groups used when a ray intersects at least one object.
+\item \textbf{Callable}: Arbitrary shaders callable by other shaders, not tied to a specific ray traversal event (not used in our application).
 \end{itemize}
 
-The shader binding table needs to be stored in a \code{VkBuffer} and the rows of the table are represented by a \code{VkStridedDeviceAddressRegionKHR}, which references a region inside that buffer. A \code{VkStridedDeviceAddressRegionKHR} also contains a stride, which specifies how many bytes we need to get from one element to the next in that region.
+The SBT is stored in a \code{VkBuffer}. A \code{VkStridedDeviceAddressRegionKHR}, which references a buffer region and specifies the stride between elements, represents a row in the SBT.
 
-When casting a ray in a shader using the function \code{traceRayEXT}, we can specify a miss offset, which is the offset of the shader group in the miss row, that should be used when the ray misses. In a similar way we can also define an offset into the hit shader groups row, to specify which shader group our ray should use when a hit occurs. Every instance in the TLAS can also define a an additional offset into the hit shader group, which gets added to the previously mentioned offset.
+When casting a ray with \code{traceRayEXT}, we can specify a miss offset and a hit offset, indicating which shader group to use. Each TLAS instance can also define an additional offset for the hit shader group, added to the previous offset.
 
-The SBT is contained in the \code{SBT} class. Because the SBT is strongy dependend on the raytracing pipeline, \code{SBT} does not use a builder, but rather we build it with the member function \code{build\_sbt} inside \code{RtxPipeline} and a \code{SBTInfo} struct as a parameter. \code{SBTInfo} has the following member variables:
+The SBT is implemented in the \code{SBT} class. Since the SBT strongly depends on the raytracing pipeline, it does not use a builder. Instead, it is built using the \code{build\_sbt} function in \code{RtxPipeline}, with a \code{SBTInfo} struct as a parameter. \code{SBTInfo} contains:
 
 \begin{itemize}
     \item \code{ray\_gen\_group}: The \code{ShaderGroup} used for ray generation.
@@ -112,9 +113,10 @@ The SBT is contained in the \code{SBT} class. Because the SBT is strongy depende
     \item \code{hit\_groups}: A list of \code{ShaderGroup}s, which can be used when a ray hits.
 \end{itemize}
 
-The \code{ShaderGroup}s used inside the \code{SBTInfo} must be a sub-set of the \code{ShaderGroup}s used to create the ray tracing pipeline. When building the SBT we first retrieve the array of shader group handles of the ray tracing pipeline using \code{vkGetRayTracingShaderGroupHandlesKHR} and with the mapping from shader group ID to index we can get the index of the handle for every shader group. We then store the ray generation shader group handle, followed by the sequence of miss shader group handles and finally the sequence of hit shader group handles in the buffer of the \code{SBT}. Finally, we set the \code{VkStridedDeviceAddressRegionKHR} for every row and our \code{SBT} is completed. We can now use our table rows when calling \code{vkCmdTraceRaysKHR}.
+The \code{ShaderGroup}s in \code{SBTInfo} must be a subset of the shader groups used to create the pipeline. When building the SBT, we first retrieve the array of shader group handles using \code{vkGetRayTracingShaderGroupHandlesKHR}. Using the ID-to-index map, we get the handle for each shader group and store them in the SBT buffer: ray generation first, followed by miss shaders, then hit shaders. Finally, the \code{VkStridedDeviceAddressRegionKHR} is set for each row, and the SBT is ready for use in \code{vkCmdTraceRaysKHR}.
 
-In the following code sample we can see how to create the ray tracing pipeline and SBT:
+The code sample in \autoref{fig:pipeline-and-sbt-creation} shows the creation of a ray tracing pipeline and SBT:
+
 \begin{figure}[H]
 \begin{lstlisting}[language=C++]
 // creating shader groups from shaders
@@ -143,6 +145,7 @@ SBT sbt = pipeline.build_sbt(SBTInfo()
 
 \end{lstlisting}
 \caption{Sample-code to create ray tracing pipeline and SBT}
+\label{fig:pipeline-and-sbt-creation}
 \end{figure}
 
 \pagebreak

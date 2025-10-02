@@ -2,15 +2,19 @@
 \section{Vulkan Abstraction}
 
 \subsection{Vulkan Handles and Move Semantics}
-As already mentioned in the Methods and Technology chapter, Rust was originally considered as programming language, because it is modern and memory safe. One of Rust's core features is ownership, which means that each value/object can only be owned and managed by a single variable, and when that variable goes out of scope, it alone is responsible for cleaning up the object. When that variable gets assigned to another variable, the new variable becomes the owner (i.e. the value gets moved). Ownership would be a very nice feature to manage Vulkan objects. Vulkan objects should not be copied on assignment but only moved and when the object is no longer needed (i.e. the owner goes out of scope), it should automatically be destroyed.
 
-While C++ does not support ownership directly, it does have so-called move semantics, with which we can emulate ownership. The ownership of Vulkan handles is managed by the \code{Handle<T>} class. To do this the class declares a default constructor, move constructor and destructor and overrides the move assignment operator. It is also important, that the copy constructor and copy assignment operator are deleted. The reason for that is that copying a Vulkan object is usually very expensive or not even possible and it is almost never necessary. When we want to copy an object, we need to explicitly create a new object first, before copying the contents of the other object into it (for example using \code{Buffer::copy\_into}).
+As mentioned in the Methods and Technology chapter, we initially considered Rust as the programming language for our application, because it is modern and memory safe. One of Rust's core features is ownership, which means that each value or object can only be owned and managed by a single variable. When that variable goes out of scope, it is solely responsible for cleaning up the object. If the value is assigned to another variable, the new variable becomes the owner (i.e., the value is moved). Ownership would be a handy feature for managing Vulkan objects. Vulkan objects should not be copied on assignment but only moved, and when the object is no longer needed (i.e., the owner goes out of scope), it should be automatically destroyed.
+
+While C++ does not support ownership directly, it does provide move semantics, which allow us to emulate it. The ownership of Vulkan handles is managed by the \code{Handle<T>} class. To achieve this, the class declares a default constructor, a move constructor, a destructor, and overrides the move assignment operator. It is also important that the copy constructor and copy assignment operator are deleted. The reason is that copying a Vulkan object is usually very expensive or not even possible, and it is almost never necessary. When we actually want to copy an object, we need to explicitly create a new one before copying the contents of the other object into it (for example, using \code{Buffer::copy\_into}).
 
 \subsection{Shared Pointers}
-Since C++11 the language supports so-called smart pointers, which make memory management safer and less complicated. One of these smart pointers is \code{std::shared\_ptr<T>} (or our alias \code{ptr::Shared<T>}). This type of pointer allocates an object, which can then be shared between multiple owners. The object is alive while it has at least one owner, and the last owner, that goes out of scope, cleans up the object. This structure can be combined very nicely with our previously mentioned \code{Handle<T>}. A Vulkan object can only have one owner, which is a harsh limitation and often causes problems. If we wrap the object in a shared pointer, it can be shared across multiple owners.
+
+Since C++11, the language supports smart pointers, which make memory management safer and less complicated. One of these smart pointers is \code{std::shared\_ptr<T>} (or our alias \code{ptr::Shared<T>}). This pointer type allocates an object that can then be shared between multiple owners. The object remains alive as long as at least one owner exists, and the last owner that goes out of scope cleans it up. This structure works very well with our previously mentioned \code{Handle<T>}. A Vulkan object can only have one owner, which is a harsh limitation and often leads to problems. If we wrap the object in a shared pointer, it can be shared across multiple owners.
 
 \subsection{The Builder Pattern}\label{subsec:builder-pattern}
-As mentioned before, we want the creation of Vulkan objects to be very explicit. The first method to create objects in C++ you think of are constructors, but they prove to be problematic for a couple of reasons. The first problem is that constructors are often called implicitly (e.g. the default constructor gets called when declaring a variable). Default construction only makes sense for very few Vulkan objects (like for example a VkFence) and we do not want a Vulkan object to be created when implicitly (or explicitly) calling the default constructor. So, for that reason, the default constructor simply does not create a Vulkan object or, in other words, leaves the handle at \code{VK\_NULL\_HANDLE}. Now if a different constructor actually creates an object, the behavior of constructors becomes inconsistent regarding Vulkan object creation. In addition to that, Vulkan objects are almost always created using a \code{Vk*CreateInfo} struct, which may take a lot of parameters. To solve all of these issues we implemented a \code{*Builder} class for most Vulkan objects. Some exceptions are \code{Fence} and \code{ImageView}, which are created with \code{Fence::create} and \code{ImageView::create\_from} respectively. This makes it very clear when a Vulkan object is created, since it can only be created using a \code{*Builder} or a static method (like \code{Fence::create}) and especially it can never be created by a constructor. This is also the reason Vulkan objects never have a constructor, besides the default constructor.
+As mentioned before, we want the creation of Vulkan objects to be very explicit. The first method you might think of for creating objects in C++ is constructors, but they are problematic for a few reasons. The first issue is that constructors are often called implicitly (e.g., the default constructor is called when declaring a variable). Default construction only makes sense for very few Vulkan objects (such as a \code{VkFence}), and we do not want a Vulkan object to be created when a default constructor is implicitly (or explicitly) called. For this reason, the default constructor simply does not create a Vulkan object and leaves the Vulkan handle at \code{VK\_NULL\_HANDLE}. If another constructor actually creates an object, the behavior of constructors becomes inconsistent with Vulkan object creation. In addition, Vulkan objects are almost always created using a \code{Vk*CreateInfo} struct, which may require many parameters.
+
+To solve these issues, we implemented a \code{*Builder} class for most Vulkan objects. Some exceptions are \code{Fence} and \code{ImageView}, which are instead created with the static methods \code{Fence::create} and \code{ImageView::create\_from}, respectively. That makes it very clear when a Vulkan object is created, since it can only be created using a \code{*Builder} or a static method (such as \code{Fence::create}), and especially because it can never be created by a constructor. For this reason, Vulkan objects never have a constructor other than the default constructor.
 
 \begin{figure}[H]
     \begin{lstlisting}[language=C++]
@@ -34,7 +38,7 @@ buffer = BufferBuilder()
 
 \subsection{Basic Vulkan Object Structure}\label{subsec:basic-vulkan-object}
 
-All of the Vulkan objects follow a basic structure, which can be seen in the following code sample:
+All of the Vulkan objects follow a basic structure, which can be seen in the code sample of \autoref{fig:basic-vulkan-object}.
 
 \begin{figure}[H]
 
@@ -73,39 +77,39 @@ public:
 \caption{The basic structure of every class representing a Vulkan object}\label{fig:basic-vulkan-object}
 \end{figure}
 
-It is important to note, that \code{Foo} is just a placeholder for an actual Vulkan object (like \code{Buffer}, \code{Image} or \code{Pipeline}). Usually, the name of the class is just the name of the Vulkan handle without the "Vk" prefix (e.g. \code{VkBuffer} $\implies$ \code{Buffer}), but there are some exceptions (e.g. a \code{Shader} class holds a \code{VkShaderModule} handle). As we can see, the Vulkan handle is wrapped in the \code{Handle<T>} class, which ensures correct move semantics. The member function \code{handle} allows us to access the raw Vulkan handle.
+It is important to note that \code{Foo} is just a placeholder for an actual Vulkan object (such as \code{Buffer}, \code{Image}, or \code{Pipeline}). Usually, the name of the class is simply the name of the Vulkan handle without the \texttt{Vk} prefix (e.g., \code{VkBuffer} $\implies$ \code{Buffer}), but there are some exceptions (e.g., a \code{Shader} class holds a \code{VkShaderModule} handle). As we can see, the Vulkan handle is wrapped in the \code{Handle<T>} class, which ensures correct move semantics. The member function \code{handle} allows us to access the raw Vulkan handle.
 
-The class inherits from \code{utils::Move} and \code{ptr::ToShared<Foo>}. The \code{utils::Move} class implements the default move constructor and move assignment operator, and it deletes the copy constructor and copy assignment operator. The \code{ptr::ToShared<Foo>} class contains the function \code{to\_shared}, which is just syntax sugar for moving the object into a shared pointer.
+The class inherits from \code{utils::Move} and \code{ptr::ToShared<Foo>}. The \code{utils::Move} class implements the default move constructor and move assignment operator, and deletes the copy constructor and copy assignment operator. The \code{ptr::ToShared<Foo>} class provides the \code{to\_shared} function, which is just syntax sugar for moving the object into a shared pointer.
 
-The additional variables in the class are often used to store meta-data (e.g the format and extent of an image) or to keep other objects alive in a shared pointer, that are referenced by the underlying object (e.g. the \code{RenderPass} is referenced by a \code{Pipeline}).
+Additional member variables in the class are often used to store metadata (e.g., the format and extent of an image) or to keep other objects alive in a shared pointer that are referenced by the underlying object (e.g., a \code{RenderPass} is referenced by a \code{Pipeline}).
 
-The may also be additional functions, which actually use or manipulate the underlying object. Often, these functions have a \code{cmd\_} prefix, which means that they are wrappers around one or multiple commands (e.g. \code{Buffer::cmd\_copy\_into} is a wrapper for the Vulkan function \code{vkCmdCopyBuffer}).
+There may also be additional functions that use or manipulate the underlying object. Often, these functions have a \code{cmd\_} prefix, which means that they are wrappers around one or multiple commands (e.g., \code{Buffer::cmd\_copy\_into} is a wrapper for the Vulkan function \code{vkCmdCopyBuffer}).
 
-Even though not every Vulkan object uses a \code{*Builder} class, it is also shown in the sample code, since most Vulkan objects have one.
+Even though not every Vulkan object uses a \code{*Builder} class, it is shown in the sample code since most Vulkan objects have one.
 
 \subsection{The Vulkan Context}
 
-Before we can actually do any work in Vulkan, we need to do a lot of setup. This usually includes the following steps:
+Before we can do any work in Vulkan, a lot of setup is required, which usually includes the following steps:
 
 \begin{enumerate}
     \item Create a \code{VkInstance}.
-    \item Select a \code{VkPhysicalDevice}, which supports the extenstions, features and capabilities required by the project.
+    \item Select a \code{VkPhysicalDevice} that supports the extensions, features, and capabilities required by the project.
     \item Create a \code{VkDevice} from the selected \code{VkPhysicalDevice}.
-    \item When creating the \code{VkDevice}, \code{VkQueue}s from a certain queue family need to be enabled, to be able to submit command buffers later.
+    \item When creating the \code{VkDevice}, enable \code{VkQueue}s from a particular queue family so that command buffers can be submitted later.
 \end{enumerate}
 
-These Vulkan objects are accessed very frequently throughout the project. For example, you need to pass the \code{VkDevice} as a parameter when creating or destroying most Vulkan objects and a command buffer, which executes a sequence of Vulkan commands, needs to be submitted to a certain \code{VkQueue}. Keeping track of all of these Vulkan objects is quite tideous, which is why we introduced the Vulkan context. It is represented by the \code{Context} class, which stores these Vulkan objects, allows the programmer to access them anywhere and reduces the effort of setting up Vulkan.
+These Vulkan objects are accessed frequently throughout the project. For example, we need to pass the \code{VkDevice} as a parameter when creating or destroying most Vulkan objects, and a command buffer that executes a sequence of Vulkan commands needs to be submitted to a specific \code{VkQueue}. Keeping track of all these Vulkan objects is tedious, so we introduced the Vulkan context. It is represented by the \code{Context} class, which stores these Vulkan objects, provides access to them anywhere, and reduces the effort of setting up Vulkan.
 
 The Vulkan context contains the following objects:
 
 \begin{itemize}
     \item the \code{VkInstance}
     \item the \code{VkPhysicalDevice} and \code{VkDevice}
-    \item an optional \code{GLFWwindow*} from which a \code{VkSurfaceKHR} is created and also stored (this is necessary for rendering to a window, but it will not be used in our main application, since it is headless)
+    \item an optional \code{GLFWwindow*} from which a \code{VkSurfaceKHR} is created and also stored (this is necessary for rendering to a window, but it is not used in our main application since it is headless)
     \item the \code{CommandManager} (manages queues and command pools)
-    \item the \code{VmaAllocator} (used when allocation memory)
+    \item the \code{VmaAllocator} (used when allocating memory)
 \end{itemize}
 
-The class is designed similar to a singleton, but it deviates in some parts. A singleton usually creates its instance at the start of the application or when it is used for the first time (lazy instantiation). However, \code{Context} can not be implicitly instanciated this way, because it needs some parameters stored in a \code{ContextInfo}, when being instanciated. For this reason we need to explicitly create the Vulkan context using \code{Context::create(...)} with the desired \code{ContextInfo} before calling \code{Context::instance()} for the first time or we will get a \code{nullptr}. While all other objects in our project get cleaned up automatically when going out of scope, the Vulkan context also needs to be destroyed explicitly using \code{Context::destroy()} when it is no longer needed. If we now want to get the current \code{VkDevice}, we can simply call \code{Context::instance()->get\_device()}.
+The class is designed similarly to a singleton, but it differs in some parts. A singleton usually creates its instance at the start of the application or when it is used for the first time (lazy instantiation). However, \code{Context} cannot be implicitly instantiated this way because it needs parameters stored in a \code{ContextInfo} when being created. For this reason, we need to explicitly create the Vulkan context using \code{Context::create} with the desired \code{ContextInfo} before accessing it for the first time using \code{Context::instance}, or we will get a \code{nullptr}. While all other objects in our project are cleaned up automatically when going out of scope, the Vulkan context must be destroyed explicitly using \code{Context::destroy()} when it is no longer needed. If we now want to get the current \code{VkDevice}, we can call \code{Context::instance()->get\_device()}.
 
 \pagebreak
