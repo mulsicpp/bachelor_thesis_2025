@@ -39,7 +39,7 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     image_view = vk::ImageView::create_from(image, image->aspect()).to_shared();
 
-    raytracer = RaytracerBuilder().build();
+    raytracer = RaytracerBuilder().ray_depth(opts.ray_depth + 1).build();
     skinner = SkinnerBuilder().build();
 
     scene = ptr::make_shared<Scene>(Scene::load(get_scene_path(opts.scene)));
@@ -49,7 +49,7 @@ RtxApp::RtxApp(int argc, char* argv[])
 
     camera = ptr::make_shared<AppCamera>(get_scene_camera(opts.scene));
 
-    camera->aspect = ((float)IMAGE_WIDTH) / ((float)IMAGE_HEIGHT);
+    camera->aspect = ((float)image->extent().width) / ((float)image->extent().height);
 
     raytracer.bind_camera(camera);
     raytracer.bind_scene(scene);
@@ -78,7 +78,12 @@ void RtxApp::run()
     RtxPushConstant rtx_push{};
 
     rtx_push.light_direction = get_scene_light_dir(opts.scene);
+    rtx_push.light_radius = opts.light_radius * glm::pi<float>();
     rtx_push.sample_factor = opts.sample_factor;
+    rtx_push.ray_depth = opts.ray_depth;
+
+    rtx_push.flags = 0;
+    rtx_push.flags |= opts.greedy ? RTX_PUSH_GREEDY : 0;
 
     auto draw_recorder = [&](vk::ReadyCommandBuffer cmd_buf) {
         image->cmd_transition(cmd_buf, vk::ImageState::Undefined, vk::ImageState::RtxOutput);

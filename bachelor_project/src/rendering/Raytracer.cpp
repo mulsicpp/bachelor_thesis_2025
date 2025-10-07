@@ -40,7 +40,12 @@ void Raytracer::cmd_trace(vk::ReadyCommandBuffer cmd_buf, RtxPipelineType type, 
         selected_pipeline = &shadow_pipeline;
         selected_sbt = &shadow_sbt;
         break;
+    case RtxPipelineType::Path:
+        selected_pipeline = &path_pipeline;
+        selected_sbt = &path_sbt;
+        break;
     }
+
 
     selected_pipeline->cmd_bind(cmd_buf);
 
@@ -98,6 +103,7 @@ Raytracer RaytracerBuilder::build() const {
         .push_constant(vk::PushConstant()
             .add_stage_flag(VK_SHADER_STAGE_RAYGEN_BIT_KHR)
             .add_stage_flag(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR)
+            .add_stage_flag(VK_SHADER_STAGE_MISS_BIT_KHR)
             .set_size(sizeof(RtxPushConstant)))
         .build().to_shared();
 
@@ -125,6 +131,14 @@ Raytracer RaytracerBuilder::build() const {
     auto closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/rtx/closest_hit.spv").string()).build().to_shared();
     auto shadow_closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/rtx/closest_hit_shadowed.spv").string()).build().to_shared();
 
+    auto path_ray_gen_shader = vk::ShaderBuilder().raygen_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/ray_gen.spv").string()).build().to_shared();
+
+    auto path_sky_miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/sky_miss.spv").string()).build().to_shared();
+    auto path_sun_miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/sun_miss.spv").string()).build().to_shared();
+    auto path_ambient_miss_shader = vk::ShaderBuilder().miss_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/ambient_miss.spv").string()).build().to_shared();
+    
+    auto path_closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/closest_hit.spv").string()).build().to_shared();
+
     vk::ShaderGroup ray_gen_group = vk::ShaderGroup::create_general(ray_gen_shader);
 
     vk::ShaderGroup miss_group = vk::ShaderGroup::create_general(miss_shader);
@@ -133,6 +147,12 @@ Raytracer RaytracerBuilder::build() const {
     vk::ShaderGroup basic_hit_group = vk::ShaderGroup::create_hit_closest(basic_closest_hit_shader);
     vk::ShaderGroup hit_group = vk::ShaderGroup::create_hit_closest(closest_hit_shader);
     vk::ShaderGroup shadow_hit_group = vk::ShaderGroup::create_hit_closest(shadow_closest_hit_shader);
+
+    vk::ShaderGroup path_ray_gen_group = vk::ShaderGroup::create_general(path_ray_gen_shader);
+    vk::ShaderGroup path_sky_miss_group = vk::ShaderGroup::create_general(path_sky_miss_shader);
+    vk::ShaderGroup path_sun_miss_group = vk::ShaderGroup::create_general(path_sun_miss_shader);
+    vk::ShaderGroup path_ambient_miss_group = vk::ShaderGroup::create_general(path_ambient_miss_shader);
+    vk::ShaderGroup path_hit_group = vk::ShaderGroup::create_hit_closest(path_closest_hit_shader);
 
     raytracer.basic_pipeline = vk::RtxPipelineBuilder()
         .add_shader_group(ray_gen_group)
@@ -175,6 +195,22 @@ Raytracer RaytracerBuilder::build() const {
         .ray_gen_group(ray_gen_group)
         .miss_groups({ miss_group, shadow_miss_group })
         .hit_groups({ shadow_hit_group }));
+
+    
+    raytracer.path_pipeline = vk::RtxPipelineBuilder()
+        .add_shader_group(path_ray_gen_group)
+        .add_shader_group(path_sky_miss_group)
+        .add_shader_group(path_sun_miss_group)
+        .add_shader_group(path_ambient_miss_group)
+        .add_shader_group(path_hit_group)
+        .layout(raytracer.pipeline_layout)
+        .max_ray_recursion_depth(_ray_depth)
+        .build();
+
+    raytracer.path_sbt = raytracer.path_pipeline.build_sbt(vk::SBTInfo()
+        .ray_gen_group(path_ray_gen_group)
+        .miss_groups({ path_sky_miss_group, path_sun_miss_group, path_ambient_miss_group })
+        .hit_groups({ path_hit_group }));
 
 
     return raytracer;

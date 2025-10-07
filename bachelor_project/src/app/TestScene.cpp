@@ -31,34 +31,34 @@ AppCamera get_scene_camera(TestScene test_scene) {
 
     switch (test_scene) {
     case TestScene::Brainstem:
-        camera.theta = glm::pi<float>() * 0.9f;
+        camera.theta = glm::pi<float>() * 0.1f;
         camera.phi = -glm::pi<float>() * 0.1f;
         camera.center = glm::vec3{ 0.0f, -1.0f, 0.0f };
         camera.distance = 3;
         break;
     case TestScene::Whirlwind:
-        camera.theta = glm::pi<float>() * 1.0f;
+        camera.theta = 0.0f;
         camera.phi = 0.0f;
         camera.center = glm::vec3{ 0.0f, -400.0f, 0.0f };
         camera.distance = 1500;
         break;
     case TestScene::SpaceStation:
-        camera.theta = 0.0f;
+        camera.theta = glm::pi<float>();
         camera.phi = 0.0f;
         camera.center = glm::vec3{ 0.0f, 0.0f, 0.0f };
         camera.distance = 10;
         break;
     case TestScene::Monsters:
-        camera.theta = glm::pi<float>() * 1.0f;
+        camera.theta = 0.0f;
         camera.phi = -glm::pi<float>() * 0.05f;
         camera.center = glm::vec3{ 0.0f, -1.0f, 0.0f };
         camera.distance = 40;
         break;
     case TestScene::EternalValley:
-        camera.theta = glm::pi<float>() * 0.0f;
-        camera.phi = glm::pi<float>() * 0.25f;
-        camera.center = glm::vec3{ 0.0f, 0.0f, 0.0f };
-        camera.distance = 100;
+        camera.theta = glm::pi<float>() * 0.9f;
+        camera.phi = -glm::pi<float>() * 0.2f;
+        camera.center = glm::vec3{ -6.6f, -6.3f, 0.0f };
+        camera.distance = 25;
         break;
     }
 
@@ -71,6 +71,6 @@ glm::vec3 get_scene_light_dir(TestScene test_scene) {
     case TestScene::Whirlwind: return glm::vec3{-0.2, -1.0, -0.7};
     case TestScene::SpaceStation: return glm::vec3{0.5, -1.0, 0.5};
     case TestScene::Monsters: return glm::vec3{0.2, 0.0, -1.0};
-    default: return glm::vec3{0.2, -1.0, 0.0};
+    default: return glm::vec3{0.3, -1.0, 1.0};
     }
 }

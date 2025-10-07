@@ -87,8 +87,8 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         sample_factor = root;
         };
 
-    std::vector<std::string> pipeline_strs = { "normal", "basic", "shadow" };
-    std::vector<RtxPipelineType> pipeline_vals = { RtxPipelineType::Normal, RtxPipelineType::Basic, RtxPipelineType::Shadow };
+    std::vector<std::string> pipeline_strs = { "normal", "basic", "shadow", "path" };
+    std::vector<RtxPipelineType> pipeline_vals = { RtxPipelineType::Normal, RtxPipelineType::Basic, RtxPipelineType::Shadow, RtxPipelineType::Path };
 
     auto trace_type_callback = [this, pipeline_strs, pipeline_vals](const std::string& str) {
         for (uint32_t i = 0; i < pipeline_vals.size(); i++) {
@@ -124,6 +124,9 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
         ->default_str(std::to_string(sample_factor * sample_factor))
         ->check(validate_square_number);
 
+    app.add_option("--ray-depth", ray_depth, "Number of bounces a ray can do before terminating")
+        ->default_str(std::to_string(ray_depth));
+
     app.add_option_function<std::string>("-p, --pipeline", trace_type_callback, "The type of raytracing pipeline to be used")
         ->check(CLI::IsMember(pipeline_strs))
         ->default_str(pipeline_strs[(int)pipeline]);
@@ -135,9 +138,14 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
     app.add_option("--store-images", store_images, "Store the rendered frames as PNG images")
         ->check(validate_file);
 
+    app.add_option("--light-radius", light_radius, "The radius of the light source")
+        ->default_str(std::to_string(light_radius));
+
 
     app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The skinning is performed on the CPU instead of the GPU");
     app.add_flag("--fast-build,!--fast-trace", fast_build, "Prefers fast build over fast trace");
+
+    app.add_flag("-g,--greedy,!--not-greedy", greedy, "Uses greedy path tracing");
 
 
     app.set_version_flag("-v,-V,--version", utils::AppPath::instance().app_name + " 1.0.0");

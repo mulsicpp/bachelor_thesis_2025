@@ -18,12 +18,17 @@ public:
     std::tuple<uint32_t, uint32_t> resolution{ std::tuple<uint32_t, uint32_t>(IMAGE_WIDTH, IMAGE_HEIGHT) };
     float delta_time{ 0.1f };
     uint32_t sample_factor{ 1 };
+    uint32_t ray_depth{ 1 };
     RtxPipelineType pipeline{ RtxPipelineType::Normal };
     uint32_t rebuild_frequency { 1 };
     std::string store_images{ "" };
 
+    float light_radius{ 0.02 };
+
     bool cpu_skinning{ false };
     bool fast_build{ false };
+
+    bool greedy{ false };
 
 private:
     CLI::App app{};

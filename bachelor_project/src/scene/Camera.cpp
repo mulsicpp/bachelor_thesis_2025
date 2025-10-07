@@ -10,7 +10,7 @@ glm::mat4 AppCamera::get_view() const {
     view = glm::rotate(view, phi, glm::vec3{ 1.0f, 0.0f, 0.0f });
     view = glm::rotate(view, theta, glm::vec3{ 0.0f, 1.0f, 0.0f });
     view = glm::translate(view, -center);
-    view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, -1.0f });
+    view = glm::scale(view, glm::vec3{ 1.0f, -1.0f, 1.0f });
 
     return view;
 }

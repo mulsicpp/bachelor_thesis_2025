@@ -11,18 +11,25 @@
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 
+#define RTX_PUSH_GREEDY 0x01
+
 struct RtxPushConstant {
     alignas(16) glm::vec3 light_direction{ 0.5, -1.0, 0.5 };
-    alignas(16) glm::vec3 light_color{ 0.9, 0.9, 0.8 };
-    alignas(16) glm::vec3 ambient_color{ 0.1, 0.1, 0.2 };
+    float light_radius{ glm::pi<float>() * 0.00f };
+    alignas(16) glm::vec3 light_color{ 1.0, 0.8, 0.5 };
+    alignas(16) glm::vec3 ambient_color{ 0.07, 0.15, 0.4 };
 
     uint32_t sample_factor{ 1 };
+    uint32_t ray_depth{ 1 };
+
+    uint32_t flags{ 0 };
 };
 
 enum class RtxPipelineType {
     Normal,
     Basic,
-    Shadow
+    Shadow,
+    Path
 };
 
 
@@ -37,10 +44,12 @@ private:
     vk::RtxPipeline basic_pipeline{};
     vk::RtxPipeline pipeline{};
     vk::RtxPipeline shadow_pipeline{};
+    vk::RtxPipeline path_pipeline{};
 
     vk::SBT basic_sbt{};
     vk::SBT sbt{};
     vk::SBT shadow_sbt{};
+    vk::SBT path_sbt{};
 
     ptr::Shared<vk::Buffer> camera_uniform_buffer{};
     ptr::Shared<Scene> scene{};
@@ -65,10 +74,12 @@ public:
 
 private:
     // TODO raytracer builder parameters
-    bool _shadows{ false };
+    uint32_t _ray_depth{ 1 };
 
 public:
     RaytracerBuilder() = default;
+
+    inline Ref ray_depth(uint32_t ray_depth) { _ray_depth = ray_depth; return *this; }
 
     Raytracer build() const;
 };
