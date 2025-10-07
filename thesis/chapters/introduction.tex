@@ -5,12 +5,12 @@ For a long time, \textbf{rasterization} has been the standard for rendering 3D s
 \begin{enumerate}
     \item Every vertex of a 3D object gets transformed in the vertex shader.
 
-    \item The transformed triangles are projected onto a 2D pixel grid. A fragment is generated for every pixel that the triangle covers.
+    \item The transformed triangles are projected onto a 2D pixel grid and a fragment is generated for every pixel that the triangle covers.
 
     \item The fragment shader runs for every generated fragment. It uses the fragment's data and some global data (e.g., light sources) to determine the final color of the pixel.
 \end{enumerate}
 
-Rasterization is very fast and efficient, but it also has its downsides. When determining the color of a pixel, we only have access to the data in the current fragment and some global data. The fragment is not aware of other objects in the scene. That makes effects like shadows and reflections very difficult, requiring a workaround like shadow-mapping and screen-space-reflections. In recent years, a new way to do real-time rendering slowly emerged, which, of course, is \textbf{ray tracing}.
+Rasterization is very fast and efficient, but it also has its downsides. When determining the color of a pixel, we only have access to the data in the current fragment and some global data. The fragment is not aware of other objects in the scene, which makes effects like shadows and reflections very difficult, requiring a workaround like shadow-mapping and screen-space-reflections. In recent years, a new way to do real-time rendering slowly emerged, which, of course, is \textbf{ray tracing}.
 
 Ray tracing works by casting rays through the screen's pixels into the 3D scene to determine the surface to be displayed. When a ray hits a surface, secondary rays, such as shadow rays, reflection rays, or refraction rays, can be cast. That is much closer to real life, where light rays bounce between objects until they reach our eyes or a camera lens, and because of that, it is much easier to generate realistic-looking images. However, it was never suitable for real-time applications in the past due to the enormous amount of processing necessary. 
 
@@ -20,4 +20,4 @@ In 2018, Nvidia paved the way for ray tracing in real-time applications by intro
 
 Testing every ray against every triangle for intersection is not feasible and takes way too much processing power, even for non-real-time applications. A much faster way to find the triangles that are hit by a ray is to use a bounding volume hierarchy (BVH). It is a tree structure of volumes (usually AABBs), which divides the scene into smaller and smaller subsections as we go down the tree. We can prune a branch as soon as we realize that the section does not intersect with the ray and therefore avoid a lot of ray/triangle intersections.
 
-In this thesis, we explore the topic of ray tracing in dynamic environments. We will look at objects that move through a scene and objects that deform their mesh using skeletal animation. Specifically, we use the Vulkan API to look at how it implements ray tracing support. We will learn how to create the raytracing pipeline, set up our shader binding table, and build and update our acceleration structures. We will then compare how different scenes perform using different approaches.
+In this thesis, we will implement hardware-accelerated ray tracing for dynamic environments using the graphics API Vulkan. We will learn how to create the raytracing pipeline, set up our shader binding table, and build and update our acceleration structures. Then, we will test different pipelines and update strategies and other parameters in dynamic scenes containing moving and deforming objects.

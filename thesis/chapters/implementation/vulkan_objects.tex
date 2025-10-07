@@ -88,13 +88,13 @@ The folloing code snippet shows, how the command buffer and its functions can be
 \begin{lstlisting}[language=C++]
 
 // create the command buffer
-vk::CommandBuffer cmd_buf = vk::CommandBufferBuilder()
+CommandBuffer cmd_buf = CommandBufferBuilder()
     .queue_type(QueueType::Graphics)
     .single_use(true)
     .build();
 
 // create a callback, which records the commands
-vk::CommandRecorder recorder = [&] (ReadyCommandBuffer ready_buf) {
+CommandRecorder recorder = [&] (ReadyCommandBuffer ready_buf) {
     // record commands
     // ...
 }
@@ -183,7 +183,7 @@ Eventhough \code{VkFenceCreateInfo} has one member variable, we use the static m
 
 \subsection{Pipeline-related Objects}\label{subsec:pipeline-objects}
 
-In this section we will talk about all the different \getVkObjects{} that are related to creating and using a pipeline. We will focus on the classical rasterization pipeline, which we also use for skinning in our application, but a lot of these objects are also used in the raytracing pipeline (see \autoref{subsec:raytracing-objects}).
+In this section we will talk about all the different Vulkan objects that are related to creating and using a pipeline. We will focus on the classical rasterization pipeline, which we also use for skinning in our application, but a lot of these objects are also used in the raytracing pipeline (see \autoref{subsec:raytracing-objects}).
 
 \subsubsection{Shaders}
 
