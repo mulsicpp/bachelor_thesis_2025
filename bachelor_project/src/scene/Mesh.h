@@ -39,11 +39,16 @@ struct Primitive {
 	using IndexType = uint32_t;
 
 	std::vector<PositionType> positions_cpu{};
+	std::vector<PositionType> normals_cpu{};
+	std::vector<PositionType> tangents_cpu{};
+	
 	std::vector<std::vector<JointWeight>> joint_weights_cpu{};
 
 	vk::SubBuffer positions{};
+	vk::SubBuffer normals{};
+	vk::SubBuffer tangents{};
+
 	vk::SubBuffer uvs{};
-	vk::SubBuffer colors{};
 	vk::SubBuffer joint_weights{};
 
 	vk::SubBuffer indices{};
@@ -60,9 +65,10 @@ struct Primitive {
 
 
 	void draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, const glm::mat4& global_transform, vk::SubBuffer dynamic_positions = {}) const;
-	void skin(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, vk::SubBuffer dynamic_positions, vk::SubBuffer joint_matrices) const;
+	void skin(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, vk::SubBuffer dynamic_positions, vk::SubBuffer joint_matrices, vk::SubBuffer dynamic_normals, vk::SubBuffer dynamic_tangents) const;
 
 	static vk::VertexInput get_vertex_input();
+	static vk::VertexInput get_skinning_vertex_input();
 
 	inline static constexpr VkIndexType get_index_type() {
 		return sizeof(IndexType) == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
@@ -93,6 +99,8 @@ struct MeshPushConst {
 
 struct SkinningPushConstant {
 	uint32_t dynamic_positions_offset{};
+	uint32_t dynamic_normals_offset{};
+	uint32_t dynamic_tangents_offset{};
 	uint32_t joint_matrices_offset{};
 	uint32_t joint_weights_offset{};
 	uint32_t joint_weights_per_vertex{};

@@ -28,6 +28,16 @@ const std::vector<const char*> GLTF_ERROR_TEXTS = {
 
 #define OFFSET_VALUE_MASK 0x7fffffff
 #define OFFSET_FLAG_MASK 0x80000000
+#define OFFSET_ATTR_UNUSED (~(uint32_t)0)
+
+struct PrimitiveOffset {
+	bool dyn;
+	uint32_t positions;
+	uint32_t normals;
+	uint32_t tangents;
+	uint32_t uvs;
+	uint32_t indices;
+};
 
 struct GLTFData {
 	cgltf_data* data{};
@@ -42,7 +52,7 @@ struct GLTFData {
 
 	SceneBuffers buffers{};
 
-	std::vector<glm::uvec2> primitive_offsets{};
+	std::vector<PrimitiveOffset> primitive_offsets{};
 
 	void create_materials();
 	void create_meshes();
@@ -120,6 +130,8 @@ void Scene::skin_cpu() {
 			auto& dynamic_sub_buffer = node->dynamic_positions[i];
 
 			auto* dynamic_positions = (glm::vec3*)(dynamic_sub_buffer.buffer()->mapped_data() + dynamic_sub_buffer.offset());
+			auto* dynamic_normals = (node->dynamic_normals.size() > 0 && node->dynamic_normals[i].buffer()) ? (glm::vec3*)(node->dynamic_normals[i].buffer()->mapped_data() + node->dynamic_normals[i].offset()) : nullptr;
+			auto* dynamic_tangents = (node->dynamic_tangents.size() > 0 && node->dynamic_tangents[i].buffer()) ? (glm::vec3*)(node->dynamic_tangents[i].buffer()->mapped_data() + node->dynamic_tangents[i].offset()) : nullptr;
 			uint32_t position_count = dynamic_sub_buffer.length() / sizeof(glm::vec3);
 
 
@@ -139,6 +151,16 @@ void Scene::skin_cpu() {
 				dynamic_positions[j].x = position.x;
 				dynamic_positions[j].y = position.y;
 				dynamic_positions[j].z = position.z;
+
+				glm::mat3 normal_matrix = glm::transpose(glm::inverse(matrix));
+
+				if(dynamic_normals) {
+					dynamic_normals[j] = normal_matrix * primitive.normals_cpu[j];
+				}
+
+				if(dynamic_tangents) {
+					dynamic_tangents[j] = normal_matrix * primitive.tangents_cpu[j];
+				}
 			}
 		}
 	}
@@ -249,6 +271,25 @@ struct AttributeData {
 
 	inline VkDeviceSize byte_offset() const { return data.size() * sizeof(T); }
 	inline VkDeviceSize element_size() const { return sizeof(T); }
+
+	inline vk::SubBuffer append_elements(cgltf_accessor* accessor, uint32_t count, std::vector<T>* p_vec = nullptr) {
+		if (!accessor) {
+			return vk::SubBuffer{};
+		}
+
+		std::vector<T> vec{};
+		vec.resize(count);
+		cgltf_accessor_unpack_floats(accessor, (cgltf_float*)vec.data(), T::length() * count);
+
+		if (p_vec) {
+			*p_vec = vec;
+		}
+
+		auto sub_buffer = vk::SubBuffer::from(buffer, byte_offset(), count * sizeof(T));
+		data.insert(data.cend(), vec.begin(), vec.end());
+
+		return sub_buffer;
+	}
 };
 
 #ifdef _WIN32
@@ -282,12 +323,9 @@ VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 void GLTFData::create_meshes() {
 	meshes.resize(data->meshes_count);
 
-	AttributeData<Primitive::PositionType> position_attr;
-	AttributeData<Primitive::UVType> uv_attr;
-	AttributeData<Primitive::ColorType> color_attr;
-	AttributeData<Primitive::IndexType> index_attr;
-
-	AttributeData<uint8_t> garbage_attr;
+	AttributeData<Primitive::PositionType> position_attr{};
+	AttributeData<Primitive::UVType> uv_attr{};
+	AttributeData<Primitive::IndexType> index_attr{};
 
 	VkDeviceSize joint_weights_buffer_size = 0;
 	buffers.joint_weights = ptr::make_shared<vk::Buffer>();
@@ -311,8 +349,10 @@ void GLTFData::create_meshes() {
 			cgltf_accessor* indices = gltf_primitive->indices;
 
 			cgltf_accessor* positions = nullptr;
+			cgltf_accessor* normals = nullptr;
+			cgltf_accessor* tangents = nullptr;
+
 			cgltf_accessor* uvs = nullptr;
-			cgltf_accessor* colors = nullptr;
 			std::vector<cgltf_accessor*> joints{};
 			std::vector<cgltf_accessor*> weights{};
 
@@ -322,11 +362,15 @@ void GLTFData::create_meshes() {
 				case cgltf_attribute_type_position:
 					positions = attribute->data;
 					break;
-				case cgltf_attribute_type_texcoord:
-					uvs = attribute->data;
+				case cgltf_attribute_type_normal:
+					normals = attribute->data;
 					break;
-				case cgltf_attribute_type_color:
-					colors = attribute->data;
+				case cgltf_attribute_type_tangent:
+					tangents = attribute->data;
+					break;
+				case cgltf_attribute_type_texcoord:
+					if (attribute->index == 0)
+						uvs = attribute->data;
 					break;
 				case cgltf_attribute_type_joints:
 					if (attribute->index >= joints.size()) {
@@ -354,20 +398,12 @@ void GLTFData::create_meshes() {
 			}
 
 			VkDeviceSize element_count = positions->count;
-			std::vector<Primitive::PositionType> position_data{ element_count };
-			cgltf_accessor_unpack_floats(positions, (cgltf_float*)position_data.data(), Primitive::PositionType::length() * element_count);
 
-			primitive.positions_cpu = position_data;
+			primitive.positions = position_attr.append_elements(positions, element_count, &primitive.positions_cpu);
+			primitive.normals = position_attr.append_elements(normals, element_count, &primitive.normals_cpu);
+			primitive.tangents = position_attr.append_elements(tangents, element_count, &primitive.tangents_cpu);
 
-			primitive.positions = vk::SubBuffer::from(position_attr.buffer, position_attr.byte_offset(), element_count * sizeof(Primitive::PositionType));
-			position_attr.data.insert(position_attr.data.cend(), position_data.begin(), position_data.end());
-
-			primitive.uvs = vk::SubBuffer::from(garbage_attr.buffer, 0, element_count * sizeof(Primitive::UVType));
-			primitive.colors = vk::SubBuffer::from(garbage_attr.buffer, 0, element_count * sizeof(Primitive::ColorType));
-
-			if (garbage_attr.data.size() < element_count * sizeof(Primitive::UVType)) {
-				garbage_attr.data.resize(element_count * sizeof(Primitive::UVType));
-			}
+			primitive.uvs = uv_attr.append_elements(uvs, element_count);
 
 			if (indices != nullptr) {
 				VkDeviceSize index_count = cgltf_accessor_unpack_indices(indices, nullptr, sizeof(Primitive::IndexType), 0);
@@ -379,10 +415,15 @@ void GLTFData::create_meshes() {
 				index_attr.data.insert(index_attr.data.cend(), index_data.begin(), index_data.end());
 			}
 
-			primitive_offsets.push_back(glm::uvec2{
-				indices != nullptr ? primitive.indices.offset() / sizeof(Primitive::IndexType) : ~(uint32_t)0,
-				primitive.positions.offset() / sizeof(Primitive::PositionType)
-				});
+			PrimitiveOffset primitive_offset{};
+			primitive_offset.dyn = false;
+			primitive_offset.positions = primitive.positions.offset() / sizeof(Primitive::PositionType);
+			primitive_offset.normals = normals ? primitive.normals.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.tangents = tangents ? primitive.tangents.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.uvs = uvs ? primitive.uvs.offset() / sizeof(Primitive::UVType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.indices = indices ? primitive.indices.offset() / sizeof(Primitive::IndexType) : OFFSET_ATTR_UNUSED;
+
+			primitive_offsets.push_back(primitive_offset);
 
 			if (joints.size() < weights.size()) {
 				joints.resize(weights.size(), nullptr);
@@ -445,11 +486,14 @@ void GLTFData::create_meshes() {
 
 	buffers.positions = position_attr.buffer;
 
-	memset(garbage_attr.data.data(), 0, garbage_attr.byte_offset());
-	*garbage_attr.buffer = buffer_builder
-		.size(garbage_attr.byte_offset())
-		.data(garbage_attr.data.data())
-		.build();
+	if (uv_attr.byte_offset() > 0) {
+		*uv_attr.buffer = buffer_builder
+			.size(uv_attr.byte_offset())
+			.data(uv_attr.data.data())
+			.build();
+
+		buffers.uvs = uv_attr.buffer;
+	}
 
 	if (index_attr.byte_offset() > 0) {
 		*index_attr.buffer = buffer_builder
@@ -460,6 +504,10 @@ void GLTFData::create_meshes() {
 
 		buffers.indices = index_attr.buffer;
 	}
+
+	printf("position count: %u\n", position_attr.byte_offset());
+	printf("uv count: %u\n", uv_attr.byte_offset());
+	printf("index count: %u\n", index_attr.byte_offset());
 
 	auto joint_weights_staging_buffer = vk::BufferBuilder().staging_buffer().size(joint_weights_buffer_size).build();
 
@@ -615,15 +663,33 @@ void GLTFData::create_nodes() {
 				joint_matrix_buffer_size += node.joint_matrices.length();
 
 				for (auto& primitive : node.mesh->primitives) {
-					auto subbuffer = vk::SubBuffer::from(buffers.dynamic_positions, dynamic_buffer_size, primitive.positions.length());
-
-					node.dynamic_positions.push_back(subbuffer);
+					auto dynamic_positions = vk::SubBuffer::from(buffers.dynamic_positions, dynamic_buffer_size, primitive.positions.length());
+					node.dynamic_positions.push_back(dynamic_positions);
 					dynamic_buffer_size += primitive.positions.length();
 
-					primitive_offsets.push_back(glm::uvec2{
-						primitive.indices.buffer() ? primitive.indices.offset() / sizeof(Primitive::IndexType) : ~(uint32_t)0,
-						(subbuffer.offset() / sizeof(Primitive::PositionType)) | OFFSET_FLAG_MASK
-						});
+					vk::SubBuffer dynamic_normals, dynamic_tangents;
+
+					if (primitive.normals.buffer()) {
+						dynamic_normals = vk::SubBuffer::from(buffers.dynamic_positions, dynamic_buffer_size, primitive.normals.length());
+						node.dynamic_normals.push_back(dynamic_normals);
+						dynamic_buffer_size += primitive.normals.length();
+					}
+
+					if (primitive.tangents.buffer()) {
+						dynamic_tangents = vk::SubBuffer::from(buffers.dynamic_positions, dynamic_buffer_size, primitive.tangents.length());
+						node.dynamic_tangents.push_back(dynamic_tangents);
+						dynamic_buffer_size += primitive.tangents.length();
+					}
+
+					PrimitiveOffset primitive_offset{};
+					primitive_offset.dyn = true;
+					primitive_offset.positions = dynamic_positions.offset() / sizeof(Primitive::PositionType);
+					primitive_offset.normals = primitive.normals.buffer() ? dynamic_normals.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;;
+					primitive_offset.tangents = primitive.tangents.buffer() ? dynamic_tangents.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
+					primitive_offset.uvs = primitive.uvs.buffer() ? primitive.uvs.offset() / sizeof(Primitive::UVType) : OFFSET_ATTR_UNUSED;
+					primitive_offset.indices = primitive.indices.buffer() ? primitive.indices.offset() / sizeof(Primitive::IndexType) : OFFSET_ATTR_UNUSED;
+
+					primitive_offsets.push_back(primitive_offset);
 				}
 			}
 		}
@@ -654,7 +720,7 @@ void GLTFData::create_nodes() {
 		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
 		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
 		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
-		.size(primitive_offsets.size() * sizeof(glm::uvec2))
+		.size(primitive_offsets.size() * sizeof(PrimitiveOffset))
 		.data(primitive_offsets.data())
 		.build().to_shared();
 }

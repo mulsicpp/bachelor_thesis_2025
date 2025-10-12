@@ -6,6 +6,9 @@
 
 struct SceneBuffers {
     ptr::Shared<vk::Buffer> positions{};
+
+    ptr::Shared<vk::Buffer> uvs{};
+
     ptr::Shared<vk::Buffer> indices{};
     ptr::Shared<vk::Buffer> dynamic_positions{};
 

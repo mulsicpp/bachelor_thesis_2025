@@ -25,16 +25,39 @@ void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, 
 	}
 }
 
-void Primitive::skin(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, vk::SubBuffer dynamic_positions, vk::SubBuffer joint_matrices) const {
+void Primitive::skin(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, vk::SubBuffer dynamic_positions, vk::SubBuffer joint_matrices, vk::SubBuffer dynamic_normals, vk::SubBuffer dynamic_tangents) const {
 	SkinningPushConstant skinning_push_const{};
 
+	vk::SubBuffer binding_normals{};
+	vk::SubBuffer binding_tangents{};
+
 	skinning_push_const.dynamic_positions_offset = dynamic_positions.offset() / sizeof(PositionType);
+
+	if(dynamic_normals.buffer()) {
+		skinning_push_const.dynamic_normals_offset = dynamic_normals.offset() / sizeof(PositionType);
+		binding_normals = normals;
+	} else {
+		skinning_push_const.dynamic_normals_offset = ~uint32_t(0);
+		binding_normals = positions;
+	}
+
+	if(dynamic_tangents.buffer()) {
+		skinning_push_const.dynamic_tangents_offset = dynamic_tangents.offset() / sizeof(PositionType);
+		binding_tangents = tangents;
+	} else {
+		skinning_push_const.dynamic_tangents_offset = ~uint32_t(0);
+		binding_tangents = positions;
+	}
+
 	skinning_push_const.joint_matrices_offset = joint_matrices.offset() / sizeof(glm::mat4);
 	skinning_push_const.joint_weights_offset = joint_weights.offset() / sizeof(JointWeight);
 	skinning_push_const.joint_weights_per_vertex = joint_weights_cpu.size() > 0 ? joint_weights_cpu[0].size() : 0;
+
 	pipeline->cmd_push_constant(cmd_buffer, &skinning_push_const);
 
 	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 0, positions.buffer().get(), positions.offset());
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 1, binding_normals.buffer().get(), binding_normals.offset());
+	vk::Pipeline::cmd_bind_vertex_buffer(cmd_buffer, 2, binding_tangents.buffer().get(), binding_tangents.offset());
 	
 	vk::Pipeline::cmd_draw(cmd_buffer, positions.length() / sizeof(PositionType), 1);
 }
@@ -66,6 +89,22 @@ vk::VertexInput Primitive::get_vertex_input() {
 		.add_binding_info(vk::VertexBindingInfo().set_stride(sizeof(PositionType)))
 		.add_attribute_info(vk::VertexAttributeInfo()
 			.set_binding(0)
+			.set_format(vk::format_of_type<PositionType>()));
+}
+
+vk::VertexInput Primitive::get_skinning_vertex_input() {
+	return vk::VertexInput()
+		.add_binding_info(vk::VertexBindingInfo().set_stride(sizeof(PositionType)))
+		.add_binding_info(vk::VertexBindingInfo().set_stride(sizeof(PositionType)))
+		.add_binding_info(vk::VertexBindingInfo().set_stride(sizeof(PositionType)))
+		.add_attribute_info(vk::VertexAttributeInfo()
+			.set_binding(0)
+			.set_format(vk::format_of_type<PositionType>()))
+		.add_attribute_info(vk::VertexAttributeInfo()
+			.set_binding(1)
+			.set_format(vk::format_of_type<PositionType>()))
+		.add_attribute_info(vk::VertexAttributeInfo()
+			.set_binding(2)
 			.set_format(vk::format_of_type<PositionType>()));
 }
 

@@ -31,7 +31,9 @@ void Skinner::cmd_skin_scene(vk::ReadyCommandBuffer cmd_buf)
 		scene->get_buffers().joint_matrices->flush();
 
 		for (uint32_t i = 0; i < mesh->primitives.size(); i++) {
-			mesh->primitives[i].skin(cmd_buf, &pipeline, node->dynamic_positions[i], node->joint_matrices);
+			vk::SubBuffer dynamic_normals = node->dynamic_normals.size() > 0 ? node->dynamic_normals[i] : vk::SubBuffer{};
+			vk::SubBuffer dynamic_tangents = node->dynamic_tangents.size() > 0 ? node->dynamic_tangents[i] : vk::SubBuffer{};
+			mesh->primitives[i].skin(cmd_buf, &pipeline, node->dynamic_positions[i], node->joint_matrices, dynamic_normals, dynamic_tangents);
 		}
 	}
 
@@ -106,7 +108,7 @@ Skinner SkinnerBuilder::build() const {
 		.render_pass(skinner.render_pass)
 		.add_shader(std::move(vertex_shader))
 		.layout(skinner.pipeline_layout)
-		.vertex_input(Primitive::get_vertex_input())
+		.vertex_input(Primitive::get_skinning_vertex_input())
 		.rasterizer_discard(true)
 		.topology(VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
 		.build();

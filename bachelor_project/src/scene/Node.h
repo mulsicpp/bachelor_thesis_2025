@@ -44,7 +44,11 @@ struct Node {
 	std::vector<ptr::Shared<Node>> children{};
 	ptr::Shared<Mesh> mesh{};
 	ptr::Shared<Skin> skin{};
+
 	std::vector<vk::SubBuffer> dynamic_positions{};
+	std::vector<vk::SubBuffer> dynamic_normals{};
+	std::vector<vk::SubBuffer> dynamic_tangents{};
+
 	vk::SubBuffer joint_matrices{};
 	ptr::Shared<vk::Blas> blas{};
 

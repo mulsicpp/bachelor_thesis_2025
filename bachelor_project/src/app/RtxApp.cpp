@@ -42,10 +42,14 @@ RtxApp::RtxApp(int argc, char* argv[])
     raytracer = RaytracerBuilder().ray_depth(opts.ray_depth + 1).build();
     skinner = SkinnerBuilder().build();
 
+    printf("created raytracer\n");
+
     scene = ptr::make_shared<Scene>(Scene::load(get_scene_path(opts.scene)));
     // scene = ptr::make_shared<Scene>(Scene::load("C:/Users/chris/projects/models/glTF-Sample-Models/2.0/Fox/glTF/Fox.gltf"));
     scene->update_transforms();
     scene->build_acceleration_structures(opts.fast_build);
+
+    printf("loaded scene\n");
 
     camera = ptr::make_shared<AppCamera>(get_scene_camera(opts.scene));
 
@@ -54,6 +58,8 @@ RtxApp::RtxApp(int argc, char* argv[])
     raytracer.bind_camera(camera);
     raytracer.bind_scene(scene);
     raytracer.bind_image(image_view);
+
+    printf("bound\n");
 
     skinner.bind_scene(scene);
 

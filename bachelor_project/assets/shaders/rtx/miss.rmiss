@@ -1,10 +1,10 @@
 #version 460 core
 #extension GL_EXT_ray_tracing : require
+#extension GL_GOOGLE_include_directive : require
 
-layout(location = 0) rayPayloadInEXT struct Payload {
-    vec3 color;
-    vec2 image_coord;
-} payload;
+#include "rtx_include/payload.glsl"
+
+layout(location = 0) rayPayloadInEXT RtxPayload payload;
 
 void main()
 {
