@@ -7,7 +7,13 @@
 
 
 void Raytracer::bind_camera(const ptr::Shared<Camera>& camera) {
-    *camera_uniform_buffer->mapped_data<CameraUBO>() = camera->as_camera_ubo(true);
+
+    auto camera_ubo = camera->as_camera_ubo(true);
+
+    printf("camera focus distance: %f\n", camera_ubo.focus_distance);
+    printf("camera rel lens radius: %f\n", camera_ubo.relative_lens_radius);
+
+    *camera_uniform_buffer->mapped_data<CameraUBO>() = camera_ubo;
     camera_uniform_buffer->flush();
 }
 

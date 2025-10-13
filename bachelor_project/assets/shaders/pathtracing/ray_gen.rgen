@@ -11,6 +11,8 @@ layout(location = 0) rayPayloadEXT PathPayload payload;
 layout(set = 0, binding = 1, rgba8) uniform image2D output_image;
 #include "rtx_include/camera.glsl"
 
+#include "rtx_include/rand.glsl"
+
 vec3 gamma_correct(vec3 color) {
     return pow(color, vec3(1.0 / 2.2));
 }
@@ -21,7 +23,6 @@ void main()
 
     ivec2 pixel = ivec2(gl_LaunchIDEXT.xy);
     ivec2 image_size = ivec2(gl_LaunchSizeEXT.xy);
-    vec3 origin = inverse_view[3].xyz;
 
     vec3 accumulated_color = vec3(0.0);
 
@@ -33,9 +34,19 @@ void main()
             );
 
             vec2 ndc = (vec2(pixel) + in_pixel_offset) / vec2(image_size) * 2.0 - 1.0;
+            
+            vec3 local_origin = vec3(rand_circle(ndc * 2.4f) * camera.relative_lens_radius, 0.0f);
+            vec3 local_target = (camera.proj * vec4(ndc, -1.0f, 1.0f)).xyz;
+            vec3 local_dir = local_target - local_origin;
 
-            vec4 target = inverse_view * camera.proj * vec4(ndc, -1.0, 0.0);
-            vec3 dir = normalize(target.xyz);
+            vec3 origin = (inverse_view * vec4(local_origin * camera.focus_distance, 1.0f)).xyz;
+
+            vec3 dir = normalize((inverse_view * vec4(local_dir, 0.0f)).xyz);
+
+            // vec3 origin = (inverse_view * vec4(rand_circle(ndc * 2.4f) * camera.relative_lens_radius * camera.focus_distance, 0.0f, 1.0f)).xyz;
+
+            // vec4 target = inverse_view * camera.proj * (vec4(ndc * camera.focus_distance, -camera.focus_distance, 1.0f));
+            // vec3 dir = normalize(target.xyz - origin);
 
             payload.color = vec3(1.0);
             payload.image_coord = ndc;

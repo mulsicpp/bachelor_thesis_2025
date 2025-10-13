@@ -28,6 +28,16 @@ vec3 reflect_diffuse(vec3 normal, vec2 seed) {
     return normalize(x * tangent + y * bitangent + z * normal);
 }
 
+vec2 rand_circle(vec2 seed) {
+    float u1 = rand_better(seed + 0.44);
+    float u2 = rand_better(seed + 0.14);
+    
+    float r = sqrt(u1);
+    float theta = 2.0 * 3.14159265 * u2;
+    
+    return vec2(cos(theta), sin(theta)) * r;
+}
+
 vec3 direction_in_cap(vec3 dir, float theta, vec2 seed){
     dir = normalize(dir);
     float cos_theta = cos(theta);

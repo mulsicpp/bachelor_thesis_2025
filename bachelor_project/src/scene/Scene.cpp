@@ -42,7 +42,7 @@ struct PrimitiveOffset {
 struct GLTFData {
 	cgltf_data* data{};
 
-	std::vector<ptr::Shared<Material>> materials{};
+	std::vector<Material> materials{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
 	std::vector<ptr::Shared<Skin>> skins{};
 
@@ -96,6 +96,7 @@ Scene Scene::load(const std::string& file_path) {
 	Scene scene{};
 	scene.nodes = gltf.get_scene_nodes();
 	scene.animations = std::move(gltf.animations);
+	scene.materials = std::move(gltf.materials);
 
 	scene.buffers = gltf.buffers;
 	cgltf_free(gltf.data);
@@ -256,11 +257,19 @@ void GLTFData::create_materials() {
 
 		Material material{};
 
+		material.emissive_factor = glm::make_vec3(gltf_material->emissive_factor);
+
 		if (gltf_material->has_pbr_metallic_roughness) {
-			material.base_color = glm::make_vec4(gltf_material->pbr_metallic_roughness.base_color_factor);
+			material.base_color = glm::make_vec3(gltf_material->pbr_metallic_roughness.base_color_factor);
+			material.metallic_factor = gltf_material->pbr_metallic_roughness.metallic_factor;
+			material.roughness_factor = gltf_material->pbr_metallic_roughness.roughness_factor;
 		}
 
-		materials[i] = ptr::make_shared<Material>(material);
+		if(gltf_material->has_emissive_strength) {
+			material.emissive_strength = gltf_material->emissive_strength.emissive_strength;
+		}
+
+		materials[i] = material;
 	}
 }
 
@@ -462,10 +471,10 @@ void GLTFData::create_meshes() {
 			}
 
 			if (gltf_primitive->material != nullptr) {
-				primitive.material = materials[cgltf_material_index(data, gltf_primitive->material)];
+				primitive.material = &materials[cgltf_material_index(data, gltf_primitive->material)];
 			}
 			else {
-				primitive.material = Material::default_material;
+				primitive.material = &*Material::default_material;
 			}
 
 			mesh.primitives.emplace_back(std::move(primitive));

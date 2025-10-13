@@ -140,7 +140,9 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
 
     app.add_option("--light-radius", light_radius, "The radius of the light source")
         ->default_str(std::to_string(light_radius));
-
+    
+    app.add_option("--lens-radius", relative_lens_radius, "The relative radius of the camera lense")
+        ->default_str(std::to_string(relative_lens_radius));
 
     app.add_flag("--cpu-skin,!--gpu-skin", cpu_skinning, "The skinning is performed on the CPU instead of the GPU");
     app.add_flag("--fast-build,!--fast-trace", fast_build, "Prefers fast build over fast trace");

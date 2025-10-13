@@ -44,6 +44,7 @@ struct SurfacePoint {
     vec3 position;
     vec3 normal;
     vec3 color;
+    vec3 face_normal;
 };
 
 SurfacePoint get_surface() {
@@ -94,8 +95,9 @@ SurfacePoint get_surface() {
 
     SurfacePoint surface;
     
+    surface.face_normal = surface.normal = normalize(cross(v1 - v0, v2 - v0));
 
-    if(offset.normals != OFFSET_ATTR_UNUSED && false) {
+    if(offset.normals != OFFSET_ATTR_UNUSED) {
         Pos ln0, ln1, ln2;
 
         if(offset.dyn) {
@@ -114,7 +116,7 @@ SurfacePoint get_surface() {
 
         surface.normal = normalize(transpose(mat3(gl_WorldToObjectEXT)) * ln);
     } else {
-        surface.normal = normalize(cross(v1 - v0, v2 - v0));
+        surface.normal = surface.face_normal;
     }
 
 

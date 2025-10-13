@@ -23,7 +23,8 @@ public:
     uint32_t rebuild_frequency { 1 };
     std::string store_images{ "" };
 
-    float light_radius{ 0.02 };
+    float light_radius{ 0.02f };
+    float relative_lens_radius { 0.0f };
 
     bool cpu_skinning{ false };
     bool fast_build{ false };

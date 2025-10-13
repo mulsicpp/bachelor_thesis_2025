@@ -24,6 +24,10 @@ void main()
     SurfacePoint surface = get_surface();
     vec3 origin = surface.position + surface.normal * 0.00001 * length(surface.position);
 
+    if(dot(gl_WorldRayDirectionEXT, surface.face_normal) > 0.0f) {
+        surface.normal = -surface.normal;
+    }
+
     vec2 seed = vec2(payload.image_coord) * 12.678 + vec2(payload.ttl) * 43.6;
     vec3 diffuse_dir = reflect_diffuse(surface.normal, seed);
 

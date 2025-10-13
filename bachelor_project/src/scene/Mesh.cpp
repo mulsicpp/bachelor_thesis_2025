@@ -9,7 +9,7 @@ void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, 
 	MeshPushConst mesh_push_const{};
 
 	mesh_push_const.transform = global_transform;
-	mesh_push_const.base_color = material->base_color;
+	mesh_push_const.base_color = glm::vec4(material->base_color, 1.0);
 	pipeline->cmd_push_constant(cmd_buffer, &mesh_push_const);
 
 	const vk::SubBuffer& draw_positions = dynamic_positions.buffer() ? dynamic_positions : positions;
@@ -152,7 +152,7 @@ Mesh Mesh::create_cube() {
 	);
 
 	primitive.topology = Primitive::Topology::Triangles;
-	primitive.material = Material::default_material;
+	primitive.material = Material::default_material.get();
 
 	mesh.primitives.push_back(primitive);
 

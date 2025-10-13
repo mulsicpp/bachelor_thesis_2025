@@ -55,10 +55,10 @@ AppCamera get_scene_camera(TestScene test_scene) {
         camera.distance = 40;
         break;
     case TestScene::EternalValley:
-        camera.theta = glm::pi<float>() * 0.9f;
-        camera.phi = -glm::pi<float>() * 0.2f;
-        camera.center = glm::vec3{ -6.6f, -6.3f, 0.0f };
-        camera.distance = 25;
+        camera.theta = glm::pi<float>() * 1.0f;
+        camera.phi = -glm::pi<float>() * 0.035f;
+        camera.center = glm::vec3{ -6.6f, -10.0f, -3.0f };
+        camera.distance = 27;
         break;
     }
 

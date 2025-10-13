@@ -54,6 +54,7 @@ RtxApp::RtxApp(int argc, char* argv[])
     camera = ptr::make_shared<AppCamera>(get_scene_camera(opts.scene));
 
     camera->aspect = ((float)image->extent().width) / ((float)image->extent().height);
+    camera->relative_lens_radius = opts.relative_lens_radius;
 
     raytracer.bind_camera(camera);
     raytracer.bind_scene(scene);
@@ -79,7 +80,11 @@ RtxApp::RtxApp(int argc, char* argv[])
 
 void RtxApp::run()
 {
-    auto& animation = scene->get_animation(0);
+    bool animated = scene->animation_count() > 0;
+    Animation* animation = nullptr;
+    if (animated) {
+        animation = &scene->get_animation(0);
+    }
 
     RtxPushConstant rtx_push{};
 
@@ -102,11 +107,11 @@ void RtxApp::run()
         };
 
     auto update_strats = SceneUpdateStrat::strats();
-    
-    if(std::filesystem::path(opts.output_file).has_parent_path()) {
+
+    if (std::filesystem::path(opts.output_file).has_parent_path()) {
         std::filesystem::create_directories(std::filesystem::path(opts.output_file).parent_path());
     }
-    
+
     if (!opts.store_images.empty()) {
         std::filesystem::create_directories(std::filesystem::path(opts.store_images));
     }
@@ -117,22 +122,25 @@ void RtxApp::run()
     {
         utils::FrameBenchmark frame_benchmark{};
         printf("drawing frame: %u\n", i);
-        animation.apply_for(i * opts.delta_time);
-        scene->update_transforms();
-        if (opts.cpu_skinning) {
-            scene->skin_cpu();
-        }
-        else {
-            cmd_buffer_graphics.record(skin_recorder).submit().wait();
-        }
 
-        cmd_buffer_raytracing.record(draw_recorder);
+        if (animated) {
+            animation->apply_for(i * opts.delta_time);
+            scene->update_transforms();
+            if (opts.cpu_skinning) {
+                scene->skin_cpu();
+            }
+            else {
+                cmd_buffer_graphics.record(skin_recorder).submit().wait();
+            }
 
-        if (opts.rebuild_frequency != 0 && (i % opts.rebuild_frequency) == 0) {
-            scene->rebuild_acceleration_structures(&frame_benchmark.update);
-        }
-        else {
-            scene->refit_acceleration_structures(&frame_benchmark.update);
+            cmd_buffer_raytracing.record(draw_recorder);
+
+            if (opts.rebuild_frequency != 0 && (i % opts.rebuild_frequency) == 0) {
+                scene->rebuild_acceleration_structures(&frame_benchmark.update);
+            }
+            else {
+                scene->refit_acceleration_structures(&frame_benchmark.update);
+            }
         }
 
         auto start_time = utils::FrameBenchmark::now();
