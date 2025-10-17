@@ -27,6 +27,15 @@ void Raytracer::bind_scene(const ptr::Shared<Scene>& scene) {
     descriptor_pool.update_set_binding(0, 5, vk::BufferDescriptorInfo(buffers.dynamic_positions));
     descriptor_pool.update_set_binding(0, 6, vk::BufferDescriptorInfo(buffers.uvs ? buffers.uvs : buffers.positions));
     descriptor_pool.update_set_binding(0, 7, vk::BufferDescriptorInfo(buffers.primitive_offsets));
+    descriptor_pool.update_set_binding(0, 8, vk::BufferDescriptorInfo(buffers.materials));
+
+    std::vector<vk::ImageDescriptorInfo> texture_infos{};
+
+    for(const auto& texture : scene->get_textures()) {
+        texture_infos.push_back({texture.image_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.sampler});
+    }
+
+    descriptor_pool.update_set_binding(0, 9, texture_infos);
 }
 
 void Raytracer::bind_image(const ptr::Shared<vk::ImageView>& image_view) {
@@ -60,6 +69,8 @@ void Raytracer::cmd_trace(vk::ReadyCommandBuffer cmd_buf, RtxPipelineType type, 
 
     selected_pipeline->cmd_push_constant(cmd_buf, &rtx_push);
 
+    // selected_pipeline->rebuild_sbt(selected_sbt);
+
     vk::RtxPipeline::cmd_trace_rays(cmd_buf, *selected_sbt, image_view->image()->extent());
 }
 
@@ -74,6 +85,8 @@ Raytracer RaytracerBuilder::build() const {
     Raytracer raytracer{};
 
     const auto& app_path = utils::AppPath::instance();
+
+    const auto HIT_STAGES = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
 
     raytracer.pipeline_layout = vk::PipelineLayoutBuilder()
         .add_layout(vk::DescriptorSetLayoutBuilder()
@@ -96,19 +109,26 @@ Raytracer RaytracerBuilder::build() const {
                 ))
             .add_binding(vk::DescriptorSetLayoutBinding()
                 .set_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
+                .set_stage_flags(HIT_STAGES))
             .add_binding(vk::DescriptorSetLayoutBinding()
                 .set_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
+                .set_stage_flags(HIT_STAGES))
             .add_binding(vk::DescriptorSetLayoutBinding()
                 .set_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
+                .set_stage_flags(HIT_STAGES))
             .add_binding(vk::DescriptorSetLayoutBinding()
                 .set_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
+                .set_stage_flags(HIT_STAGES))
             .add_binding(vk::DescriptorSetLayoutBinding()
                 .set_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                .set_stage_flags(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR))
+                .set_stage_flags(HIT_STAGES))
+            .add_binding(vk::DescriptorSetLayoutBinding()
+                .set_type(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                .set_stage_flags(HIT_STAGES))
+            .add_binding(vk::DescriptorSetLayoutBinding()
+                .set_type(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                .set_count(200)
+                .set_stage_flags(HIT_STAGES))
             .build())
         .push_constant(vk::PushConstant()
             .add_stage_flag(VK_SHADER_STAGE_RAYGEN_BIT_KHR)
@@ -149,6 +169,8 @@ Raytracer RaytracerBuilder::build() const {
     
     auto path_closest_hit_shader = vk::ShaderBuilder().closest_hit_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/closest_hit.spv").string()).build().to_shared();
 
+    auto path_any_hit_shader = vk::ShaderBuilder().any_hit_stage().load_spirv(app_path.get_path("assets/shaders/pathtracing/any_hit.spv").string()).build().to_shared();
+
     vk::ShaderGroup ray_gen_group = vk::ShaderGroup::create_general(ray_gen_shader);
 
     vk::ShaderGroup miss_group = vk::ShaderGroup::create_general(miss_shader);
@@ -162,7 +184,7 @@ Raytracer RaytracerBuilder::build() const {
     vk::ShaderGroup path_sky_miss_group = vk::ShaderGroup::create_general(path_sky_miss_shader);
     vk::ShaderGroup path_sun_miss_group = vk::ShaderGroup::create_general(path_sun_miss_shader);
     vk::ShaderGroup path_ambient_miss_group = vk::ShaderGroup::create_general(path_ambient_miss_shader);
-    vk::ShaderGroup path_hit_group = vk::ShaderGroup::create_hit_closest(path_closest_hit_shader);
+    vk::ShaderGroup path_hit_group = vk::ShaderGroup::create_hit(path_closest_hit_shader, path_any_hit_shader);
 
     raytracer.basic_pipeline = vk::RtxPipelineBuilder()
         .add_shader_group(ray_gen_group)
@@ -219,7 +241,7 @@ Raytracer RaytracerBuilder::build() const {
 
     raytracer.path_sbt = raytracer.path_pipeline.build_sbt(vk::SBTInfo()
         .ray_gen_group(path_ray_gen_group)
-        .miss_groups({ path_sky_miss_group, path_sun_miss_group, path_ambient_miss_group })
+        .miss_groups({ path_sky_miss_group, path_ambient_miss_group, path_sun_miss_group })
         .hit_groups({ path_hit_group }));
 
 

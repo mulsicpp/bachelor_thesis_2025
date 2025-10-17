@@ -1,0 +1,24 @@
+#version 460 core
+#extension GL_EXT_ray_tracing : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "rtx_include/surface.glsl"
+
+void main()
+{
+    // if (gl_HitKindEXT == gl_HitKindFrontFacingTriangleEXT) {
+    //     ignoreIntersectionEXT;
+    // }
+
+    uvec3 i = get_indices();
+
+    vec2 uv = get_uv(i);
+
+    Material mat = get_material();
+
+    vec4 color = get_surface_color(mat, get_uv(i));
+
+    if(color.a < 0.1f) {
+        ignoreIntersectionEXT;
+    }
+}

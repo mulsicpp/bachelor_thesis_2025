@@ -54,7 +54,7 @@ void main()
 
             traceRayEXT(
                 tlas,                      // acceleration structure
-                gl_RayFlagsOpaqueEXT,      // ray flags
+                gl_RayFlagsNoneEXT,        // ray flags
                 0xFF,                      // cull mask
                 0,                         // sbtRecordOffset
                 0,                         // sbtRecordStride

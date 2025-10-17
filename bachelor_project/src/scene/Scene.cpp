@@ -2,6 +2,8 @@
 
 #include "external/cgltf.h"
 
+#include "stb_image.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 #include "utils/dbg_log.h"
@@ -12,6 +14,7 @@
 #include <fstream>
 #include <filesystem>
 #include <stdexcept>
+#include <thread>
 
 const std::vector<const char*> GLTF_ERROR_TEXTS = {
 	"success",
@@ -26,6 +29,11 @@ const std::vector<const char*> GLTF_ERROR_TEXTS = {
 	"legacy_gltf",
 };
 
+const std::vector<const char*> GLTF_SUPPORTED_EXTENSIONS = {
+	"KHR_materials_pbrSpecularGlossiness",
+	"KHR_materials_emissive_strength"
+};
+
 #define OFFSET_VALUE_MASK 0x7fffffff
 #define OFFSET_FLAG_MASK 0x80000000
 #define OFFSET_ATTR_UNUSED (~(uint32_t)0)
@@ -37,11 +45,13 @@ struct PrimitiveOffset {
 	uint32_t tangents;
 	uint32_t uvs;
 	uint32_t indices;
+	uint32_t material;
 };
 
 struct GLTFData {
 	cgltf_data* data{};
 
+	std::vector<Texture> textures{};
 	std::vector<Material> materials{};
 	std::vector<ptr::Shared<Mesh>> meshes{};
 	std::vector<ptr::Shared<Skin>> skins{};
@@ -54,6 +64,9 @@ struct GLTFData {
 
 	std::vector<PrimitiveOffset> primitive_offsets{};
 
+	void check_extensions();
+
+	void create_textures();
 	void create_materials();
 	void create_meshes();
 
@@ -71,6 +84,8 @@ Scene Scene::load(const std::string& file_path) {
 	cgltf_options options = {};
 	GLTFData gltf;
 
+
+
 	cgltf_result result = cgltf_parse_file(&options, file_path.c_str(), &gltf.data);
 	if (result != cgltf_result_success)
 	{
@@ -84,6 +99,17 @@ Scene Scene::load(const std::string& file_path) {
 		throw std::runtime_error("GLTF buffer loading failed for '" + file_path + "': " + GLTF_ERROR_TEXTS[result]);
 	}
 
+	auto prev_cwd = std::filesystem::canonical(std::filesystem::current_path());
+
+	auto path = std::filesystem::path(file_path);
+
+	if (path.has_parent_path()) {
+		std::filesystem::current_path(path.parent_path());
+	}
+
+	gltf.check_extensions();
+
+	gltf.create_textures();
 	gltf.create_materials();
 	gltf.create_meshes();
 
@@ -93,10 +119,13 @@ Scene Scene::load(const std::string& file_path) {
 
 	gltf.create_animations();
 
+	std::filesystem::current_path(prev_cwd);
+
 	Scene scene{};
+	scene.textures = std::move(gltf.textures);
+	scene.materials = std::move(gltf.materials);
 	scene.nodes = gltf.get_scene_nodes();
 	scene.animations = std::move(gltf.animations);
-	scene.materials = std::move(gltf.materials);
 
 	scene.buffers = gltf.buffers;
 	cgltf_free(gltf.data);
@@ -155,11 +184,11 @@ void Scene::skin_cpu() {
 
 				glm::mat3 normal_matrix = glm::transpose(glm::inverse(matrix));
 
-				if(dynamic_normals) {
+				if (dynamic_normals) {
 					dynamic_normals[j] = normal_matrix * primitive.normals_cpu[j];
 				}
 
-				if(dynamic_tangents) {
+				if (dynamic_tangents) {
 					dynamic_tangents[j] = normal_matrix * primitive.tangents_cpu[j];
 				}
 			}
@@ -249,28 +278,207 @@ void Scene::refit_acceleration_structures(double* update_time) {
 
 
 
-void GLTFData::create_materials() {
-	materials.resize(data->materials_count);
+void GLTFData::check_extensions() {
+	for (uint32_t i = 0; i < data->extensions_used_count; i++) {
+		if (std::find(GLTF_SUPPORTED_EXTENSIONS.begin(), GLTF_SUPPORTED_EXTENSIONS.end(), data->extensions_used[i]) == GLTF_SUPPORTED_EXTENSIONS.end()) {
+			printf("The extension '%s' is used but not supported\n", data->extensions_used[i]);
+		}
+	}
+}
 
-	for (uint32_t i = 0; i < materials.size(); i++) {
-		auto* gltf_material = &data->materials[i];
+void GLTFData::create_textures() {
+	textures.resize(data->textures_count);
+
+	std::vector<ptr::Shared<vk::ImageView>> images{};
+	if (data->images_count > 0) {
+
+		images.resize(data->images_count);
+
+		std::vector<vk::Buffer> staging_buffers{};
+		staging_buffers.resize(data->images_count);
+
+		auto load_image = [&](uint32_t i) {
+			auto* gltf_image = &data->images[i];
+
+			uint8_t* image_data = nullptr;
+			int w = 0, h = 0, c = 0;
+
+			if (gltf_image->uri) {
+				image_data = stbi_load(gltf_image->uri, &w, &h, &c, 4);
+			}
+			else if (gltf_image->buffer_view) {
+				uint8_t* file_data = (uint8_t*)gltf_image->buffer_view->buffer->data + gltf_image->buffer_view->offset;
+
+				image_data = stbi_load_from_memory(file_data, gltf_image->buffer_view->size, &w, &h, &c, 4);
+			}
+
+			if (image_data != nullptr) {
+
+				auto image_builder = vk::ImageBuilder()
+					.queue_types({ vk::QueueType::Compute })
+					.usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
+					.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+					.aspect(VK_IMAGE_ASPECT_COLOR_BIT)
+					.format(VK_FORMAT_R8G8B8A8_UNORM)
+					.extent({ w, h });
+
+				images[i] = vk::ImageView::create_from(image_builder.build().to_shared(), VK_IMAGE_ASPECT_COLOR_BIT).to_shared();
+
+				staging_buffers[i] = vk::BufferBuilder().staging_buffer().data(image_data).size(w * h * 4).build();
+
+				stbi_image_free(image_data);
+			}
+			else {
+				// printf("image %i failed\n", i);
+				images[i] = std::make_shared<vk::ImageView>();
+			}
+			};
+
+		std::mutex mutex;
+		uint32_t next_i = 0;
+
+		uint32_t thread_count = std::thread::hardware_concurrency();
+
+		std::vector<std::thread> threads{};
+
+		auto thread_func = [&]() {
+			while (true) {
+				mutex.lock();
+				auto i = next_i++;
+				mutex.unlock();
+
+				if (i >= images.size()) break;
+
+				load_image(i);
+			}
+			};
+
+		for (uint32_t i = 0; i < thread_count; i++) {
+			threads.push_back(std::thread{ thread_func });
+		}
+
+		for (uint32_t i = 0; i < thread_count; i++) {
+			threads[i].join();
+		}
+
+		auto copy_images_recorder = [&] (vk::ReadyCommandBuffer cmd_buf) {
+			for(uint32_t i = 0; i < images.size(); i++) {
+				auto image = images[i]->image();
+				image->cmd_transition(cmd_buf, vk::ImageState::Undefined, vk::ImageState::TransferDst);
+				image->cmd_load(cmd_buf, &staging_buffers[i]);
+				image->cmd_transition(cmd_buf, vk::ImageState::TransferDst, vk::ImageState::ShaderReadOnly);
+			}
+		};
+
+		vk::CommandBuffer::single_time_submit(vk::QueueType::Transfer, copy_images_recorder);
+	}
+
+	std::vector<ptr::Shared<vk::Sampler>> samplers{};
+	samplers.resize(data->samplers_count);
+
+	auto address_mode_from_gltf = [](const cgltf_wrap_mode mode) {
+		switch (mode) {
+		case cgltf_wrap_mode_clamp_to_edge: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		case cgltf_wrap_mode_mirrored_repeat: return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+		default: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		}
+		};
+
+	auto filter_from_gltf = [](const cgltf_filter_type filter) {
+		switch (filter) {
+		case cgltf_filter_type_nearest:
+		case cgltf_filter_type_nearest_mipmap_linear:
+		case cgltf_filter_type_nearest_mipmap_nearest:
+			return VK_FILTER_NEAREST;
+
+		default: return VK_FILTER_LINEAR;
+		}
+		};
+
+	for (uint32_t i = 0; i < samplers.size(); i++) {
+		auto* gltf_sampler = &data->samplers[i];
+
+		samplers[i] = vk::SamplerBuilder()
+			.mag_filter(filter_from_gltf(gltf_sampler->mag_filter))
+			.min_filter(filter_from_gltf(gltf_sampler->min_filter))
+			.address_mode_u(address_mode_from_gltf(gltf_sampler->wrap_s))
+			.address_mode_v(address_mode_from_gltf(gltf_sampler->wrap_t))
+			.build().to_shared();
+	}
+
+	for (uint32_t i = 0; i < textures.size(); i++) {
+		auto* gltf_texture = &data->textures[i];
+
+		textures[i].image_view = images[cgltf_image_index(data, gltf_texture->image)];
+		textures[i].sampler = samplers[cgltf_sampler_index(data, gltf_texture->sampler)];
+	}
+}
+
+void GLTFData::create_materials() {
+	materials.resize(data->materials_count + 1);
+
+	materials[0] = Material{};
+
+	for (uint32_t i = 1; i < materials.size(); i++) {
+		auto* gltf_material = &data->materials[i - 1];
 
 		Material material{};
+
+		switch(gltf_material->alpha_mode) {
+		case cgltf_alpha_mode_opaque:
+			material.flags |= MAT_ALPHA_MODE & ALPHA_MODE_OPAQUE;
+			break;
+		case cgltf_alpha_mode_blend:
+			material.flags |= MAT_ALPHA_MODE & ALPHA_MODE_BLEND;
+			break;
+		case cgltf_alpha_mode_mask:
+			material.flags |= MAT_ALPHA_MODE & ALPHA_MODE_MASK;
+			material.alpha_cutoff = gltf_material->alpha_cutoff;
+			break;
+		}
+
+		material.flags |= gltf_material->double_sided ? MAT_DOUBLE_SIDED : 0;
 
 		material.emissive_factor = glm::make_vec3(gltf_material->emissive_factor);
 
 		if (gltf_material->has_pbr_metallic_roughness) {
-			material.base_color = glm::make_vec3(gltf_material->pbr_metallic_roughness.base_color_factor);
+			material.base_color = glm::make_vec4(gltf_material->pbr_metallic_roughness.base_color_factor);
 			material.metallic_factor = gltf_material->pbr_metallic_roughness.metallic_factor;
 			material.roughness_factor = gltf_material->pbr_metallic_roughness.roughness_factor;
+
+			auto& gltf_base_color_texture = gltf_material->pbr_metallic_roughness.base_color_texture;
+
+			if(gltf_base_color_texture.texture != nullptr && gltf_base_color_texture.texcoord == 0) {
+				material.base_color_texture = cgltf_texture_index(data, gltf_base_color_texture.texture);
+				// printf("texture %i used\n", material.base_color_texture);
+			}
 		}
 
-		if(gltf_material->has_emissive_strength) {
+		if(gltf_material->has_pbr_specular_glossiness) {
+			auto& gltf_base_color_texture = gltf_material->pbr_specular_glossiness.diffuse_texture;
+
+			if(gltf_base_color_texture.texture != nullptr && gltf_base_color_texture.texcoord == 0) {
+				material.base_color_texture = cgltf_texture_index(data, gltf_base_color_texture.texture);
+				// printf("texture %i used\n", material.base_color_texture);
+			}
+		}
+
+		if (gltf_material->has_emissive_strength) {
 			material.emissive_strength = gltf_material->emissive_strength.emissive_strength;
 		}
 
 		materials[i] = material;
 	}
+
+	data->images[0].mime_type;
+
+	buffers.materials = vk::BufferBuilder()
+		.usage(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+		.memory_usage(VMA_MEMORY_USAGE_GPU_ONLY)
+		.queue_types({ vk::QueueType::Graphics, vk::QueueType::Transfer, vk::QueueType::Compute })
+		.size(materials.size() * sizeof(Material))
+		.data(materials.data())
+		.build().to_shared();
 }
 
 template<class T>
@@ -424,15 +632,6 @@ void GLTFData::create_meshes() {
 				index_attr.data.insert(index_attr.data.cend(), index_data.begin(), index_data.end());
 			}
 
-			PrimitiveOffset primitive_offset{};
-			primitive_offset.dyn = false;
-			primitive_offset.positions = primitive.positions.offset() / sizeof(Primitive::PositionType);
-			primitive_offset.normals = normals ? primitive.normals.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
-			primitive_offset.tangents = tangents ? primitive.tangents.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
-			primitive_offset.uvs = uvs ? primitive.uvs.offset() / sizeof(Primitive::UVType) : OFFSET_ATTR_UNUSED;
-			primitive_offset.indices = indices ? primitive.indices.offset() / sizeof(Primitive::IndexType) : OFFSET_ATTR_UNUSED;
-
-			primitive_offsets.push_back(primitive_offset);
 
 			if (joints.size() < weights.size()) {
 				joints.resize(weights.size(), nullptr);
@@ -471,11 +670,22 @@ void GLTFData::create_meshes() {
 			}
 
 			if (gltf_primitive->material != nullptr) {
-				primitive.material = &materials[cgltf_material_index(data, gltf_primitive->material)];
+				primitive.material = &materials[cgltf_material_index(data, gltf_primitive->material) + 1];
 			}
 			else {
-				primitive.material = &*Material::default_material;
+				primitive.material = &materials[0];
 			}
+
+			PrimitiveOffset primitive_offset{};
+			primitive_offset.dyn = false;
+			primitive_offset.positions = primitive.positions.offset() / sizeof(Primitive::PositionType);
+			primitive_offset.normals = normals ? primitive.normals.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.tangents = tangents ? primitive.tangents.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.uvs = uvs ? primitive.uvs.offset() / sizeof(Primitive::UVType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.indices = indices ? primitive.indices.offset() / sizeof(Primitive::IndexType) : OFFSET_ATTR_UNUSED;
+			primitive_offset.material = primitive.material - materials.data();
+
+			primitive_offsets.push_back(primitive_offset);
 
 			mesh.primitives.emplace_back(std::move(primitive));
 		}
@@ -697,6 +907,7 @@ void GLTFData::create_nodes() {
 					primitive_offset.tangents = primitive.tangents.buffer() ? dynamic_tangents.offset() / sizeof(Primitive::PositionType) : OFFSET_ATTR_UNUSED;
 					primitive_offset.uvs = primitive.uvs.buffer() ? primitive.uvs.offset() / sizeof(Primitive::UVType) : OFFSET_ATTR_UNUSED;
 					primitive_offset.indices = primitive.indices.buffer() ? primitive.indices.offset() / sizeof(Primitive::IndexType) : OFFSET_ATTR_UNUSED;
+					primitive_offset.material = primitive.material - materials.data();
 
 					primitive_offsets.push_back(primitive_offset);
 				}

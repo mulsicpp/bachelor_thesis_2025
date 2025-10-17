@@ -8,7 +8,7 @@
 
 enum class TestScene {
     Brainstem,
-    Whirlwind,
+    Bathroom,
     SpaceStation,
     Monsters,
     EternalValley

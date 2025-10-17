@@ -9,3 +9,4 @@ glslangValidator -I.. -V sun.rmiss -o sun_miss.spv --target-env spirv1.5
 glslangValidator -I.. -V ambient.rmiss -o ambient_miss.spv --target-env spirv1.5
 
 glslangValidator -I.. -V closest_hit.rchit -o closest_hit.spv --target-env spirv1.5
+glslangValidator -I.. -V any_hit.rahit -o any_hit.spv --target-env spirv1.5

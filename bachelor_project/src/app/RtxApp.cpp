@@ -90,6 +90,8 @@ void RtxApp::run()
 
     rtx_push.light_direction = get_scene_light_dir(opts.scene);
     rtx_push.light_radius = opts.light_radius * glm::pi<float>();
+
+    // rtx_push.ambient_color = glm::vec3(0.0f);
     rtx_push.sample_factor = opts.sample_factor;
     rtx_push.ray_depth = opts.ray_depth;
 
@@ -133,8 +135,7 @@ void RtxApp::run()
                 cmd_buffer_graphics.record(skin_recorder).submit().wait();
             }
 
-            cmd_buffer_raytracing.record(draw_recorder);
-
+            
             if (opts.rebuild_frequency != 0 && (i % opts.rebuild_frequency) == 0) {
                 scene->rebuild_acceleration_structures(&frame_benchmark.update);
             }
@@ -142,6 +143,7 @@ void RtxApp::run()
                 scene->refit_acceleration_structures(&frame_benchmark.update);
             }
         }
+        cmd_buffer_raytracing.record(draw_recorder);
 
         auto start_time = utils::FrameBenchmark::now();
         cmd_buffer_raytracing.submit().wait();

@@ -11,6 +11,7 @@
 
 class Scene {
 private:
+	std::vector<Texture> textures{};
 	std::vector<Material> materials{};
 	std::vector<ptr::Shared<Skin>> skins{};
 	std::vector<ptr::Shared<Node>> nodes{};
@@ -30,6 +31,7 @@ public:
 	inline uint32_t animation_count() const { return animations.size(); }
 	inline Animation& get_animation(uint32_t index) { return animations[index]; }
 	inline const ptr::Shared<vk::Tlas>& get_tlas() { return tlas; }
+	inline const std::vector<Texture>& get_textures() { return textures; }
 
 	inline const SceneBuffers& get_buffers() { return buffers; }
 

@@ -4,15 +4,15 @@ fast trace
 delta time;0.100000
 pipeline;shadow
 resolution;1280x720
-spp;1600
+spp;400
 
 update
-54.522044;
+61.003351;
 trace
-6347.582335;
+3118.721423;
 total
-6402.104379;
+3179.724774;
 
-avg. update;54.522044
-avg. trace;6347.582335
-avg. total;6402.104379
+avg. update;61.003351
+avg. trace;3118.721423
+avg. total;3179.724774

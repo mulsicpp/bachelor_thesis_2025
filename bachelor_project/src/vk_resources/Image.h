@@ -21,7 +21,8 @@ namespace vk {
 		TransferSrc,
 		TransferDst,
 		ColorOutput,
-		RtxOutput
+		RtxOutput,
+		ShaderReadOnly
 	};
 
 	class SwapchainDeprecated;

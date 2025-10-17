@@ -7,7 +7,7 @@ namespace vk {
         return create_from(std::move(image).to_shared(), aspect);
 	}
 
-    ImageView ImageView::create_from(const ptr::Shared<const Image>& image, VkImageAspectFlags aspect) {
+    ImageView ImageView::create_from(const ptr::Shared<Image>& image, VkImageAspectFlags aspect) {
         ImageView image_view;
 
         image_view._image = image;
@@ -25,7 +25,7 @@ namespace vk {
         view_info.subresourceRange.layerCount = 1;
 
         if (vkCreateImageView(Context::get()->get_device(), &view_info, nullptr, &*image_view.image_view) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create texture image view!");
+            throw std::runtime_error("Image view creation failed!");
         }
 
         return image_view;

@@ -85,22 +85,32 @@ namespace vk {
 		VkPhysicalDeviceBufferDeviceAddressFeatures bda_features{};
 		bda_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		bda_features.bufferDeviceAddress = true;
-		device_builder.add_pNext(&bda_features);
+		//device_builder.add_pNext(&bda_features);
 
 		// VkPhysicalDeviceDynamicRenderingFeaturesKHR dyn_rendering_features{};
 		// dyn_rendering_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
 		// dyn_rendering_features.dynamicRendering = VK_TRUE;
 		// device_builder.add_pNext(&dyn_rendering_features);
+		VkPhysicalDeviceVulkan12Features vk12_features{};
+		vk12_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vk12_features.runtimeDescriptorArray = true;
+		vk12_features.bufferDeviceAddress = true;
+
+		VkPhysicalDeviceFeatures2 features2 = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
+		features2.pNext = &vk12_features;
+
+
+		VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features{};
+		as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		as_features.accelerationStructure = true;
+
+		VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtp_features{};
+		rtp_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+		rtp_features.rayTracingPipeline = true;
 
 		if (info._use_raytracing) {
-			VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features{};
-			as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-			as_features.accelerationStructure = true;
+			device_builder.add_pNext(&vk12_features);
 			device_builder.add_pNext(&as_features);
-
-			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtp_features{};
-			rtp_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-			rtp_features.rayTracingPipeline = true;
 			device_builder.add_pNext(&rtp_features);
 		}
 

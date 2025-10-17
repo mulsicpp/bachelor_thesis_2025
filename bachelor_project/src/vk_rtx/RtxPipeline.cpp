@@ -9,8 +9,28 @@
 
 namespace vk {
 
+    void hexdump(void* ptr, int buflen) {
+        unsigned char* buf = (unsigned char*)ptr;
+        int i, j;
+        for (i = 0; i < buflen; i += 16) {
+            printf("%06x: ", i);
+            for (j = 0; j < 16; j++)
+                if (i + j < buflen)
+                    printf("%02x ", buf[i + j]);
+                else
+                    printf("   ");
+            printf(" ");
+            for (j = 0; j < 16; j++)
+                if (i + j < buflen)
+                    printf("%c", isprint(buf[i + j]) ? buf[i + j] : '.');
+            printf("\n");
+        }
+    }
+
     SBT RtxPipeline::build_sbt(const SBTInfo& info) const {
         SBT sbt{};
+
+        sbt.info = info;
 
         const auto& raytracing_props = Context::get()->get_raytracing_props();
 
@@ -51,6 +71,8 @@ namespace vk {
                 const auto& group = groups[i];
                 auto idx = _group_id_to_idx.at(group.id());
 
+                hexdump(handle_buffer.data() + idx * handle_size, handle_size);
+
                 memcpy(staging_data + offset + aligned_handle_size * i, handle_buffer.data() + idx * handle_size, handle_size);
                 if (aligned_handle_size > handle_size) {
                     memset(staging_data + offset + aligned_handle_size * i + handle_size, 0, aligned_handle_size - handle_size);
@@ -61,6 +83,10 @@ namespace vk {
         store_region(std::vector<ShaderGroup>{ info._ray_gen_group }, ray_gen_offset);
         store_region(info._miss_groups, miss_offset);
         store_region(info._hit_groups, hit_offset);
+
+        printf("\n");
+
+        // hexdump(staging_data, staging_buffer.size());
 
         sbt._buffer = BufferBuilder()
             .queue_types({ QueueType::Transfer, QueueType::Compute })
@@ -74,7 +100,7 @@ namespace vk {
         auto device_address = sbt._buffer.device_address();
 
         staging_buffer.copy_into(&sbt._buffer);
-        
+
         sbt.ray_gen_region.deviceAddress = device_address + ray_gen_offset;
         sbt.ray_gen_region.stride = aligned_handle_size;
         sbt.ray_gen_region.size = ray_gen_size;
@@ -90,6 +116,10 @@ namespace vk {
         return sbt;
     }
 
+    void RtxPipeline::rebuild_sbt(SBT* sbt) const {
+        *sbt = build_sbt(sbt->info);
+    }
+
 
     void RtxPipeline::cmd_bind(ReadyCommandBuffer cmd_buffer) const {
         vkCmdBindPipeline(cmd_buffer.handle(), VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, *pipeline);
@@ -99,7 +129,7 @@ namespace vk {
         vkCmdPushConstants(cmd_buffer.handle(), _layout->handle(), _layout->push_constant().stage_flags, 0, _layout->push_constant().size, value);
     }
 
-	void RtxPipeline::cmd_trace_rays(ReadyCommandBuffer cmd_buffer, const SBT& sbt, const VkExtent2D& image_extent) {
+    void RtxPipeline::cmd_trace_rays(ReadyCommandBuffer cmd_buffer, const SBT& sbt, const VkExtent2D& image_extent) {
         VkStridedDeviceAddressRegionKHR call_region{};
         vkCmdTraceRaysKHR(cmd_buffer.handle(), &sbt.ray_gen_region, &sbt.miss_region, &sbt.hit_region, &call_region, image_extent.width, image_extent.height, 1);
     }

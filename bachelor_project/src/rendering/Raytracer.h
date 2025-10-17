@@ -15,7 +15,7 @@
 
 struct RtxPushConstant {
     alignas(16) glm::vec3 light_direction{ 0.5, -1.0, 0.5 };
-    float light_radius{ glm::pi<float>() * 0.00f };
+    float light_radius{ glm::pi<float>() * 0.006f };
     alignas(16) glm::vec3 light_color{ 1.0, 0.8, 0.5 };
     alignas(16) glm::vec3 ambient_color{ 0.07, 0.15, 0.4 };
 

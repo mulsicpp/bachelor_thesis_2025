@@ -34,6 +34,7 @@ namespace vk {
 		inline VkPipeline handle() const { return *pipeline; }
 
 		SBT build_sbt(const SBTInfo& info) const;
+		void rebuild_sbt(SBT* sbt) const;
 
 		void cmd_bind(ReadyCommandBuffer cmd_buffer) const;
 

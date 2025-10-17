@@ -12,21 +12,7 @@
 
 #include "vk_rtx/Blas.h"
 
-struct Material {
-	static const ptr::Shared<Material> default_material;
-
-	glm::vec3 base_color = glm::vec3{ 1.0f, 1.0f, 1.0f };
-	float metallic_factor = 0.0f;
-	float roughness_factor = 0.0f;
-	
-	glm::vec3 emissive_factor = glm::vec3{ 0.0f, 0.0f, 0.0f };
-	float emissive_strength = 1.0f;
-
-	uint32_t base_color_texture = ~uint32_t(0);
-	uint32_t metallic_roughness_texture = ~uint32_t(0);
-	uint32_t emission_texture = ~uint32_t(0);
-	uint32_t normal_texture = ~uint32_t(0);
-};
+#include "Material.h"
 
 struct Node;
 

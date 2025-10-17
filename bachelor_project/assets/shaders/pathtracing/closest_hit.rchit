@@ -14,6 +14,8 @@ layout(location = 0) rayPayloadInEXT PathPayload payload;
 
 #include "rtx_include/rand.glsl"
 
+#define SHADOW_RAY_FLAGS gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsSkipClosestHitShaderEXT
+
 void main()
 {
     if(payload.ttl == 0) {
@@ -22,11 +24,15 @@ void main()
     }
 
     SurfacePoint surface = get_surface();
-    vec3 origin = surface.position + surface.normal * 0.00001 * length(surface.position);
+    // vec3 origin = surface.position + surface.face_normal * (0.00001 + 0.00001 * length(surface.position));
+    vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT * (1.0 - 0.00001);
 
     if(dot(gl_WorldRayDirectionEXT, surface.face_normal) > 0.0f) {
         surface.normal = -surface.normal;
     }
+
+    // payload.color = vec3(surface.color.a);
+    // return;
 
     vec2 seed = vec2(payload.image_coord) * 12.678 + vec2(payload.ttl) * 43.6;
     vec3 diffuse_dir = reflect_diffuse(surface.normal, seed);
@@ -40,17 +46,14 @@ void main()
         vec3 sun_color = vec3(0.0);
 
         if(dot_sun > 0.0) {
-
-            uint flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
-
             payload.color = sun_color;
             traceRayEXT(
                 tlas,                      // acceleration structure
-                flags,                     // ray flags
+                SHADOW_RAY_FLAGS,          // ray flags
                 0xFF,                      // cull mask
                 0,                         // sbtRecordOffset
                 0,                         // sbtRecordStride
-                1,                         // missIndex
+                2,                         // missIndex
                 origin,                    // ray origin
                 0.0,                       // minT
                 sun_dir,                   // ray direction
@@ -65,11 +68,11 @@ void main()
 
         traceRayEXT(
             tlas,                      // acceleration structure
-            gl_RayFlagsOpaqueEXT,      // ray flags
+            gl_RayFlagsNoneEXT,        // ray flags
             0xFF,                      // cull mask
             0,                         // sbtRecordOffset
             0,                         // sbtRecordStride
-            2,                         // missIndex
+            1,                         // missIndex
             origin,                    // ray origin
             0.0,                       // minT
             diffuse_dir,               // ray direction
@@ -78,7 +81,7 @@ void main()
         );
 
         payload.color += sun_color;
-        payload.color *= 0.7 * surface.color;
+        payload.color *= 0.7 * surface.color.rgb;
 
     } else {
 
@@ -86,7 +89,7 @@ void main()
 
         traceRayEXT(
             tlas,                      // acceleration structure
-            gl_RayFlagsOpaqueEXT,      // ray flags
+            gl_RayFlagsNoneEXT,        // ray flags
             0xFF,                      // cull mask
             0,                         // sbtRecordOffset
             0,                         // sbtRecordStride

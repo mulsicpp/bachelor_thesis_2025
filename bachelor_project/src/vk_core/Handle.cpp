@@ -28,6 +28,7 @@ IMPL_DESTROY(Buffer)
 IMPL_DESTROY(BufferView)
 IMPL_DESTROY(Image)
 IMPL_DESTROY(ImageView)
+IMPL_DESTROY(Sampler)
 
 IMPL_DESTROY(AccelerationStructureKHR)
 

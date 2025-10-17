@@ -43,7 +43,7 @@ namespace vk
     VkAccelerationStructureGeometryKHR BlasGeometry::as_vk_struct() const {
         VkAccelerationStructureGeometryKHR vk_struct{};
         vk_struct.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-        vk_struct.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
+        vk_struct.flags = opaque ? VK_GEOMETRY_OPAQUE_BIT_KHR : 0;
 
         vk_struct.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 

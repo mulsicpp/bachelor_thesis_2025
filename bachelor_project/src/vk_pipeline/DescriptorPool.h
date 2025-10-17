@@ -9,6 +9,7 @@
 
 #include "vk_resources/Buffer.h"
 #include "vk_resources/ImageView.h"
+#include "vk_resources/Sampler.h"
 
 #include "vk_rtx/Tlas.h"
 
@@ -48,6 +49,7 @@ namespace vk {
 		using Ref = ImageDescriptorInfo&;
 
 		ptr::Shared<ImageView> image_view{};
+		ptr::Shared<Sampler> sampler{};
 		VkImageLayout layout{ VK_IMAGE_LAYOUT_GENERAL };
 
 		ImageDescriptorInfo() = default;
@@ -57,9 +59,10 @@ namespace vk {
 		{
 		}
 
-		inline ImageDescriptorInfo(const ptr::Shared<ImageView>& image_view, VkImageLayout layout = VK_IMAGE_LAYOUT_GENERAL)
+		inline ImageDescriptorInfo(const ptr::Shared<ImageView>& image_view,  VkImageLayout layout = VK_IMAGE_LAYOUT_GENERAL, const ptr::Shared<Sampler> sampler = {})
 			: image_view{ image_view }
 			, layout{ layout }
+			, sampler{ sampler}
 		{
 		}
 

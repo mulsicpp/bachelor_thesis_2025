@@ -60,7 +60,7 @@ CLIOptions::CLIOptions() : app{ APP_DESCRIPTION, APP_NAME } {
 
     const std::vector<TestScene> scene_values = {
         TestScene::Brainstem,
-        TestScene::Whirlwind,
+        TestScene::Bathroom,
         TestScene::SpaceStation,
         TestScene::Monsters,
         TestScene::EternalValley

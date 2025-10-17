@@ -19,6 +19,7 @@ namespace vk {
 
 		vk_struct.imageView = image_view->handle();
 		vk_struct.imageLayout = layout;
+		vk_struct.sampler = sampler ? sampler->handle() : VK_NULL_HANDLE;
 
 		return vk_struct;
 	}

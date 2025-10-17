@@ -13,7 +13,7 @@ namespace vk {
 	class ImageView : public utils::Move, public ptr::ToShared<ImageView> {
 	private:
 		Handle<VkImageView> image_view{};
-		ptr::Shared<const Image> _image{};
+		ptr::Shared<Image> _image{};
 
 		VkImageAspectFlags _aspect{ 0 };
 
@@ -22,13 +22,14 @@ namespace vk {
 
 		inline VkImageView handle() const { return *image_view; }
 
-		inline const ptr::Shared<const Image>& image() const { return _image; }
+		inline ptr::Shared<const Image> image() const { return _image; }
+		inline ptr::Shared<Image> image() { return _image; }
 
 		inline VkFormat format() const { return _image->format(); }
 		inline VkExtent2D extent() const { return _image->extent(); }
 		inline VkImageAspectFlags aspect() const { return _aspect; }
 
 		static ImageView create_from(Image&& image, VkImageAspectFlags aspect);
-		static ImageView create_from(const ptr::Shared<const Image>& image, VkImageAspectFlags aspect);
+		static ImageView create_from(const ptr::Shared<Image>& image, VkImageAspectFlags aspect);
 	};
 }

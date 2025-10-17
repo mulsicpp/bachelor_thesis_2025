@@ -9,7 +9,7 @@ void Primitive::draw(vk::ReadyCommandBuffer cmd_buffer, vk::Pipeline* pipeline, 
 	MeshPushConst mesh_push_const{};
 
 	mesh_push_const.transform = global_transform;
-	mesh_push_const.base_color = glm::vec4(material->base_color, 1.0);
+	mesh_push_const.base_color = material->base_color;
 	pipeline->cmd_push_constant(cmd_buffer, &mesh_push_const);
 
 	const vk::SubBuffer& draw_positions = dynamic_positions.buffer() ? dynamic_positions : positions;
@@ -122,6 +122,8 @@ vk::BlasGeometry Primitive::get_blas_geometry(const vk::SubBuffer& dynamic_posit
 	else {
 		geometry.set_triangle_count(blas_positions.length() / (sizeof(PositionType) * 3));
 	}
+
+	geometry.set_opaque((material->flags & MAT_ALPHA_MODE) == ALPHA_MODE_OPAQUE);
 
 	return geometry;
 }

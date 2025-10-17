@@ -34,6 +34,10 @@ void main()
 
     vec3 normal = surface.normal;
 
+    if(dot(gl_WorldRayDirectionEXT, surface.face_normal) > 0.0f) {
+        normal = -normal;
+    }
+
     vec3 light_dir = normalize(rtx_push.light_direction);
 
     float dot_prod = dot(normal, -light_dir);
@@ -105,7 +109,7 @@ void main()
     payload.color += rtx_push.ambient_color;
 #endif
 #else
-    payload.color = rtx_push.ambient_color + clamp(dot_prod, 0.0f, 1.0f) * rtx_push.light_color;
+    payload.color = rtx_push.ambient_color * 0.5 + clamp(dot_prod, 0.0f, 1.0f) * rtx_push.light_color;
 #endif
-    payload.color *= surface.color * 0.7;
+    payload.color *= surface.color.rgb * 0.7;
 }
